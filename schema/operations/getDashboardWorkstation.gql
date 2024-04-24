@@ -1,0 +1,12 @@
+query getDashboardWorkstation($login: String!) {
+  student {
+    getWorkstationByLogin(login: $login) {
+      id
+      classroomId
+      hostName
+      classroom {
+        floor
+      }
+    }
+  }
+}

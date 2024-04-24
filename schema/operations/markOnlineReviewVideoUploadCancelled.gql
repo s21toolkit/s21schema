@@ -1,0 +1,18 @@
+fragment OnlineReviewVideoInfo on OnlineReviewVideo {
+  onlineVideoId
+  link
+  status
+  statusDetails
+  updateDateTime
+}
+
+mutation markOnlineReviewVideoUploadCancelled($filledChecklistId: ID!, $onlineReviewId: ID!) {
+  school21 {
+    markP2pCheckVideoUploadCancelled(
+      filledChecklistId: $filledChecklistId
+      onlineReviewId: $onlineReviewId
+    ) {
+      ...OnlineReviewVideoInfo
+    }
+  }
+}

@@ -1,0 +1,19 @@
+query getAgendaEvents($from: DateTime!, $to: DateTime!, $limit: Int!) {
+  calendarEventS21 {
+    getMyAgendaEvents(from: $from, to: $to, limit: $limit) {
+      agendaItemContext {
+        entityId
+        entityType
+      }
+      start
+      end
+      label
+      description
+      agendaEventType
+      additionalInfo {
+        key
+        value
+      }
+    }
+  }
+}

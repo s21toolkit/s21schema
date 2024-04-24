@@ -1,0 +1,12 @@
+query eventsWithoutFeedback($from: DateTime!, $to: DateTime!) {
+  student {
+    getCalendarEventsWithoutFeedback(from: $from, to: $to) {
+      id
+      activity {
+        eventId
+        name
+        endDate
+      }
+    }
+  }
+}

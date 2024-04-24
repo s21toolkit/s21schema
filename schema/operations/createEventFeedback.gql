@@ -1,0 +1,14 @@
+mutation createEventFeedback($calendarEventId: ID!, $rating: Int!, $comment: String) {
+  student {
+    createCalendarEventFeedback(
+      studentFeedback: {calendarEventId: $calendarEventId, rating: $rating, comment: $comment}
+    ) {
+      user {
+        login
+      }
+      createDate
+      rating
+      comment
+    }
+  }
+}

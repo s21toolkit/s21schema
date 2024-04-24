@@ -1,0 +1,53 @@
+fragment ProjectTeamMember on User {
+  id
+  avatarUrl
+  login
+  userExperience {
+    level {
+      id
+      range {
+        levelCode
+      }
+    }
+    cookiesCount
+    codeReviewPoints
+  }
+  activeSchoolShortName
+}
+
+fragment TeamMemberWithRole on TeamMember {
+  role
+  user {
+    ...ProjectTeamMember
+  }
+}
+
+fragment TeamWithMembers on ProjectTeamWithMembers {
+  teamWithMembers {
+    team {
+      id
+      name
+      status
+      minTeamMemberCount
+      maxTeamMemberCount
+    }
+    members {
+      ...TeamMemberWithRole
+    }
+  }
+  invitedStudents {
+    student {
+      user {
+        ...ProjectTeamMember
+      }
+    }
+  }
+}
+
+query getProjectTeamWithMembersByStudent($goalId: ID!, $studentId: UUID!) {
+  school21 {
+    getProjectTeamWithMembers(goalId: $goalId, studentId: $studentId) {
+      ...TeamWithMembers
+    }
+  }
+}

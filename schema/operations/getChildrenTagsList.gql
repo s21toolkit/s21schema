@@ -1,0 +1,10 @@
+query getChildrenTagsList($filter: MediatekaTagsWithLinksFilter!) {
+  mediateka {
+    getTagsRelativesWithFiltering(filter: $filter) {
+      children {
+        id
+        name
+      }
+    }
+  }
+}

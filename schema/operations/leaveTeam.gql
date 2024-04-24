@@ -1,0 +1,9 @@
+mutation leaveTeam($teamId: UUID!, $exitReasonId: Int, $exitReasonDescription: String) {
+  student {
+    exitStudentFromTeam(
+      teamId: $teamId
+      exitReasonId: $exitReasonId
+      exitReasonDescription: $exitReasonDescription
+    )
+  }
+}

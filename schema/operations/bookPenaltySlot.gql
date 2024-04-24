@@ -1,0 +1,5 @@
+mutation bookPenaltySlot($penaltyId: ID!, $slotId: ID!) {
+  penalty {
+    setPenaltyBooking(penaltyId: $penaltyId, slotId: $slotId)
+  }
+}

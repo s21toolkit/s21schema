@@ -1,0 +1,65 @@
+fragment GraphJson on HolyGraphJSON {
+  nodes {
+    id
+    label
+    items {
+      id
+      code
+      handles
+      entityType
+      entityId
+      parentNodeCodes
+      skills {
+        id
+        name
+        color
+        textColor
+      }
+      goal {
+        projectId
+        projectName
+        projectDescription
+        projectPoints
+        goalExecutionType
+        duration
+        projectDate
+        projectState
+        isMandatory
+        projectDate
+      }
+      course {
+        projectId
+        projectName
+        projectDescription
+        projectPoints
+        projectPoints
+        courseType
+        duration
+        projectDate
+        projectState
+        projectDate
+        localCourseId
+      }
+      parentNodeCodes
+    }
+    position {
+      x
+      y
+    }
+  }
+  edges {
+    id
+    source
+    target
+    sourceHandle
+    targetHandle
+  }
+}
+
+query ProjectMapGetStudentGraphState($studentId: UUID, $stageGroupId: Int) {
+  holyGraph {
+    getStudentStateGraph(studentId: $studentId, stageGroupId: $stageGroupId) {
+      ...GraphJson
+    }
+  }
+}

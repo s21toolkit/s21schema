@@ -1,0 +1,5 @@
+mutation checkCodeReviewPoints($goalId: ID!) {
+  student {
+    tryDecreaseCodeReviewPoints(goalId: $goalId)
+  }
+}

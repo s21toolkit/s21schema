@@ -1,0 +1,15 @@
+query EventsGetStudents($activityEventId: ID!, $studentType: StudentEventTypeEnum!, $page: PagingInput!) {
+  event {
+    getEventStudents(
+      eventId: $activityEventId
+      page: $page
+      studentType: $studentType
+    ) {
+      User {
+        id
+        login
+        email
+      }
+    }
+  }
+}

@@ -1,0 +1,55 @@
+fragment CourseGoalsTypes on LocalCourseGoalInformation {
+  executionType
+}
+
+fragment CourseInfo on CourseCoverInformation {
+  courseName
+  courseType
+  courseStatus
+  signUpEndDate
+  signUpStartDate
+  workStartDate
+  workEndDate
+  duration
+  courseDescription
+  finalPercentage
+  courseStatusesHistory
+  experience
+  experienceFact
+  currentStudentCount
+  retriesOfCurrentStudents
+  teamsWaitingEvaluationCount
+  displayedCourseStatus
+  finishedCount
+  retriesCount
+  resultCourseCompletion
+  softSkills {
+    softSkillId
+    maxPower
+    currentUserPower
+    softSkillName
+    totalPower
+    teamRole
+    achievedUserPower
+  }
+  isRetryAvailable
+  isCourseCanBeFinished
+}
+
+query getCourseCoverInformation($localCourseId: ID!) {
+  course {
+    getCourseCoverInformation(localCourseId: $localCourseId) {
+      ...CourseInfo
+    }
+    getCourseRetryInfo(localCourseId: $localCourseId) {
+      totalRetryValue
+      usedRetryCount
+      unlimitedAttempts
+    }
+    getLocalCourseGoals(localCourseId: $localCourseId) {
+      localCourseGoals {
+        ...CourseGoalsTypes
+      }
+    }
+  }
+}

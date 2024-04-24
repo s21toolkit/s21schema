@@ -1,0 +1,8 @@
+query calendarGetStudentExperience {
+  student {
+    getExperience {
+      id
+      cookiesCount
+    }
+  }
+}

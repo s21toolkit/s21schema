@@ -1,0 +1,27 @@
+fragment CalendarNameLessTimeslot on CalendarNamelessTimeSlot {
+  start
+  end
+  validStartTimes
+  staffSlot
+}
+
+fragment ProjectReviewsInfo on ProjectReviewsInfo {
+  reviewByStudentCount
+  relevantReviewByStudentsCount
+  reviewByInspectionStaffCount
+  relevantReviewByInspectionStaffCount
+}
+
+query calendarGetNameLessStudentTimeslotsForReview($from: DateTime!, $taskId: ID!, $to: DateTime!) {
+  student {
+    getNameLessStudentTimeslotsForReview(from: $from, taskId: $taskId, to: $to) {
+      checkDuration
+      projectReviewsInfo {
+        ...ProjectReviewsInfo
+      }
+      timeSlots {
+        ...CalendarNameLessTimeslot
+      }
+    }
+  }
+}

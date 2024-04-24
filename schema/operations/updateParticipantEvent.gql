@@ -1,0 +1,10 @@
+mutation updateParticipantEvent($activityEventId: ID!, $input: ActivityEventByStudentInputModel!) {
+  event {
+    updateParticipantEvent(activityEventId: $activityEventId, input: $input) {
+      activityEventId
+      eventId
+      name
+      eventType
+    }
+  }
+}

@@ -1,0 +1,8 @@
+query getPenaltyReasons {
+  penalty {
+    getPenaltyReasons {
+      id
+      name
+    }
+  }
+}

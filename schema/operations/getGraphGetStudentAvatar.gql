@@ -1,0 +1,5 @@
+query getGraphGetStudentAvatar($userId: UUID!) {
+  school21 {
+    getAvatarByUserId(userId: $userId)
+  }
+}

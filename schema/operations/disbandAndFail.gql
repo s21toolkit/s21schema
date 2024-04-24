@@ -1,0 +1,5 @@
+mutation disbandAndFail($taskId: ID!) {
+  sc21ProjectFlow {
+    surrenderFromProject(taskId: $taskId)
+  }
+}

@@ -1,0 +1,69 @@
+fragment InternshipEvaluationFeedback on ReviewFeedback {
+  id
+  comment
+  filledChecklist {
+    id
+  }
+  reviewFeedbackCategoryValues {
+    feedbackCategory
+    feedbackValue
+    id
+  }
+}
+
+fragment InternshipChecklist on FilledChecklist {
+  id
+  checklistId
+  endTimeCheck
+  startTimeCheck
+  reviewer {
+    avatarUrl
+    login
+    businessAdminRoles {
+      id
+      school {
+        id
+        organizationType
+      }
+    }
+  }
+  reviewFeedback {
+    ...InternshipEvaluationFeedback
+  }
+  comment
+  receivedPoint
+  receivedPercentage
+  quickAction
+}
+
+fragment InternshipP2PEvaluation on P2PEvaluationInfo {
+  status
+  checklist {
+    ...InternshipChecklist
+  }
+}
+
+fragment InternshipAtemptResult on StudentGoalAttempt {
+  finalPointProject
+  finalPercentageProject
+  resultModuleCompletion
+  resultDate
+}
+
+fragment InternshipAttemptEvaluations on ProjectAttemptEvaluationsInfo {
+  studentAnswerId
+  attemptResult {
+    ...InternshipAtemptResult
+  }
+  p2p {
+    ...InternshipP2PEvaluation
+  }
+}
+
+query getInternshipAttemptEvaluationsInfo($goalId: ID!) {
+  student {
+    getProjectAttemptEvaluationsInfo(goalId: $goalId) {
+      ...InternshipAttemptEvaluations
+    }
+  }
+}

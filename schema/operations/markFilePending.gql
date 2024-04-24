@@ -1,0 +1,19 @@
+fragment OnlineReviewVideoInfo on OnlineReviewVideo {
+  onlineVideoId
+  link
+  status
+  statusDetails
+  updateDateTime
+}
+
+mutation markFilePending($filledChecklistId: ID!, $fileName: String!, $relativePath: String!) {
+  school21 {
+    markFilePending(
+      filledChecklistId: $filledChecklistId
+      fileName: $fileName
+      relativePath: $relativePath
+    ) {
+      ...OnlineReviewVideoInfo
+    }
+  }
+}

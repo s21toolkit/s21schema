@@ -1,0 +1,7 @@
+mutation removeCodeReviewBooking($eventId: ID!) {
+  student {
+    removeBookingToCodeReview(eventId: $eventId) {
+      id
+    }
+  }
+}

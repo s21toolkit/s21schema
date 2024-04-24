@@ -1,0 +1,10 @@
+mutation createParticipantEvent($input: ActivityEventByStudentInputModel!) {
+  event {
+    createParticipantEvent(input: $input) {
+      activityEventId
+      eventId
+      name
+      eventType
+    }
+  }
+}

@@ -1,0 +1,7 @@
+mutation unsubscribeFromAgendaEvent($eventId: ID!) {
+  student {
+    unsubscribeFromEvent(eventId: $eventId) {
+      id
+    }
+  }
+}

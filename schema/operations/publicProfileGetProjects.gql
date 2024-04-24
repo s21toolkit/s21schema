@@ -1,0 +1,17 @@
+query publicProfileGetProjects($studentId: UUID!, $stageGroupId: ID!) {
+  school21 {
+    getStudentProjectsForPublicProfileByStageGroup(
+      studentId: $studentId
+      stageGroupId: $stageGroupId
+    ) {
+      groupName
+      name
+      experience
+      finalPercentage
+      goalId
+      goalStatus
+      amountAnswers
+      amountReviewedAnswers
+    }
+  }
+}

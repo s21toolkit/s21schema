@@ -1,0 +1,8 @@
+mutation saveStudentFeedbackResults($studentFeedbackId: ID!, $studentFeedbackResults: [StudentFeedbackResultInput!]!) {
+  sc21StudentTaskCheck {
+    saveStudentFeedbackResults(
+      studentFeedbackId: $studentFeedbackId
+      studentFeedbackResults: $studentFeedbackResults
+    )
+  }
+}

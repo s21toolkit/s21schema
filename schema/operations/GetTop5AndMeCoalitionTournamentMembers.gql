@@ -1,0 +1,36 @@
+fragment CompetitioncoalitionUserInfo on User {
+  id
+  login
+  avatarUrl
+  userExperience {
+    level {
+      id
+      levelCode
+    }
+  }
+}
+
+fragment GetTop5AndMeCoalitionTournamentMembersInfo on CoalitionMemberPowerRank {
+  id
+  rank
+  power {
+    id
+    points
+    coalitionMemberUser {
+      ...CompetitioncoalitionUserInfo
+    }
+  }
+}
+
+query GetTop5AndMeCoalitionTournamentMembers($gameCoalitionId: Int!, $gameTournamentId: Int!) {
+  student {
+    getTop5AndMeCoalitionTournamentMembers(
+      gameCoalitionId: $gameCoalitionId
+      gameTournamentId: $gameTournamentId
+    ) {
+      top5 {
+        ...GetTop5AndMeCoalitionTournamentMembersInfo
+      }
+    }
+  }
+}

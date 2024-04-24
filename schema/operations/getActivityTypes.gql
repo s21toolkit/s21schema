@@ -1,0 +1,9 @@
+query getActivityTypes {
+  school21 {
+    getActivityTypes {
+      id
+      description
+      category
+    }
+  }
+}

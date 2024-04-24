@@ -1,0 +1,9 @@
+query getStudentStageGroupS21($studentId: UUID!) {
+  school21 {
+    getStageGroupS21PublicProfile(studentId: $studentId) {
+      waveId
+      waveName
+      eduForm
+    }
+  }
+}

@@ -1,0 +1,135 @@
+fragment FormChecklistQuestion on SectionQuestion {
+  sectionQuestionId
+  name
+  description
+  taskAssessmentScale {
+    criterionScaleId
+    type
+    description
+    scaleWeights {
+      key
+      value
+    }
+  }
+}
+
+fragment FormChecklistSection on ChecklistSection {
+  checklistSectionId
+  name
+  description
+  kindQuestionId
+  questionList {
+    ...FormChecklistQuestion
+  }
+}
+
+fragment OnlineReviewInfo on OnlineReview {
+  isOnline
+  video {
+    onlineVideoId
+    link
+    status
+    statusDetails
+    updateDateTime
+  }
+}
+
+fragment TeamMemberUser on User {
+  id
+  avatarUrl
+  login
+  userExperience {
+    level {
+      id
+      levelCode
+      range {
+        levelCode
+      }
+    }
+    cookiesCount
+    codeReviewPoints
+  }
+  activeSchoolShortName
+}
+
+fragment TeamMember on TeamMember {
+  user {
+    ...TeamMemberUser
+  }
+  role
+}
+
+fragment FilledChecklistModuleInfo on ModuleInfoP2P {
+  moduleName
+  executionType
+  periodOfVerification
+}
+
+fragment FormChecklist on Checklist {
+  language
+  introduction
+  guidelines
+  sectionList {
+    ...FormChecklistSection
+  }
+  quickActions
+}
+
+fragment ChecklistSolutionInfo on SolutionInfo {
+  solutionType
+  gitlabSolutionInfo {
+    gitlabLink {
+      id
+      sshLink
+      httpsLink
+    }
+  }
+  platfSolutionInfo {
+    comment
+    files {
+      studyProcessFileId
+      link
+      creatorLogin
+      fileExtension
+      fileSize
+    }
+  }
+}
+
+query getFilledChecklist($filledChecklistId: ID!) {
+  student {
+    getP2pInfo(filledChecklistId: $filledChecklistId) {
+      id
+      solutionInfo {
+        ...ChecklistSolutionInfo
+      }
+      checklist {
+        ...FormChecklist
+      }
+      moduleInfoP2P {
+        ...FilledChecklistModuleInfo
+      }
+      progressCheckInfo {
+        reviewUserCount
+        reviewUserCountExecuted
+      }
+      verifiableUsers {
+        teamWithMembers {
+          team {
+            id
+            name
+          }
+          members {
+            ...TeamMember
+          }
+        }
+        user {
+          ...TeamMemberUser
+        }
+      }
+      onlineReview {
+        ...OnlineReviewInfo
+      }
+    }
+  }
+}

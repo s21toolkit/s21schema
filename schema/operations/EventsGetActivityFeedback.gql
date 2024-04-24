@@ -1,0 +1,16 @@
+query EventsGetActivityFeedback($activityEventId: ID!, $page: PagingInput!) {
+  event {
+    getActivityEventFeedback(activityEventId: $activityEventId, page: $page) {
+      id
+      user {
+        id
+        login
+        email
+      }
+      comment
+      rating
+      createDate
+    }
+    getActivityEventFeedbackCount(activityEventId: $activityEventId)
+  }
+}

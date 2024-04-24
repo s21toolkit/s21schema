@@ -1,0 +1,7 @@
+query getGitlabSettingsToken($taskId: ID!) {
+  student {
+    getLinkToPrivateStudentGitlabProjectByTaskId(taskId: $taskId) {
+      runnersToken
+    }
+  }
+}

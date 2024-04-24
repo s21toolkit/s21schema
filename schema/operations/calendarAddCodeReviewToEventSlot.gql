@@ -1,0 +1,10 @@
+mutation calendarAddCodeReviewToEventSlot($studentGoalId: ID!, $startTime: DateTime!) {
+  student {
+    addBookingCodeReviewToEventSlot(
+      studentGoalId: $studentGoalId
+      startTime: $startTime
+    ) {
+      id
+    }
+  }
+}

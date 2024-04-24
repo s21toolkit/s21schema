@@ -1,0 +1,7 @@
+mutation addToFavourites($videoId: UUID!) {
+  mediateka {
+    addBookmark(itemId: $videoId) {
+      status
+    }
+  }
+}

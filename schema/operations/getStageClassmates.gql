@@ -1,0 +1,11 @@
+query getStageClassmates($textSearch: String) {
+  school21 {
+    getStageClassmates(textSearch: $textSearch) {
+      id
+      login
+      firstName
+      middleName
+      lastName
+    }
+  }
+}

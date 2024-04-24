@@ -1,0 +1,5 @@
+mutation retryProject($taskId: ID!) {
+  sc21ProjectFlow {
+    retryProject(taskId: $taskId)
+  }
+}

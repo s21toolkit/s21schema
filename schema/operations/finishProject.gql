@@ -1,0 +1,5 @@
+mutation finishProject($taskId: ID!) {
+  sc21ProjectFlow {
+    finishProject(taskId: $taskId)
+  }
+}

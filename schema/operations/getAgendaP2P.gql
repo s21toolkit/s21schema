@@ -1,0 +1,55 @@
+query getAgendaP2P($bookingId: ID!) {
+  student {
+    getEnrichedBooking(bookingId: $bookingId) {
+      id
+      eventSlot {
+        start
+        school {
+          shortName
+        }
+      }
+      task {
+        goalId
+        goalName
+        assignmentType
+        studentTaskAdditionalAttributes {
+          cookiesCount
+        }
+      }
+      verifierUser {
+        id
+        login
+        avatarUrl
+        userExperience {
+          level {
+            range {
+              levelCode
+            }
+          }
+        }
+      }
+      verifiableInfo {
+        verifiableStudents {
+          userId
+          login
+          avatarUrl
+          levelCode
+          isTeamLead
+          school {
+            shortName
+          }
+        }
+        team {
+          name
+        }
+      }
+      answerId
+      bookingStatus
+      additionalChecklist {
+        filledChecklistId
+      }
+      isOnline
+      vcLinkUrl
+    }
+  }
+}

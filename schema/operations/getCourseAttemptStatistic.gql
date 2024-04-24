@@ -1,0 +1,10 @@
+query getCourseAttemptStatistic($localCourseId: ID!) {
+  course {
+    getCourseAttemptStatistic(localCourseId: $localCourseId) {
+      resultDate
+      finalPercentage
+      pointProject
+      completionResultStatus
+    }
+  }
+}

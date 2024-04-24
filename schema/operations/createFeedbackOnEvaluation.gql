@@ -1,0 +1,20 @@
+fragment EvaluationFeedback on ReviewFeedback {
+  id
+  comment
+  filledChecklist {
+    id
+  }
+  reviewFeedbackCategoryValues {
+    feedbackCategory
+    feedbackValue
+    id
+  }
+}
+
+mutation createFeedbackOnEvaluation($reviewFeedbackInput: ReviewFeedbackInput!) {
+  student {
+    createReviewFeedback(reviewFeedbackInput: $reviewFeedbackInput) {
+      ...EvaluationFeedback
+    }
+  }
+}

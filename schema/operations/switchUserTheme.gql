@@ -1,0 +1,5 @@
+mutation switchUserTheme($userId: UUID!, $isDarkThemeEnabled: Boolean!) {
+  user {
+    switchUserTheme(userId: $userId, isDarkThemeEnabled: $isDarkThemeEnabled)
+  }
+}

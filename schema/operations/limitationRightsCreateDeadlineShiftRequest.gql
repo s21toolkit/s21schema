@@ -1,0 +1,9 @@
+mutation limitationRightsCreateDeadlineShiftRequest($deadlineId: UUID!, $comment: String!) {
+  student {
+    createDeadlineShiftRequest(
+      deadlineRequest: {deadlineId: $deadlineId, comment: $comment}
+    ) {
+      deadlineShiftRequestId
+    }
+  }
+}

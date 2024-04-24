@@ -1,0 +1,8 @@
+query getCampusCurrentUser {
+  user {
+    getCurrentUser {
+      id
+      login
+    }
+  }
+}

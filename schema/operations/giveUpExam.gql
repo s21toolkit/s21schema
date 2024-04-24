@@ -1,0 +1,10 @@
+mutation giveUpExam($goalId: ID!, $examEventId: ID, $taskId: ID, $skillId: ID) {
+  sc21ProjectFlow {
+    surrenderFromExam(
+      goalId: $goalId
+      examEventId: $examEventId
+      taskId: $taskId
+      skillId: $skillId
+    )
+  }
+}

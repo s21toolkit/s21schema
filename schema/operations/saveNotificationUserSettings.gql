@@ -1,0 +1,5 @@
+mutation saveNotificationUserSettings($settings: [NotificationUserSettingInput!]!) {
+  notificationConfiguration {
+    saveNotificationUserSettings(settings: $settings)
+  }
+}

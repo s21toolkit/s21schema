@@ -1,0 +1,14 @@
+query getDismissInfoByStudentId($studentId: UUID!) {
+  school21 {
+    getDismissInfoByStudentId(studentId: $studentId) {
+      dismissTypeId
+      dismissTs
+      lastStageGroupS21 {
+        waveId
+        waveName
+        eduForm
+        active
+      }
+    }
+  }
+}

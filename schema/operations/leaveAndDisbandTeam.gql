@@ -1,0 +1,5 @@
+mutation leaveAndDisbandTeam($teamId: UUID!) {
+  student {
+    disbandTeam(teamId: $teamId)
+  }
+}

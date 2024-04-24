@@ -1,0 +1,16 @@
+query getNotificationUserSettings {
+  notificationConfiguration {
+    settings: getNotificationUserSettings {
+      groupTypeId
+      groupTypeName
+      typeId
+      typeName
+      channelId
+      channelName
+      channelActive
+      channelActiveSystem
+      channelLockedSystem
+      isMutable
+    }
+  }
+}

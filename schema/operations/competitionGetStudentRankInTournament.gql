@@ -1,0 +1,33 @@
+fragment CompetitioncoalitionUserInfo on User {
+  id
+  login
+  avatarUrl
+  userExperience {
+    level {
+      id
+      levelCode
+    }
+  }
+}
+
+query competitionGetStudentRankInTournament($gameTournamentId: Int!) {
+  student {
+    getStudentRankInTournament(gameTournamentId: $gameTournamentId) {
+      id
+      rank
+      power {
+        id
+        points
+        coalitionTournament {
+          id
+          coalition {
+            id
+          }
+        }
+        coalitionMemberUser {
+          ...CompetitioncoalitionUserInfo
+        }
+      }
+    }
+  }
+}

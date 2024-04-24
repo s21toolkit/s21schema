@@ -1,0 +1,55 @@
+fragment MediatekaTagV2ItemFragment on TagHierarchyElement {
+  tagId
+  name
+  tagType
+  children {
+    tagId
+    name
+    tagType
+    children {
+      tagId
+      name
+      tagType
+      children {
+        tagId
+        name
+        tagType
+      }
+    }
+  }
+}
+
+fragment MediatekaMediaFragment on ContentItem {
+  itemId
+  creatorUserId
+  tagIds
+  tagsV2 {
+    ...MediatekaTagV2ItemFragment
+  }
+  fileName
+  contentName
+  contentType
+  contentUrl
+  createDate
+  contentAuthor
+  previewUrl
+  description
+  fileSize
+  subtitleLink
+  itemBookmarked
+  stages {
+    id
+    name
+  }
+}
+
+query getSearchItems($filter: MediatekaItemsFilter, $page: PagingInput!) {
+  mediateka {
+    searchItems(filter: $filter, page: $page) {
+      content {
+        ...MediatekaMediaFragment
+      }
+      totalItems
+    }
+  }
+}

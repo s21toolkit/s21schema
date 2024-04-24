@@ -1,0 +1,7 @@
+mutation capitulationFromTheCourse($localCourseId: ID!) {
+  student {
+    capitulationFromTheCourse(localCourseId: $localCourseId) {
+      finalPoint
+    }
+  }
+}

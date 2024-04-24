@@ -1,0 +1,5 @@
+mutation changeProjectTeamName($teamId: UUID!, $newName: String!) {
+  student {
+    changeGroupName(teamId: $teamId, newName: $newName)
+  }
+}

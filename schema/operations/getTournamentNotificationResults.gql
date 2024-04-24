@@ -1,0 +1,13 @@
+query getTournamentNotificationResults {
+  student {
+    getTournamentResults(isShown: false) {
+      id
+      power
+      coalitionRank
+      userRank
+      firstCoalitionName
+      coalitionName
+      timeClosed
+    }
+  }
+}

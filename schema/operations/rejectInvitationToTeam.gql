@@ -1,0 +1,5 @@
+mutation rejectInvitationToTeam($teamId: UUID!) {
+  student {
+    rejectInvitation(teamId: $teamId)
+  }
+}

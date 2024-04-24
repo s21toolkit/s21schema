@@ -1,0 +1,8 @@
+query getSearchHistory {
+  globalSearch {
+    getSearchHistoryTooltips {
+      tooltipText
+      tooltipCategory
+    }
+  }
+}

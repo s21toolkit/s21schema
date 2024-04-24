@@ -1,0 +1,16 @@
+fragment PartialStudyProcessFile on StudyProcessFile {
+  studyProcessFileId
+  link
+  status
+}
+
+query getPlatfSolution($studentGoalAttemptId: ID!) {
+  sc21StudentTaskCheck {
+    getPlatfSolutionInfo(studentGoalAttemptId: $studentGoalAttemptId) {
+      files {
+        ...PartialStudyProcessFile
+      }
+      comment
+    }
+  }
+}

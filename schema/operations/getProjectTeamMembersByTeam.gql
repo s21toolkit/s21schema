@@ -1,0 +1,34 @@
+fragment TeamMemberUser on User {
+  id
+  avatarUrl
+  login
+  userExperience {
+    level {
+      id
+      levelCode
+      range {
+        levelCode
+      }
+    }
+    cookiesCount
+    codeReviewPoints
+  }
+  activeSchoolShortName
+}
+
+fragment TeamMember on TeamMember {
+  user {
+    ...TeamMemberUser
+  }
+  role
+}
+
+query getProjectTeamMembersByTeam($teamId: UUID!) {
+  team {
+    getTeamMembersByTeam(teamId: $teamId) {
+      teamId
+      role
+      ...TeamMember
+    }
+  }
+}

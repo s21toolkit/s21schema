@@ -1,0 +1,20 @@
+fragment TeamLeadGoalPeriodSettings on TeamLeadGoalPeriodSettings {
+  signUpDate
+  beginDate
+  checkDate
+  deadlineDate
+  isTeamLeadPeriodsEqual
+}
+
+query getTeamLeadPeriodSettings($goalId: ID!, $currentStudentLocalCourseId: ID!, $location: LocationEnum!, $teamLeadUserId: UUID!) {
+  student {
+    getTeamLeadPeriodSettings(
+      goalId: $goalId
+      currentStudentLocalCourseId: $currentStudentLocalCourseId
+      location: $location
+      teamLeadUserId: $teamLeadUserId
+    ) {
+      ...TeamLeadGoalPeriodSettings
+    }
+  }
+}

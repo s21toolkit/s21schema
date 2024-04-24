@@ -1,0 +1,5 @@
+query getCampusUserIdByLogin($login: String!) {
+  school21 {
+    getUserIdByLogin(login: $login)
+  }
+}

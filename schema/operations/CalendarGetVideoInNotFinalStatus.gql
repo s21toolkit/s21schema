@@ -1,0 +1,11 @@
+query CalendarGetVideoInNotFinalStatus($filledChecklistId: ID!) {
+  sc21StudentTaskCheck {
+    getVideoInNotFinalStatus(filledChecklistId: $filledChecklistId) {
+      onlineVideoId
+      link
+      status
+      statusDetails
+      updateDateTime
+    }
+  }
+}

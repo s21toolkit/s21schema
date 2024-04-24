@@ -1,0 +1,11 @@
+query getCampusWorkstation($login: String!) {
+  student {
+    getWorkstationByLogin(login: $login) {
+      id
+      classroomId
+      hostName
+      workstationRow
+      workstationNumber
+    }
+  }
+}

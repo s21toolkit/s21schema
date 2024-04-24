@@ -1,0 +1,10 @@
+query getParentTagsList($filter: MediatekaTagsFilter!, $page: PagingInput!) {
+  mediateka {
+    getTagsByFilter(filter: $filter, page: $page) {
+      tags {
+        id
+        name
+      }
+    }
+  }
+}

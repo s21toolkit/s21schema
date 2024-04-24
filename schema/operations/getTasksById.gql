@@ -1,0 +1,18 @@
+fragment StudentTaskInProject on StudentTask {
+  id
+  task {
+    id
+    content {
+      id
+      body
+    }
+  }
+}
+
+query getTasksById($goalId: ID!, $localCourseId: ID, $taskId: ID!) {
+  school21 {
+    getTasksById(goalId: $goalId, localCourseId: $localCourseId, taskId: $taskId) {
+      ...StudentTaskInProject
+    }
+  }
+}

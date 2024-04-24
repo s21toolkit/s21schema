@@ -1,0 +1,12 @@
+fragment StudentAnswerComment on StudentAnswerComment {
+  studentAnswerId
+  comment
+}
+
+mutation saveSolutionComment($taskId: ID!, $comment: String!) {
+  sc21StudentTaskCheck {
+    saveSolutionComment(taskId: $taskId, comment: $comment) {
+      ...StudentAnswerComment
+    }
+  }
+}

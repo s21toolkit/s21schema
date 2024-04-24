@@ -1,0 +1,179 @@
+fragment GroupProjectStatistics on GroupProjectStatistics {
+  inProgressTeams
+  evaluationTeams
+  finishedTeams
+  acceptedTeams
+  failedTeams
+}
+
+fragment InternshipStudentReviewList on InternshipStudentReviewList {
+  reviewModelList {
+    reviewOrderNumber
+    planTimeMentorReview
+    factTimeMentorReview
+    percentageMentorReview
+    commentMentorReview
+    threshold
+  }
+  numberReview
+  studentProgressInternshipId
+}
+
+fragment ProjectReviewsInfo on ProjectReviewsInfo {
+  reviewByStudentCount
+  relevantReviewByStudentsCount
+  reviewByInspectionStaffCount
+  relevantReviewByInspectionStaffCount
+}
+
+fragment ProjectStatistics on ProjectStatistics {
+  registeredStudents
+  inProgressStudents
+  evaluationStudents
+  finishedStudents
+  acceptedStudents
+  failedStudents
+  retriedStudentsPercentage
+  groupProjectStatistics {
+    ...GroupProjectStatistics
+  }
+}
+
+fragment InternshipTimelineItem on ProjectTimelineItem {
+  type
+  status
+  start
+  end
+  order
+  children {
+    type
+    elementType
+    status
+    start
+    end
+    order
+  }
+}
+
+fragment CurrentTaskInfo on StudentTask {
+  id
+  taskId
+  task {
+    id
+    assignmentType
+    studentTaskAdditionalAttributes {
+      cookiesCount
+      maxCodeReviewCount
+      codeReviewCost
+      ciCdMode
+    }
+    checkTypes
+  }
+  lastAnswer {
+    id
+  }
+}
+
+fragment RetrySettings on ModuleAttemptsSettings {
+  maxModuleAttempts
+  isUnlimitedAttempts
+}
+
+fragment InternshipStudentReviewInfo on InternshipStudentReviewInfo {
+  internshipStudentReviewList {
+    ...InternshipStudentReviewList
+  }
+}
+
+fragment InternshipApplicantInfo on InternshipStudentInfo {
+  link
+  internshipStartTime
+  internshipCompletionTime
+}
+
+fragment P2PInfo on P2PChecksInfo {
+  cookiesCount
+  periodOfVerification
+  projectReviewsInfo {
+    ...ProjectReviewsInfo
+  }
+}
+
+fragment InternshipModuleCoverInfo on ModuleCoverInformation {
+  softSkills {
+    softSkillId
+    softSkillName
+    totalPower
+    maxPower
+    currentUserPower
+    achievedUserPower
+  }
+  timeline {
+    ...InternshipTimelineItem
+  }
+  projectStatistics {
+    ...ProjectStatistics
+  }
+}
+
+fragment InternshipInfo on StudentModule {
+  id
+  moduleTitle
+  finalPercentage
+  finalPoint
+  goalExecutionType
+  displayedGoalStatus
+  accessBeforeStartProgress
+  resultModuleCompletion
+  finishedExecutionDateByScheduler
+  durationFromStageSubjectGroupPlan
+  currentAttemptNumber
+  isDeadlineFree
+  isRetryAvailable
+  localCourseId
+  courseBaseParameters {
+    isGradedCourse
+  }
+  studyModule {
+    retrySettings {
+      ...RetrySettings
+    }
+    id
+    idea
+    duration
+    goalPoint
+    levels {
+      id
+      goalElements {
+        id
+        tasks {
+          id
+          taskId
+        }
+      }
+    }
+  }
+  currentTask {
+    ...CurrentTaskInfo
+  }
+}
+
+query getInternshipInfo($goalId: ID!) {
+  student {
+    getModuleById(goalId: $goalId) {
+      ...InternshipInfo
+    }
+    getModuleCoverInformation(goalId: $goalId) {
+      ...InternshipModuleCoverInfo
+    }
+    getP2PChecksInfo(goalId: $goalId) {
+      ...P2PInfo
+    }
+    getInternshipDataById(goalId: $goalId) {
+      ...InternshipApplicantInfo
+    }
+    getInternshipReviewDataInfo(goalId: $goalId) {
+      ...InternshipStudentReviewInfo
+    }
+  }
+}

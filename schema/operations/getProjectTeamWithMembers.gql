@@ -1,0 +1,45 @@
+fragment TeamMemberInProjectPage on User {
+  id
+  avatarUrl
+  login
+  userExperience {
+    level {
+      id
+      range {
+        levelCode
+      }
+    }
+    cookiesCount
+    codeReviewPoints
+  }
+  activeSchoolShortName
+}
+
+query getProjectTeamWithMembers($goalId: ID!) {
+  student {
+    getProjectTeamWithMembers(goalId: $goalId) {
+      teamWithMembers {
+        team {
+          id
+          name
+          status
+          minTeamMemberCount
+          maxTeamMemberCount
+        }
+        members {
+          role
+          user {
+            ...TeamMemberInProjectPage
+          }
+        }
+      }
+      invitedStudents {
+        student {
+          user {
+            ...TeamMemberInProjectPage
+          }
+        }
+      }
+    }
+  }
+}

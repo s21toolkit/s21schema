@@ -1,0 +1,5 @@
+mutation registerForExam($goalId: ID!) {
+  sc21ProjectFlow {
+    registerForExam(goalId: $goalId)
+  }
+}

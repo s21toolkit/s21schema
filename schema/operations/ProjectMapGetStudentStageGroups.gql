@@ -1,0 +1,12 @@
+query ProjectMapGetStudentStageGroups($studentId: UUID!) {
+  school21 {
+    loadStudentStageGroups(studentId: $studentId) {
+      stageGroupS21 {
+        waveId
+        waveName
+        eduForm
+        active
+      }
+    }
+  }
+}

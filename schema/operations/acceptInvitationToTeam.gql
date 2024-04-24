@@ -1,0 +1,5 @@
+mutation acceptInvitationToTeam($teamId: UUID!) {
+  student {
+    acceptInvitation(teamId: $teamId)
+  }
+}

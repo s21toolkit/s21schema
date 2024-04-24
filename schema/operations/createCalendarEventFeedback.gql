@@ -1,0 +1,12 @@
+mutation createCalendarEventFeedback($studentFeedback: StudentEventFeedbackInput!) {
+  student {
+    createCalendarEventFeedback(studentFeedback: $studentFeedback) {
+      id
+      user {
+        id
+      }
+      rating
+      comment
+    }
+  }
+}

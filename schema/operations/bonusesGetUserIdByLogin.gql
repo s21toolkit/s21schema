@@ -1,0 +1,5 @@
+query bonusesGetUserIdByLogin($login: String!) {
+  school21 {
+    getUserIdByLogin(login: $login)
+  }
+}

@@ -1,0 +1,21 @@
+fragment PlatfSolutionInfo on PlatfSolutionInfo {
+  comment
+  files {
+    studyProcessFileId
+    link
+    status
+    statusDetails
+    updateDateTime
+    creatorLogin
+    fileExtension
+    fileSize
+  }
+}
+
+query getPlatfSolutionInfo($studentGoalAttemptId: ID!) {
+  sc21StudentTaskCheck {
+    getPlatfSolutionInfo(studentGoalAttemptId: $studentGoalAttemptId) {
+      ...PlatfSolutionInfo
+    }
+  }
+}

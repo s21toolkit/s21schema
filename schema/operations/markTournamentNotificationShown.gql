@@ -1,0 +1,8 @@
+mutation markTournamentNotificationShown($userTournamentResultId: [UUID!]!) {
+  student {
+    markTournamentResultAsShown(userTournamentResultIds: $userTournamentResultId) {
+      id
+      isShown
+    }
+  }
+}

@@ -1,0 +1,14 @@
+query publicProfileGetSoftSkills($studentId: UUID!) {
+  school21 {
+    getSoftSkillsByStudentId(studentId: $studentId) {
+      id
+      type
+      code
+      totalPower
+      hueSaturationLightness
+    }
+    getSoftSkillLimitByStudentId(studentId: $studentId) {
+      powerLimit
+    }
+  }
+}

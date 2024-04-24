@@ -1,0 +1,19 @@
+query competitionCoalitionGetMyCoalitionMembers($page: PagingInput) {
+  student {
+    getUserTournamentWidget {
+      getMyCoalitionMembers(page: $page) {
+        user {
+          id
+          login
+          avatarUrl
+          userExperience {
+            level {
+              id
+              levelCode
+            }
+          }
+        }
+      }
+    }
+  }
+}

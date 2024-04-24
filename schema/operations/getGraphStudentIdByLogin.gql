@@ -1,0 +1,6 @@
+query getGraphStudentIdByLogin($login: String!) {
+  school21 {
+    getStudentIdByLogin(login: $login)
+    getUserIdByLogin(login: $login)
+  }
+}

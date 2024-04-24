@@ -1,0 +1,5 @@
+mutation retryCourse($localCourseId: ID!) {
+  course {
+    retryCourse(localCourseId: $localCourseId)
+  }
+}

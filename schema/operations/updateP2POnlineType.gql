@@ -1,0 +1,7 @@
+mutation updateP2POnlineType($bookingId: ID!) {
+  sc21StudentTaskCheck {
+    enableOnlineP2pCheck(bookingId: $bookingId) {
+      id
+    }
+  }
+}

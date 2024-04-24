@@ -1,0 +1,20 @@
+fragment LocalCourseGoals on LocalCourseGoals {
+  courseType
+  displayedCourseStatus
+  localCourseGoals {
+    finalPercentage
+    status
+    localCourseGoalId
+    goalId
+    goalName
+    executionType
+  }
+}
+
+query getLocalCourseGoalsInfo($localCourseId: ID!) {
+  course {
+    getLocalCourseGoals(localCourseId: $localCourseId) {
+      ...LocalCourseGoals
+    }
+  }
+}

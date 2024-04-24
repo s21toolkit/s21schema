@@ -1,0 +1,36 @@
+fragment CompetitionCurrentCoalition on GameCoalition {
+  id
+  name
+  avatarUrl
+  backgroundUrl
+  backgroundUrlBig
+  memberCount
+  color
+  masterAvatarImgUrl
+  currentTournament {
+    points
+    tournament {
+      name
+      timeStart
+      timeEnd
+    }
+  }
+  masterUser {
+    login
+  }
+}
+
+query competitionCoalitionGetUserTournament {
+  student {
+    getUserTournamentWidget {
+      coalitionMember {
+        coalition {
+          ...CompetitionCurrentCoalition
+        }
+      }
+      lastTournamentResult {
+        id
+      }
+    }
+  }
+}

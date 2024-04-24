@@ -1,0 +1,5 @@
+mutation finishCourse($localCourseId: ID!) {
+  course {
+    finishCourse(localCourseId: $localCourseId)
+  }
+}

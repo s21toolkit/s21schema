@@ -1,0 +1,5 @@
+mutation calendarDeleteEventSlot($eventSlotId: ID!) {
+  student {
+    deleteEventSlot(eventSlotId: $eventSlotId)
+  }
+}

@@ -1,0 +1,5 @@
+query getInvitationsCount {
+  team {
+    getCreatedJoinTeamRequestCount
+  }
+}

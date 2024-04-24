@@ -1,0 +1,41 @@
+fragment CurrentUserExperience on UserExperience {
+  id
+  cookiesCount
+  codeReviewPoints
+  coinsCount
+  level {
+    id
+    range {
+      id
+      levelCode
+    }
+  }
+}
+
+fragment AvailableStudentForTeam on Student {
+  id
+  user {
+    id
+    login
+    avatarUrl
+    userExperience {
+      ...CurrentUserExperience
+    }
+  }
+}
+
+fragment StudentInvitationInfo on StudentInvitationInfo {
+  student {
+    ...AvailableStudentForTeam
+  }
+  invitationStatus
+  schoolShortName
+}
+
+mutation cancelInvitation($teamId: UUID!, $userId: ID!) {
+  student {
+    cancelInvitation(teamId: $teamId, userId: $userId) {
+      ...StudentInvitationInfo
+    }
+  }
+}

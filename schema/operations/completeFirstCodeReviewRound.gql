@@ -1,0 +1,7 @@
+mutation completeFirstCodeReviewRound($studentGoalId: ID!) {
+  student {
+    completeFirstCodeReviewRound(studentGoalId: $studentGoalId) {
+      codeReviewRoundId
+    }
+  }
+}

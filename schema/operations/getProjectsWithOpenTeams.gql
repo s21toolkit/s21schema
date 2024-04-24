@@ -1,0 +1,99 @@
+fragment TeamMemberUser on User {
+  id
+  avatarUrl
+  login
+  userExperience {
+    level {
+      id
+      levelCode
+      range {
+        levelCode
+      }
+    }
+    cookiesCount
+    codeReviewPoints
+  }
+  activeSchoolShortName
+}
+
+fragment TeamMember on TeamMember {
+  user {
+    ...TeamMemberUser
+  }
+  role
+}
+
+fragment InvitatingTeamsToProject on TeamWithMembers {
+  team {
+    id
+    name
+    currentTeamMemberCount
+  }
+  captains {
+    ...TeamMemberUser
+  }
+}
+
+fragment CurrentTeamInvitationProject on TeamWithMembers {
+  team {
+    id
+    name
+  }
+  members {
+    ...TeamMember
+  }
+}
+
+fragment SoftSkill on SoftSkillPoint {
+  softSkillName
+  softSkillId
+  totalPower
+  currentUserPower
+  maxPower
+  teamRole
+}
+
+fragment ProjectWithTeamInvitations on GroupProject {
+  module {
+    id
+    moduleTitle
+    openRegistration
+    startProgress
+    durationFromStageSubjectGroupPlan
+    isDeadlineFree
+    localCourseId
+    studyModule {
+      duration
+    }
+    softSkills {
+      ...SoftSkill
+    }
+    teamSettings {
+      minAmountMember
+      maxAmountMember
+      location
+    }
+    currentTask {
+      id
+      task {
+        studentTaskAdditionalAttributes {
+          pointTask
+        }
+      }
+    }
+  }
+  currentTeam {
+    ...CurrentTeamInvitationProject
+  }
+  invitingTeams {
+    ...InvitatingTeamsToProject
+  }
+}
+
+query getProjectsWithOpenTeams {
+  student {
+    getGroupProjectsWithOpenTeams {
+      ...ProjectWithTeamInvitations
+    }
+  }
+}

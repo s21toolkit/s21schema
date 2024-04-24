@@ -1,0 +1,5 @@
+query getUserNotificationsCount($wasReadIncluded: Boolean) {
+  s21Notification {
+    getS21NotificationsCount(wasReadIncluded: $wasReadIncluded)
+  }
+}

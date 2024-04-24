@@ -1,0 +1,10 @@
+query publicProfileGetXpGraph($userId: UUID!) {
+  student {
+    getExperienceHistoryDate(userId: $userId) {
+      history {
+        awardDate
+        expValue
+      }
+    }
+  }
+}

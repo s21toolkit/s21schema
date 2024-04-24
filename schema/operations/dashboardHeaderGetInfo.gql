@@ -1,0 +1,55 @@
+query dashboardHeaderGetInfo {
+  user {
+    getCurrentUser {
+      id
+      login
+      avatarUrl
+      firstName
+      middleName
+      lastName
+      currentSchoolStudentId
+      studentRoles {
+        id
+        status
+        school {
+          id
+          shortName
+        }
+      }
+    }
+  }
+  student {
+    getUserTournamentWidget {
+      coalitionMember {
+        coalition {
+          avatarUrl
+          color
+          name
+          memberCount
+        }
+        currentTournamentPowerRank {
+          rank
+        }
+      }
+      lastTournamentResult {
+        userRank
+      }
+    }
+    getExperience {
+      id
+      value
+      level {
+        id
+        range {
+          id
+          levelCode
+          rightBorder
+          leftBorder
+        }
+      }
+      cookiesCount
+      coinsCount
+      codeReviewPoints
+    }
+  }
+}

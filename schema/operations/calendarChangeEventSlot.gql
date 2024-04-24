@@ -1,0 +1,174 @@
+fragment VerifiableStudentItem on VerifiableStudent {
+  userId
+  login
+  avatarUrl
+  levelCode
+  isTeamLead
+  cookiesCount
+  codeReviewPoints
+  school {
+    shortName
+  }
+}
+
+fragment CalendarReviewUser on User {
+  id
+  login
+}
+
+fragment Penalty on Penalty {
+  comment
+  id
+  duration
+  status
+  startTime
+  createTime
+  penaltySlot {
+    currentStudentsCount
+    description
+    duration
+    startTime
+    id
+    endTime
+  }
+  reasonId
+}
+
+fragment CalendarEventActivity on ActivityEvent {
+  activityEventId
+  eventId
+  name
+  beginDate
+  endDate
+  isRegistered
+  description
+  currentStudentsCount
+  maxStudentCount
+  location
+  updateDate
+  isWaitListActive
+  isInWaitList
+  stopRegisterDate
+}
+
+fragment CalendarEventExam on Exam {
+  examId
+  eventId
+  beginDate
+  endDate
+  name
+  location
+  currentStudentsCount
+  maxStudentCount
+  updateDate
+  goalId
+  goalName
+  isWaitListActive
+  isInWaitList
+  stopRegisterDate
+}
+
+fragment CalendarReviewBooking on CalendarBooking {
+  id
+  answerId
+  eventSlotId
+  task {
+    id
+    goalId
+    goalName
+    studentTaskAdditionalAttributes {
+      cookiesCount
+    }
+    assignmentType
+  }
+  eventSlot {
+    id
+    start
+    end
+    event {
+      eventUserRole
+    }
+    school {
+      shortName
+    }
+  }
+  verifierUser {
+    ...CalendarReviewUser
+  }
+  verifiableInfo {
+    verifiableStudents {
+      ...VerifiableStudentItem
+    }
+    team {
+      name
+    }
+  }
+  bookingStatus
+  isOnline
+  vcLinkUrl
+  additionalChecklist {
+    filledChecklistId
+    filledChecklistStatusRecordingEnum
+  }
+}
+
+fragment CalendarEvent on CalendarEvent {
+  id
+  start
+  end
+  description
+  eventType
+  eventCode
+  eventSlots {
+    id
+    type
+    start
+    end
+  }
+  bookings {
+    ...CalendarReviewBooking
+  }
+  exam {
+    ...CalendarEventExam
+  }
+  studentCodeReview {
+    studentGoalId
+  }
+  activity {
+    ...CalendarEventActivity
+    studentFeedback {
+      id
+      rating
+      comment
+    }
+    status
+    activityType
+    isMandatory
+    isWaitListActive
+    isVisible
+    comments {
+      type
+      createTs
+      comment
+    }
+    organizers {
+      id
+      login
+    }
+  }
+  goals {
+    goalId
+    goalName
+  }
+  penalty {
+    ...Penalty
+  }
+}
+
+mutation calendarChangeEventSlot($id: ID!, $start: DateTime!, $end: DateTime!) {
+  student {
+    changeEventSlot(eventSlotId: $id, start: $start, end: $end) {
+      ...CalendarEvent
+    }
+  }
+}

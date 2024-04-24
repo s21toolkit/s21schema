@@ -1,0 +1,42 @@
+query getAgendaActivityOrExam($eventId: ID!) {
+  student {
+    getEnrichedCalendar(eventId: $eventId) {
+      start
+      end
+      description
+      exam {
+        currentStudentsCount
+        maxStudentCount
+        isRegistered
+        isInWaitList
+        isWaitListActive
+        stopRegisterDate
+        endDate
+        registrationAccessStatus
+        goalId
+        name
+        location
+      }
+      activity {
+        eventId
+        activityEventId
+        currentStudentsCount
+        maxStudentCount
+        isRegistered
+        isInWaitList
+        isWaitListActive
+        stopRegisterDate
+        endDate
+        activityType
+        location
+        isMandatory
+        description
+        status
+        organizers {
+          id
+          login
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,53 @@
+query publicProfileGetPersonalInfo($userId: UUID!, $studentId: UUID!, $login: String!, $schoolId: UUID!) {
+  school21 {
+    getAvatarByUserId(userId: $userId)
+    getStageGroupS21PublicProfile(studentId: $studentId) {
+      waveId
+      waveName
+      eduForm
+    }
+    getExperiencePublicProfile(userId: $userId) {
+      value
+      level {
+        levelCode
+        range {
+          leftBorder
+          rightBorder
+        }
+      }
+      cookiesCount
+      coinsCount
+      codeReviewPoints
+    }
+    getEmailbyUserId(userId: $userId)
+    getClassRoomByLogin(login: $login) {
+      id
+      number
+      floor
+    }
+  }
+  student {
+    getWorkstationByLogin(login: $login) {
+      workstationId
+      hostName
+      row
+      number
+    }
+    getFeedbackStatisticsAverageScore(studentId: $studentId) {
+      countFeedback
+      feedbackAverageScore {
+        categoryCode
+        categoryName
+        value
+      }
+    }
+  }
+  user {
+    getSchool(schoolId: $schoolId) {
+      id
+      fullName
+      shortName
+      address
+    }
+  }
+}

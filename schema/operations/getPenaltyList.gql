@@ -1,0 +1,36 @@
+fragment Penalty on Penalty {
+  comment
+  id
+  duration
+  status
+  startTime
+  createTime
+  penaltySlot {
+    currentStudentsCount
+    description
+    duration
+    startTime
+    id
+    endTime
+  }
+  reasonId
+}
+
+query getPenaltyList($statuses: [String]!, $from: DateTime, $to: DateTime, $sorting: [SortingField], $page: PagingInput!) {
+  penalty {
+    getMyPenalties(
+      statuses: $statuses
+      from: $from
+      to: $to
+      sorting: $sorting
+      page: $page
+    ) {
+      ...Penalty
+    }
+    getPenaltyReasons {
+      id
+      name
+    }
+    countMyPenalties(statuses: $statuses)
+  }
+}

@@ -1,0 +1,27 @@
+query getStageInfo {
+  user {
+    getCurrentUser {
+      id
+      studentRoles {
+        status
+        school {
+          organizationType
+        }
+        stageGroup {
+          classSubjects {
+            stage {
+              name
+            }
+          }
+          name
+          stage
+          isActive
+        }
+      }
+    }
+    getAllStagesTenantAware {
+      id
+      name
+    }
+  }
+}

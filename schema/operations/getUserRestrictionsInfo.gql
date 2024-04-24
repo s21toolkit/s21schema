@@ -1,0 +1,13 @@
+query getUserRestrictionsInfo {
+  school21 {
+    getUserRestrictions {
+      restrictionId
+      restrictionType
+      userId
+      schoolId
+      isActive
+      createdTs
+      updatedTs
+    }
+  }
+}

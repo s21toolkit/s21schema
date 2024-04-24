@@ -1,0 +1,5 @@
+query getIsDisbandRequestAlreadySent($teamId: UUID!) {
+  student {
+    isRequestBeenSentToTeamDisband(teamId: $teamId)
+  }
+}

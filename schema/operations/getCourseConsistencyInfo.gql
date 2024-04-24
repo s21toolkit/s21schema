@@ -1,0 +1,10 @@
+query getCourseConsistencyInfo($localCourseId: ID!) {
+  school21 {
+    loadCourseConsistencyInfo(localCourseId: $localCourseId) {
+      courseId
+      name
+      isConsistent
+      isConstructorsValid
+    }
+  }
+}

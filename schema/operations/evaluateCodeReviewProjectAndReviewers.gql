@@ -1,0 +1,11 @@
+mutation evaluateCodeReviewProjectAndReviewers($studentGoalId: ID!, $finalMark: Boolean!, $studentMarks: [CodeReviewersMarksInput!]!) {
+  student {
+    evaluateCodeReviewProjectAndReviewers(
+      studentGoalId: $studentGoalId
+      finalMark: $finalMark
+      studentMarks: $studentMarks
+    ) {
+      studentCodeReviewId
+    }
+  }
+}

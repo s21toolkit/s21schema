@@ -1,0 +1,5 @@
+query getCodeReviewPointChargedOff($goalId: ID!) {
+  student {
+    getCodeReviewPointChargedOff(goalId: $goalId)
+  }
+}

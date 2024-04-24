@@ -1,0 +1,7 @@
+mutation saveHonorRatings($studentHonorRatings: [StudentHonorRatingInput!]!) {
+  honorRating {
+    saveStudentHonorRatings(studentHonorRatings: $studentHonorRatings) {
+      studentHonorRatingId
+    }
+  }
+}

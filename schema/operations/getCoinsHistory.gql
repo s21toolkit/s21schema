@@ -1,0 +1,20 @@
+fragment CoinsTransactionInfo on UserCoinsHistoryItemModel {
+  id
+  itemType
+  amount
+  date
+  badgeName
+  badgeAvatar
+  externalTransactionId
+  giverLogin
+  comment
+  amountAfter
+}
+
+query getCoinsHistory {
+  student {
+    getUserCoinsHistory {
+      ...CoinsTransactionInfo
+    }
+  }
+}

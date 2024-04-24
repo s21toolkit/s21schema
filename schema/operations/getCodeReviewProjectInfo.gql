@@ -1,0 +1,36 @@
+fragment CodeReviewCurrentTaskInfo on StudentTask {
+  id
+  taskId
+  task {
+    content {
+      body
+    }
+    assignmentType
+    studentTaskAdditionalAttributes {
+      codeReviewDuration
+      codeReviewCost
+    }
+  }
+}
+
+fragment CodeReviewProjectInfo on StudentModule {
+  id
+  moduleTitle
+  studyModule {
+    duration
+    stage {
+      name
+    }
+  }
+  currentTask {
+    ...CodeReviewCurrentTaskInfo
+  }
+}
+
+query getCodeReviewProjectInfo($studentGoalId: ID!) {
+  student {
+    getStudentModuleByStudentGoalId(studentGoalId: $studentGoalId) {
+      ...CodeReviewProjectInfo
+    }
+  }
+}

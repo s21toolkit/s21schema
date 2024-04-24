@@ -1,0 +1,15 @@
+fragment StudentsCodeReviewByStudent on StudentCodeReview {
+  reviewerStudentId
+  user {
+    login
+    avatarUrl
+  }
+}
+
+query getStudentCodeReviewByStudentGoalId($studentGoalId: ID!) {
+  student {
+    getStudentCodeReviewByStudentGoalId(studentGoalId: $studentGoalId) {
+      ...StudentsCodeReviewByStudent
+    }
+  }
+}

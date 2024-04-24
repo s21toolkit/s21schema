@@ -1,0 +1,29 @@
+query getStudentFeedbackById($studentFeedbackId: ID!) {
+  sc21StudentTaskCheck {
+    getStudentFeedbackById(studentFeedbackId: $studentFeedbackId) {
+      id
+      studentGoalAttemptId
+      goalId
+      goalName
+      goalExecutionType
+      pointPercent
+      resultModuleCompletion
+      resultAttemptDate
+      serialNumber
+      feedbackForm {
+        id
+        feedbackFormEnum
+        name
+        feedbackFormQuestions {
+          id
+          serialNumber
+          titleEn
+          descriptionEn
+          feedbackSectionEnum
+          typeValue
+          quickActionEn
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,5 @@
+mutation saveFilledChecklist($filledChecklistInput: ChecklistFilledInput!) {
+  student {
+    completeP2pCheck(checklistFilledInput: $filledChecklistInput)
+  }
+}

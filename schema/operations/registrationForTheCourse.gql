@@ -1,0 +1,7 @@
+mutation registrationForTheCourse($localCourseId: ID!) {
+  course {
+    registrationForTheCourse(localCourseId: $localCourseId) {
+      finalPoint
+    }
+  }
+}

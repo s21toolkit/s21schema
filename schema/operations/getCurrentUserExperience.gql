@@ -1,0 +1,21 @@
+fragment CurrentUserExperience on UserExperience {
+  id
+  cookiesCount
+  codeReviewPoints
+  coinsCount
+  level {
+    id
+    range {
+      id
+      levelCode
+    }
+  }
+}
+
+query getCurrentUserExperience {
+  student {
+    getExperience {
+      ...CurrentUserExperience
+    }
+  }
+}

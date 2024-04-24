@@ -1,0 +1,13 @@
+query publicProfileGetAchievements($userId: UUID!) {
+  school21 {
+    getBadgesPublicProfile(userId: $userId) {
+      points
+      id
+      badge {
+        id
+        name
+        avatarUrl
+      }
+    }
+  }
+}

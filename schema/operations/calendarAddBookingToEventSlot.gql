@@ -1,0 +1,12 @@
+mutation calendarAddBookingToEventSlot($answerId: ID!, $startTime: DateTime!, $wasStaffSlotChosen: Boolean!, $isOnline: Boolean) {
+  student {
+    addBookingP2PToEventSlot(
+      answerId: $answerId
+      startTime: $startTime
+      wasStaffSlotChosen: $wasStaffSlotChosen
+      isOnline: $isOnline
+    ) {
+      id
+    }
+  }
+}

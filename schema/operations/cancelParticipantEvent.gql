@@ -1,0 +1,9 @@
+mutation cancelParticipantEvent($activityEvent: ID!) {
+  event {
+    cancelParticipantEvent(activityEvent: $activityEvent) {
+      activityEventId
+      eventId
+      name
+    }
+  }
+}

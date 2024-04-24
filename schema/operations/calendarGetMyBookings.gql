@@ -1,0 +1,69 @@
+fragment VerifiableStudentItem on VerifiableStudent {
+  userId
+  login
+  avatarUrl
+  levelCode
+  isTeamLead
+  cookiesCount
+  codeReviewPoints
+  school {
+    shortName
+  }
+}
+
+fragment CalendarReviewUser on User {
+  id
+  login
+}
+
+fragment CalendarReviewBooking on CalendarBooking {
+  id
+  answerId
+  eventSlotId
+  task {
+    id
+    goalId
+    goalName
+    studentTaskAdditionalAttributes {
+      cookiesCount
+    }
+    assignmentType
+  }
+  eventSlot {
+    id
+    start
+    end
+    event {
+      eventUserRole
+    }
+    school {
+      shortName
+    }
+  }
+  verifierUser {
+    ...CalendarReviewUser
+  }
+  verifiableInfo {
+    verifiableStudents {
+      ...VerifiableStudentItem
+    }
+    team {
+      name
+    }
+  }
+  bookingStatus
+  isOnline
+  vcLinkUrl
+  additionalChecklist {
+    filledChecklistId
+    filledChecklistStatusRecordingEnum
+  }
+}
+
+query calendarGetMyBookings($from: DateTime!, $to: DateTime!) {
+  student {
+    getMyCalendarBookings(from: $from, to: $to) {
+      ...CalendarReviewBooking
+    }
+  }
+}

@@ -1,0 +1,5 @@
+query getTaskSolutionType($taskId: ID!) {
+  sc21StudentTaskCheck {
+    getTaskSolutionType(taskId: $taskId)
+  }
+}

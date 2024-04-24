@@ -1,0 +1,5 @@
+mutation tryAgainExamModule($goalId: ID!) {
+  sc21ProjectFlow {
+    retryExam(goalId: $goalId)
+  }
+}

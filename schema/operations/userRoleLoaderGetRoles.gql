@@ -1,0 +1,37 @@
+query userRoleLoaderGetRoles {
+  user {
+    getCurrentUser {
+      functionalRoles {
+        code
+      }
+      id
+      studentRoles {
+        id
+        school {
+          id
+          shortName
+          organizationType
+        }
+        status
+      }
+      userSchoolPermissions {
+        schoolId
+        permissions
+      }
+      systemAdminRole {
+        id
+      }
+      businessAdminRolesV2 {
+        id
+        school {
+          id
+          organizationType
+        }
+        orgUnitId
+      }
+    }
+    getCurrentUserSchoolRoles {
+      schoolId
+    }
+  }
+}

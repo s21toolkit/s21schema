@@ -1,0 +1,19 @@
+fragment CodeReviewProject on CodeReview {
+  goalId
+  goalTitle
+  studentGoalId
+  studentCodeReviewStatus
+  goalExecutionType
+  studentTaskAdditionalAttributesModel {
+    codeReviewCost
+    codeReviewDuration
+  }
+}
+
+query getSecondRoundCodeReviewProjects($paging: PagingInput!) {
+  student {
+    getSecondRoundCodeReviewProjects(paging: $paging) {
+      ...CodeReviewProject
+    }
+  }
+}

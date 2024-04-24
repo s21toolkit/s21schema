@@ -1,0 +1,9 @@
+query getGraphGetCurrentUser {
+  user {
+    getCurrentUser {
+      id
+      currentSchoolStudentId
+      login
+    }
+  }
+}

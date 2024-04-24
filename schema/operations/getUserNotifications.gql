@@ -1,0 +1,17 @@
+query getUserNotifications($paging: PagingInput!) {
+  s21Notification {
+    getS21Notifications(paging: $paging) {
+      notifications {
+        id
+        relatedObjectType
+        relatedObjectId
+        message
+        time
+        wasRead
+        groupName
+      }
+      totalCount
+      groupNames
+    }
+  }
+}

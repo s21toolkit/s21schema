@@ -1,0 +1,20 @@
+fragment CodeReviewRound on CodeReviewRound {
+  eventId
+  codeReviewRoundType
+  codeReviewStatus
+  startTime
+  endTime
+  mergeRequestURL
+  createTime
+}
+
+query getCodeReviewMyStudent($studentGoalId: ID!) {
+  student {
+    getMyStudentCodeReview(studentGoalId: $studentGoalId) {
+      reviewerCommentsCount
+      codeReviewRounds {
+        ...CodeReviewRound
+      }
+    }
+  }
+}

@@ -1,0 +1,27 @@
+fragment CurrentUserExperience on UserExperience {
+  id
+  cookiesCount
+  codeReviewPoints
+  coinsCount
+  level {
+    id
+    range {
+      id
+      levelCode
+    }
+  }
+}
+
+query getProfileUser($userId: UUID!) {
+  school21 {
+    getBasePublicProfile(userId: $userId) {
+      avatarUrl
+      firstName
+      middleName
+      lastName
+    }
+    getExperiencePublicProfile(userId: $userId) {
+      ...CurrentUserExperience
+    }
+  }
+}

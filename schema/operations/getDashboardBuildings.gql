@@ -1,0 +1,11 @@
+query getDashboardBuildings {
+  student {
+    getBuildings {
+      id
+      classrooms {
+        id
+        number
+      }
+    }
+  }
+}

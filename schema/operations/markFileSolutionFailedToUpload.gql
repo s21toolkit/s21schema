@@ -1,0 +1,20 @@
+fragment StudyProcessFile on StudyProcessFile {
+  studyProcessFileId
+  link
+  status
+  statusDetails
+  updateDateTime
+  creatorLogin
+  fileExtension
+}
+
+mutation markFileSolutionFailedToUpload($taskId: ID!, $fileCancelEvent: [StudyProcessFileFailOrCancelInput!]!) {
+  sc21StudentTaskCheck {
+    markFileSolutionFailedToUpload(
+      taskId: $taskId
+      fileCancelEvent: $fileCancelEvent
+    ) {
+      ...StudyProcessFile
+    }
+  }
+}

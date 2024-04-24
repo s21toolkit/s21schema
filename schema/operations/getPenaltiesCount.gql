@@ -1,0 +1,5 @@
+query getPenaltiesCount($statuses: [String]!) {
+  penalty {
+    countMyPenalties(statuses: $statuses)
+  }
+}

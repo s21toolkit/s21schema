@@ -1,0 +1,17 @@
+query publicProfileLoadStageGroups($studentId: UUID!) {
+  school21 {
+    loadStudentStageGroups(studentId: $studentId) {
+      stageGroupStudentId
+      studentId
+      stageGroupS21 {
+        waveId
+        waveName
+        eduForm
+        active
+      }
+      safeSchool {
+        fullName
+      }
+    }
+  }
+}

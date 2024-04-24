@@ -1,0 +1,7 @@
+mutation removeFromFavourites($videoId: UUID!) {
+  mediateka {
+    removeBookmark(itemId: $videoId) {
+      status
+    }
+  }
+}

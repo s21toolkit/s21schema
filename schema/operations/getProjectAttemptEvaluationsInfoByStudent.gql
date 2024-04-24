@@ -1,0 +1,134 @@
+fragment OnlineReviewInfo on OnlineReview {
+  isOnline
+  video {
+    onlineVideoId
+    link
+    status
+    statusDetails
+    updateDateTime
+  }
+}
+
+fragment EvaluationFeedback on ReviewFeedback {
+  id
+  comment
+  filledChecklist {
+    id
+  }
+  reviewFeedbackCategoryValues {
+    feedbackCategory
+    feedbackValue
+    id
+  }
+}
+
+fragment Checklist on FilledChecklist {
+  id
+  checklistId
+  endTimeCheck
+  startTimeCheck
+  reviewer {
+    avatarUrl
+    login
+    businessAdminRoles {
+      id
+      school {
+        id
+        organizationType
+      }
+    }
+  }
+  reviewFeedback {
+    ...EvaluationFeedback
+  }
+  comment
+  receivedPoint
+  receivedPercentage
+  quickAction
+  checkType
+  onlineReview {
+    ...OnlineReviewInfo
+  }
+}
+
+fragment AttemptTeamMember on User {
+  id
+  avatarUrl
+  login
+  userExperience {
+    level {
+      id
+      range {
+        levelCode
+      }
+    }
+    cookiesCount
+    codeReviewPoints
+  }
+}
+
+fragment P2PEvaluation on P2PEvaluationInfo {
+  status
+  checklist {
+    ...Checklist
+  }
+}
+
+fragment AttemptTeamWithMembers on TeamWithMembers {
+  team {
+    id
+    name
+  }
+  members {
+    role
+    user {
+      ...AttemptTeamMember
+    }
+  }
+}
+
+fragment AtemptResult on StudentGoalAttempt {
+  finalPointProject
+  finalPercentageProject
+  resultModuleCompletion
+  resultDate
+}
+
+fragment ProjectAttemptEvaluations on ProjectAttemptEvaluationsInfo {
+  studentAnswerId
+  attemptResult {
+    ...AtemptResult
+  }
+  team {
+    ...AttemptTeamWithMembers
+  }
+  p2p {
+    ...P2PEvaluation
+  }
+  auto {
+    status
+    receivedPercentage
+    endTimeCheck
+    resultInfo
+  }
+  codeReview {
+    averageMark
+    studentCodeReviews {
+      user {
+        avatarUrl
+        login
+      }
+      finalMark
+      markTime
+      reviewerCommentsCount
+    }
+  }
+}
+
+query getProjectAttemptEvaluationsInfoByStudent($goalId: ID!, $studentId: UUID!) {
+  school21 {
+    getProjectAttemptEvaluationsInfo(goalId: $goalId, studentId: $studentId) {
+      ...ProjectAttemptEvaluations
+    }
+  }
+}

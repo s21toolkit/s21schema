@@ -1,0 +1,5 @@
+query getProjectAccessGroupIdByStudentAnswerId($answerId: ID!) {
+  sc21StudentTaskCheck {
+    getProjectAccessGroupIdByStudentAnswerId(answerId: $answerId)
+  }
+}

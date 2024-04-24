@@ -1,0 +1,24 @@
+fragment CalendarExam on Exam {
+  examId
+  eventId
+  beginDate
+  endDate
+  name
+  location
+  maxStudentCount
+  currentStudentsCount
+  updateDate
+  goalId
+  goalName
+  isWaitListActive
+  isInWaitList
+  stopRegisterDate
+}
+
+query calendarGetExams($from: DateTime!, $to: DateTime!) {
+  student {
+    getExams(from: $from, to: $to) {
+      ...CalendarExam
+    }
+  }
+}

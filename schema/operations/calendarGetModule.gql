@@ -1,0 +1,32 @@
+fragment CalendarStudentTaskAdditionalAttributes on StudentTaskAdditionalAttributes {
+  cookiesCount
+}
+
+fragment CalendarStudentTask on StudentTask {
+  id
+  taskId
+  task {
+    id
+    studentTaskAdditionalAttributes {
+      ...CalendarStudentTaskAdditionalAttributes
+    }
+    assignmentType
+  }
+  lastAnswer {
+    id
+  }
+}
+
+query calendarGetModule($moduleId: ID!) {
+  student {
+    getModuleById(goalId: $moduleId) {
+      id
+      moduleTitle
+      subjectTitle
+      goalExecutionType
+      currentTask {
+        ...CalendarStudentTask
+      }
+    }
+  }
+}

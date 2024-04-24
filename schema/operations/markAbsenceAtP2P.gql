@@ -1,0 +1,5 @@
+mutation markAbsenceAtP2P($bookingId: ID!) {
+  student {
+    markAbsenceInProtocol(bookingId: $bookingId)
+  }
+}

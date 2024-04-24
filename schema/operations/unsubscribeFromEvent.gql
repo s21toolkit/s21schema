@@ -1,0 +1,109 @@
+fragment Penalty on Penalty {
+  comment
+  id
+  duration
+  status
+  startTime
+  createTime
+  penaltySlot {
+    currentStudentsCount
+    description
+    duration
+    startTime
+    id
+    endTime
+  }
+  reasonId
+}
+
+fragment UpcomingEvent on CalendarEvent {
+  id
+  start
+  end
+  bookings {
+    id
+    task {
+      id
+      goalName
+    }
+  }
+  eventSlots {
+    id
+    eventId
+    type
+    start
+    end
+  }
+  maxStudentCount
+  location
+  ipRange
+  eventType
+  eventCode
+  description
+  externalId
+  currentStudentsCount
+  exam {
+    examId
+    eventId
+    beginDate
+    endDate
+    location
+    ip
+    maxStudentCount
+    isVisible
+    name
+    goalId
+    isWaitListActive
+    isInWaitList
+    currentStudentsCount
+    createDate
+    updateDate
+    schoolId
+    stopRegisterDate
+    isRegistered
+    goalName
+    eventType
+    registrationAccessStatus
+  }
+  studentCodeReview {
+    studentGoalId
+  }
+  activity {
+    activityEventId
+    eventId
+    beginDate
+    endDate
+    location
+    description
+    maxStudentCount
+    isVisible
+    name
+    isWaitListActive
+    isInWaitList
+    currentStudentsCount
+    createDate
+    updateDate
+    schoolId
+    stopRegisterDate
+    isRegistered
+    activityType
+    eventType
+    isMandatory
+    status
+    organizers {
+      id
+      login
+    }
+  }
+  penalty {
+    ...Penalty
+  }
+}
+
+mutation unsubscribeFromEvent($eventId: ID!) {
+  student {
+    unsubscribeFromEvent(eventId: $eventId) {
+      ...UpcomingEvent
+    }
+  }
+}

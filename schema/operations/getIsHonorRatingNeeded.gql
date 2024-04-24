@@ -1,0 +1,5 @@
+query getIsHonorRatingNeeded {
+  honorRating {
+    isHonorRatingNeeded
+  }
+}

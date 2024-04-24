@@ -1,0 +1,20 @@
+query getCampusBuildings {
+  student {
+    getBuildings {
+      id
+      name
+      classrooms {
+        id
+        number
+        capacity
+        availableCapacity
+        floor
+        classroomPlan {
+          classroomPlanId
+          planMeta
+        }
+        specializations
+      }
+    }
+  }
+}

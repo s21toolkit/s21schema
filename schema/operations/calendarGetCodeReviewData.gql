@@ -1,0 +1,14 @@
+query calendarGetCodeReviewData($studentGoalId: ID!) {
+  student {
+    getStudentModuleByStudentGoalId(studentGoalId: $studentGoalId) {
+      moduleTitle
+      currentTask {
+        task {
+          studentTaskAdditionalAttributes {
+            codeReviewDuration
+          }
+        }
+      }
+    }
+  }
+}

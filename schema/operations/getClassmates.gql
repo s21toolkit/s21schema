@@ -1,0 +1,12 @@
+query getClassmates($textSearch: String) {
+  honorRating {
+    getClassmates(textSearch: $textSearch) {
+      __typename
+      id
+      firstName
+      lastName
+      login
+    }
+    __typename
+  }
+}

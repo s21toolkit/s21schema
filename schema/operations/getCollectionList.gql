@@ -1,0 +1,12 @@
+fragment MediatekaCollectionItemFragment on Selection {
+  selectionId
+  name
+}
+
+query getCollectionList($bound: Boolean, $selectionType: SelectionType, $stageIds: [ID!]) {
+  selection {
+    getSelections(bound: $bound, selectionType: $selectionType, stageIds: $stageIds) {
+      ...MediatekaCollectionItemFragment
+    }
+  }
+}

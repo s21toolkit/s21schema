@@ -1,0 +1,13 @@
+query StudentProfileGetUserRestrictionsByUserIdAndSchoolId($userId: UUID!, $schoolId: UUID!) {
+  school21 {
+    getUserRestrictionsByUserIdAndSchoolId(userId: $userId, schoolId: $schoolId) {
+      restrictionId
+      restrictionType
+      userId
+      schoolId
+      isActive
+      createdTs
+      updatedTs
+    }
+  }
+}

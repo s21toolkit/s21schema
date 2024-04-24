@@ -1,0 +1,29 @@
+fragment StudentProjectItem on StudentItem {
+  goalId
+  name
+  description
+  experience
+  dateTime
+  finalPercentage
+  laboriousness
+  executionType
+  goalStatus
+  courseType
+  displayedCourseStatus
+  amountAnswers
+  amountMembers
+  amountJoinedMembers
+  amountReviewedAnswers
+  amountCodeReviewMembers
+  amountCurrentCodeReviewMembers
+  groupName
+  localCourseId
+}
+
+query getStudentFinishedProjects($userId: ID!) {
+  student {
+    getStudentFinishedProjects(userId: $userId) {
+      ...StudentProjectItem
+    }
+  }
+}

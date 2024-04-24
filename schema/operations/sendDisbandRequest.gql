@@ -1,0 +1,10 @@
+mutation sendDisbandRequest($teamId: UUID!, $comment: String!, $urlFileComment: String, $goalId: ID!) {
+  student {
+    sendTeamDisbandRequest(
+      teamId: $teamId
+      comment: $comment
+      urlFileComment: $urlFileComment
+      goalId: $goalId
+    )
+  }
+}

@@ -1,0 +1,50 @@
+fragment CurrentCoalitionTournament on CoalitionTournamentRank {
+  id
+  rank
+  coalitionTournament {
+    points
+    extraPoints
+    coalition {
+      id
+      name
+      avatarUrl
+      backgroundUrl
+      backgroundUrlBig
+      memberCount
+      color
+      masterAvatarImgUrl
+      masterUser {
+        id
+        login
+      }
+    }
+    mvpMember {
+      id
+      points
+      coalitionMemberUser {
+        id
+        login
+        avatarUrl
+      }
+    }
+  }
+}
+
+fragment CurrentTournament on GameTournament {
+  id
+  name
+  timeStart
+  timeEnd
+  tournamentAwardDescription
+  coalitionPoints {
+    ...CurrentCoalitionTournament
+  }
+}
+
+query competitionGetCurrentOrLastTournament {
+  student {
+    getCurrentOrLastTournament {
+      ...CurrentTournament
+    }
+  }
+}

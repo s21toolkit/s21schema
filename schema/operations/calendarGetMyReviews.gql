@@ -1,0 +1,90 @@
+fragment ProjectTeamMember on User {
+  id
+  avatarUrl
+  login
+  userExperience {
+    level {
+      id
+      range {
+        levelCode
+      }
+    }
+    cookiesCount
+    codeReviewPoints
+  }
+  activeSchoolShortName
+}
+
+fragment ProjectTeamMembers on ProjectTeamMembers {
+  id
+  teamLead {
+    ...ProjectTeamMember
+  }
+  members {
+    ...ProjectTeamMember
+  }
+  invitedUsers {
+    ...ProjectTeamMember
+  }
+  teamName
+  teamStatus
+  minTeamMemberCount
+  maxTeamMemberCount
+}
+
+fragment UserInBooking on User {
+  id
+  login
+  avatarUrl
+  userExperience {
+    level {
+      id
+      range {
+        levelCode
+      }
+    }
+  }
+}
+
+fragment Review on CalendarBooking {
+  id
+  answerId
+  eventSlot {
+    id
+    start
+    end
+  }
+  task {
+    id
+    title
+    assignmentType
+    goalId
+    goalName
+    studentTaskAdditionalAttributes {
+      cookiesCount
+    }
+  }
+  verifierUser {
+    ...UserInBooking
+  }
+  verifiableStudent {
+    id
+    user {
+      ...UserInBooking
+    }
+  }
+  team {
+    ...ProjectTeamMembers
+  }
+  bookingStatus
+  isOnline
+  vcLinkUrl
+}
+
+query calendarGetMyReviews($to: DateTime, $limit: Int) {
+  student {
+    getMyUpcomingBookings(to: $to, limit: $limit) {
+      ...Review
+    }
+  }
+}

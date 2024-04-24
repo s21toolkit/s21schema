@@ -1,0 +1,11 @@
+query getProjectGitlabInfo($answerId: ID!) {
+  student {
+    getPrivateGitlabProjectLinkInfoByAnswerId(answerId: $answerId) {
+      gitlabProjectId
+      sshLink
+      httpsLink
+      status
+      hasOpenedMR
+    }
+  }
+}

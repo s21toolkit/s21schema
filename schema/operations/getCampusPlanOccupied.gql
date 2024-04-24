@@ -1,0 +1,31 @@
+query getCampusPlanOccupied($clusterId: ID!) {
+  student {
+    getClusterPlanStudentsByClusterId(clusterId: $clusterId) {
+      occupiedPlaces {
+        row
+        number
+        stageGroupName
+        stageName
+        user {
+          id
+          login
+          avatarUrl
+        }
+        experience {
+          id
+          value
+          level {
+            id
+            range {
+              id
+              levelCode
+              leftBorder
+              rightBorder
+            }
+          }
+        }
+        studentType
+      }
+    }
+  }
+}

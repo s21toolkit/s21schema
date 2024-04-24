@@ -1,0 +1,9 @@
+query getAllInCompletedStudentFeedbackPopup {
+  sc21StudentTaskCheck {
+    getAllInCompletedStudentFeedbackPopup {
+      studentFeedbackId
+      goalName
+      resultAttemptDate
+    }
+  }
+}

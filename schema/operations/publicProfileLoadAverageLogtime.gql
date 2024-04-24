@@ -1,0 +1,9 @@
+query publicProfileLoadAverageLogtime($login: String!, $schoolID: UUID!, $date: Date!) {
+  school21 {
+    loadAverageLogtime(login: $login, schoolID: $schoolID, date: $date) {
+      week
+      month
+      weekPerMonth
+    }
+  }
+}

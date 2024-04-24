@@ -1,0 +1,17 @@
+fragment StudyProcessFile on StudyProcessFile {
+  studyProcessFileId
+  link
+  status
+  statusDetails
+  updateDateTime
+  creatorLogin
+  fileExtension
+}
+
+mutation markFileSolutionUploaded($taskId: ID!, $fileUploadEvents: [StudyProcessFileUploadInput!]!) {
+  sc21StudentTaskCheck {
+    markFileSolutionUploaded(taskId: $taskId, fileUploadEvents: $fileUploadEvents) {
+      ...StudyProcessFile
+    }
+  }
+}

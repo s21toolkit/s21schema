@@ -1,0 +1,17 @@
+query widgetAchievementsGetLastBadges($limit: Int) {
+  student {
+    getLastBadges(limit: $limit) {
+      id
+      points
+      badge {
+        name
+        avatarUrl
+      }
+      award {
+        awardBounties {
+          awardLevelId
+        }
+      }
+    }
+  }
+}

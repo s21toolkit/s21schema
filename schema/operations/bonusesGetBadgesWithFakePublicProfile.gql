@@ -1,0 +1,53 @@
+fragment UserAchievements on UserBadgeAward {
+  id
+  histories {
+    id
+    rewardDate
+    awardPoints
+  }
+  badge {
+    id
+    kind {
+      id
+      name
+      order
+    }
+    name
+    description
+    avatarUrl
+    bigAvatarUrl
+  }
+  award {
+    id
+    awardCondition {
+      id
+      description
+    }
+    awardBounties {
+      awardBountyId
+      description
+      cookies
+      coins
+      experienceValue
+      coalitionPoints
+      softSkillPowers {
+        softSkillId
+        power
+        softSkill {
+          id
+          name
+        }
+      }
+    }
+  }
+  points
+  isFake
+}
+
+query bonusesGetBadgesWithFakePublicProfile($userId: UUID) {
+  school21 {
+    getBadgesWithFakePublicProfile(userId: $userId) {
+      ...UserAchievements
+    }
+  }
+}

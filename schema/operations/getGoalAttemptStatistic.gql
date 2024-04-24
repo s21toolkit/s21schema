@@ -1,0 +1,14 @@
+fragment AttemptStatisticResult on StudentGoalAttemptStatistic {
+  finalPercentage
+  pointProject
+  resultModuleCompletion
+  resultDate
+}
+
+query getGoalAttemptStatistic($goalId: ID!) {
+  student {
+    getGoalAttemptStatistic(goalId: $goalId) {
+      ...AttemptStatisticResult
+    }
+  }
+}

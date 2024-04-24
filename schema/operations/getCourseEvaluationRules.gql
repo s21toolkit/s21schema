@@ -1,0 +1,34 @@
+fragment ExecutionConditionValue on StudentEvaluationRuleValue {
+  fieldId
+  fieldName
+  fieldType
+  subFieldKey
+  subFieldName
+  operator
+  valueWithDescription {
+    key
+    value
+  }
+  projectRoutingInfo {
+    key
+    value
+  }
+}
+
+fragment ExecutionConditions on StudentEvaluationRuleGroup {
+  logicalOperatorId
+  rulesInGroup {
+    logicalOperatorId
+    value {
+      ...ExecutionConditionValue
+    }
+  }
+}
+
+query getCourseEvaluationRules($localCourseId: ID!) {
+  course {
+    loadCourseEvaluationRules(localCourseId: $localCourseId) {
+      ...ExecutionConditions
+    }
+  }
+}

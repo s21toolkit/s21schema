@@ -1,0 +1,5 @@
+mutation registerToInternship($goalId: ID!) {
+  sc21ProjectFlow {
+    registerForProject(goalId: $goalId)
+  }
+}

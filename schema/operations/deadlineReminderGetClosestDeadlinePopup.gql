@@ -1,0 +1,74 @@
+fragment Level on ExperienceLevelRange {
+  id
+  level
+  levelCode
+  leftBorder
+  rightBorder
+}
+
+fragment GoalCourse on CourseCoverInformation {
+  localCourseId
+  courseName
+  courseType
+  experienceFact
+  finalPercentage
+  displayedCourseStatus
+}
+
+fragment DeadlineGoalData on DeadlineGoal {
+  goalProjects {
+    studentGoalId
+    project {
+      goalName
+      goalId
+    }
+    status
+    executionType
+    finalPercentage
+    finalPoint
+    pointTask
+  }
+  goalCourses {
+    ...GoalCourse
+  }
+  levels {
+    ...Level
+  }
+}
+
+fragment DeadlineData on Deadline {
+  deadlineId
+  description
+  comment
+  deadlineToDaysArray
+  deadlineTs
+  createTs
+  updateTs
+  status
+  rules {
+    logicalOperatorId
+    rulesInGroup {
+      logicalOperatorId
+      value {
+        fieldId
+        subFieldKey
+        operator
+        value
+      }
+    }
+  }
+}
+
+query deadlineReminderGetClosestDeadlinePopup {
+  student {
+    getClosestDeadlinePopup {
+      deadline {
+        ...DeadlineData
+      }
+      deadlineGoal {
+        ...DeadlineGoalData
+      }
+      shiftCount
+    }
+  }
+}

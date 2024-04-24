@@ -1,0 +1,5 @@
+mutation removeP2P($bookingId: ID!) {
+  student {
+    removeBookingFromEventSlot(bookingId: $bookingId)
+  }
+}

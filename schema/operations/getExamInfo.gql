@@ -1,0 +1,99 @@
+fragment GroupProjectStatistics on GroupProjectStatistics {
+  inProgressTeams
+  evaluationTeams
+  finishedTeams
+  acceptedTeams
+  failedTeams
+}
+
+fragment TimelineItemChildren on ProjectTimelineItem {
+  type
+  elementType
+  status
+  start
+  end
+  order
+}
+
+fragment ProjectStatistics on ProjectStatistics {
+  registeredStudents
+  inProgressStudents
+  evaluationStudents
+  finishedStudents
+  acceptedStudents
+  failedStudents
+  retriedStudentsPercentage
+  groupProjectStatistics {
+    ...GroupProjectStatistics
+  }
+}
+
+fragment TimelineItem on ProjectTimelineItem {
+  type
+  status
+  start
+  end
+  children {
+    ...TimelineItemChildren
+  }
+}
+
+fragment StudentGoalRetryInfo on StudentGoalRetryInfo {
+  totalRetryValue
+  usedRetryCount
+  unlimitedAttempts
+}
+
+fragment ModuleExamCoverInfo on ModuleCoverInformation {
+  timeline {
+    ...TimelineItem
+  }
+  projectStatistics {
+    ...ProjectStatistics
+  }
+  softSkills {
+    softSkillId
+    maxPower
+    currentUserPower
+    softSkillName
+    totalPower
+    teamRole
+    achievedUserPower
+  }
+}
+
+fragment ExamInfo on StudentModule {
+  id
+  moduleTitle
+  displayedGoalStatus
+  resultModuleCompletion
+  localCourseId
+  finalPercentage
+  finalPoint
+  localCourseId
+  goalExecutionType
+  isRetryAvailable
+  durationFromStageSubjectGroupPlan
+  courseBaseParameters {
+    isGradedCourse
+  }
+  studyModule {
+    idea
+    duration
+    goalPoint
+  }
+}
+
+query getExamInfo($goalId: ID!) {
+  student {
+    getModuleById(goalId: $goalId) {
+      ...ExamInfo
+    }
+    getModuleCoverInformation(goalId: $goalId) {
+      ...ModuleExamCoverInfo
+    }
+    getGoalRetryInfo(goalId: $goalId) {
+      ...StudentGoalRetryInfo
+    }
+  }
+}

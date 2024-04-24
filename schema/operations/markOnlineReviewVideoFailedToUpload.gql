@@ -1,0 +1,19 @@
+fragment OnlineReviewVideoInfo on OnlineReviewVideo {
+  onlineVideoId
+  link
+  status
+  statusDetails
+  updateDateTime
+}
+
+mutation markOnlineReviewVideoFailedToUpload($filledChecklistId: ID!, $onlineReviewId: ID!, $errorMessage: String!) {
+  school21 {
+    markP2pCheckVideoFailedToUpload(
+      filledChecklistId: $filledChecklistId
+      onlineReviewId: $onlineReviewId
+      errorMessage: $errorMessage
+    ) {
+      ...OnlineReviewVideoInfo
+    }
+  }
+}

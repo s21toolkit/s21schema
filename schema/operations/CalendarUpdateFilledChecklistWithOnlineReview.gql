@@ -1,0 +1,10 @@
+mutation CalendarUpdateFilledChecklistWithOnlineReview($filledChecklistId: ID!, $onlineReviewId: ID!) {
+  school21 {
+    updateFilledChecklistWithOnlineReview(
+      filledChecklistId: $filledChecklistId
+      onlineReviewId: $onlineReviewId
+    ) {
+      checklistId
+    }
+  }
+}

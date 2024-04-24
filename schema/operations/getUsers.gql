@@ -1,0 +1,13 @@
+query getUsers($userIds: [UUID!]!) {
+  school21 {
+    getUsers(userIds: $userIds) {
+      userId
+      login
+      firstName
+      middleName
+      lastName
+      avatarUrl
+      level
+    }
+  }
+}

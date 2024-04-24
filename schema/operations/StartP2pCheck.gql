@@ -1,0 +1,5 @@
+mutation StartP2pCheck($filledChecklistId: ID!) {
+  student {
+    startP2pCheck(filledChecklistId: $filledChecklistId)
+  }
+}

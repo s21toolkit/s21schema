@@ -1,0 +1,8 @@
+query getLinkToPrivateStudentGitlabProjectByAnswerId($studentAnswerId: ID!) {
+  student {
+    getLinkToPrivateStudentGitlabProjectByAnswerId(answerId: $studentAnswerId) {
+      httpsLink
+      sshLink
+    }
+  }
+}

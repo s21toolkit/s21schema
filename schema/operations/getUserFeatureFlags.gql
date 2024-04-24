@@ -1,0 +1,8 @@
+query getUserFeatureFlags($entityId: String!) {
+  user {
+    getAllBackendConfigurations: getAllBackendConfigurationsV2(entityId: $entityId) {
+      propertyCode
+      value
+    }
+  }
+}

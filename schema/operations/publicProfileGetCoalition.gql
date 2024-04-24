@@ -1,0 +1,25 @@
+query publicProfileGetCoalition($userId: UUID!) {
+  student {
+    getUserTournamentWidget(userId: $userId) {
+      coalitionMember {
+        coalition {
+          avatarUrl
+          color
+          name
+          memberCount
+        }
+        currentTournamentPowerRank {
+          rank
+          power {
+            id
+            points
+          }
+        }
+      }
+      lastTournamentResult {
+        userRank
+        power
+      }
+    }
+  }
+}

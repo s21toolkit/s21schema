@@ -1,0 +1,59 @@
+fragment GlobalSearchCoursesSearchResult on CoursesSearchResult {
+  count
+  courses {
+    goalId
+    name
+    displayedCourseStatus
+    executionType
+    finalPercentage
+    experience
+    courseType
+    localCourseId
+    goalStatus
+  }
+}
+
+fragment GlobalSearchProjectsSearchResult on ProjectsSearchResult {
+  count
+  projects {
+    studentTaskId
+    status
+    finalPercentage
+    finalPoint
+    project {
+      goalId
+      goalName
+    }
+    executionType
+  }
+}
+
+fragment GlobalSearchProfilesSearchResult on ProfilesSearchResult {
+  count
+  profiles {
+    login
+    firstName
+    lastName
+    level
+    avatarUrl
+    school {
+      shortName
+    }
+  }
+}
+
+query getGlobalSearchResults($searchString: String!, $items: [SearchItem]!, $page: PagingInput!) {
+  globalSearch {
+    searchByText(searchString: $searchString, items: $items, page: $page) {
+      profiles {
+        ...GlobalSearchProfilesSearchResult
+      }
+      projects {
+        ...GlobalSearchProjectsSearchResult
+      }
+      studentCourses {
+        ...GlobalSearchCoursesSearchResult
+      }
+    }
+  }
+}

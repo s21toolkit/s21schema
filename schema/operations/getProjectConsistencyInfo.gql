@@ -1,0 +1,9 @@
+query getProjectConsistencyInfo($goalId: ID!) {
+  school21 {
+    loadGoalConsistencyInfo(goalId: $goalId) {
+      goalId
+      isConsistent
+      isConstructorsValid
+    }
+  }
+}

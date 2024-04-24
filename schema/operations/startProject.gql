@@ -1,0 +1,5 @@
+mutation startProject($goalId: ID!) {
+  sc21ProjectFlow {
+    startProject(goalId: $goalId)
+  }
+}

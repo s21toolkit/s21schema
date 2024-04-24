@@ -1,0 +1,44 @@
+query getMySuggestedActivities($page: PagingInput!, $statuses: [ParticipantEventStatus]) {
+  event {
+    getMySuggestedActivities(page: $page, statuses: $statuses) {
+      id
+      start
+      end
+      eventType
+      description
+      eventCode
+      activity {
+        organizers {
+          id
+          login
+        }
+        eventCreator {
+          id
+          login
+        }
+        comments {
+          type
+          createTs
+          comment
+        }
+        averageFeedbackRating
+        isVisible
+        activityType
+        status
+        activityEventId
+        eventId
+        name
+        description
+        location
+        currentStudentsCount
+        maxStudentCount
+        isRegistered
+        isInWaitList
+        isWaitListActive
+        stopRegisterDate
+        beginDate
+        endDate
+      }
+    }
+  }
+}

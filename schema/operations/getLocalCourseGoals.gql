@@ -1,0 +1,40 @@
+fragment RetrySettings on ModuleAttemptsSettings {
+  maxModuleAttempts
+  isUnlimitedAttempts
+}
+
+fragment LocalCourse on LocalCourseGoalInformation {
+  localCourseGoalId
+  goalId
+  goalName
+  description
+  projectHours
+  signUpDate
+  beginDate
+  deadlineDate
+  checkDate
+  isContentAvailable
+  executionType
+  finalPoint
+  finalPercentage
+  status
+  deadlineFree
+  retriesUsed
+  retrySettings {
+    ...RetrySettings
+  }
+}
+
+query getLocalCourseGoals($localCourseId: ID!) {
+  course {
+    getLocalCourseGoals(localCourseId: $localCourseId) {
+      localCourseId
+      globalCourseId
+      courseName
+      courseType
+      localCourseGoals {
+        ...LocalCourse
+      }
+    }
+  }
+}

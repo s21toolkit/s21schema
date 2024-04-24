@@ -1,0 +1,23 @@
+fragment AsapWidget on AsapWidgetInfo {
+  shortImg
+  shortTitle
+  shortUrl
+  startDate
+  finishDate
+  showFinishDate
+  fullTitle
+  text
+  fullImgUrl
+  adtTypeId
+  adtWidgetId
+}
+
+query getAsapWidgets {
+  student {
+    getAsapWidgetList {
+      widgetList {
+        ...AsapWidget
+      }
+    }
+  }
+}

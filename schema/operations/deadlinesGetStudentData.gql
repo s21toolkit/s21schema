@@ -1,0 +1,31 @@
+query deadlinesGetStudentData {
+  student {
+    getStudentProfile {
+      user {
+        id
+        login
+        firstName
+        middleName
+        lastName
+      }
+    }
+    getExperience {
+      id
+      value
+      level {
+        id
+        range {
+          id
+          levelCode
+          rightBorder
+          leftBorder
+        }
+      }
+    }
+    getExperienceHistory {
+      id
+      awardDate
+      experienceReceived
+    }
+  }
+}

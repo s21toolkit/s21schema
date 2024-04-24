@@ -1,0 +1,5 @@
+mutation retryCreatePrivateGitlabProject($studentAnswerId: ID!) {
+  student {
+    retryCreatePrivateGitlabProject(studentAnswerId: $studentAnswerId)
+  }
+}

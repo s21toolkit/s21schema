@@ -1,0 +1,14 @@
+query publicProfileGetStudentTraffic($login: String!, $schoolID: UUID!, $date: Date!) {
+  student {
+    getStudentTraffic(login: $login, schoolID: $schoolID, date: $date) {
+      days {
+        date
+        periodOnCampus
+        periodAuthorizSDP
+        periodAuthorizIMac
+      }
+      endDate
+      startDate
+    }
+  }
+}

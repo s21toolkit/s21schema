@@ -1,0 +1,17 @@
+fragment PenaltySlot on PenaltySlot {
+  id
+  startTime
+  endTime
+  description
+  currentStudentsCount
+  maxStudentsCount
+  duration
+}
+
+query getPenaltySlots($duration: Int!, $page: PagingInput!, $sorting: [SortingField]) {
+  penalty {
+    getPenaltyFreeSlots(duration: $duration, page: $page, sorting: $sorting) {
+      ...PenaltySlot
+    }
+  }
+}
