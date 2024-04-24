@@ -48,5 +48,6 @@ jobs:
           git config user.name s21toolkit
           git config user.email s21toolkit@github.com
           git add .
-          git commit -m "$VERSION"
-          git push
+          git commit -m "feat(schema): $VERSION"
+          git tag "v:$VERSION"
+          git push --tags
