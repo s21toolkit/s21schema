@@ -30,6 +30,7 @@ jobs:
           S21_USERNAME: ${{ secrets.S21_USERNAME }}
           S21_PASSWORD: ${{ secrets.S21_PASSWORD }}
         run: |
+          rm -rf ./schema
           ./s21introspector/bin/main.ts @ $(./s21introspector/bin/main.ts auth $S21_USERNAME $S21_PASSWORD) --isolate-operations -o ./schema
 
       - id: diff
