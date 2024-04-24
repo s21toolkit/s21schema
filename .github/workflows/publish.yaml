@@ -1,0 +1,52 @@
+name: publish
+
+on:
+  schedule:
+    # Every day at 11:45
+    - cron: "45 11 * * *"
+
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - uses: actions/checkout@v4
+
+      - uses: actions/checkout@v4
+        with:
+          repository: s21toolkit/s21introspector
+          path: s21introspector
+
+      - env:
+          S21_USERNAME: ${{ secrets.S21_USERNAME }}
+          S21_PASSWORD: ${{ secrets.S21_PASSWORD }}
+        run: |
+          ./s21introspector/bin/main.ts @ $(./s21introspector/bin/main.ts auth $S21_USERNAME $S21_PASSWORD) --isolate-operations -o ./schema
+
+      - id: diff
+        run: |
+          if [ "$(git add --all --dry-run | head -1 | wc -l)" -eq 1 ]; then
+            echo "changed=true" >> $GITHUB_OUTPUT;
+            echo "version=$(./s21introspector/bin/main.ts static -n -s PRODUCT_VERSION)" >> $GITHUB_OUTPUT;
+          else
+            echo "changed=false" >> $GITHUB_OUTPUT;
+          fi
+
+      - if: steps.diff.outputs.changed == 'true'
+        env:
+          VERSION: ${{ steps.diff.outputs.version }}
+        run: |
+          git config user.name s21toolkit
+          git config user.email s21toolkit@github.com
+          git add .
+          git commit -m "$VERSION"
+          git push
