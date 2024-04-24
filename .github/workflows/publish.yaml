@@ -34,7 +34,7 @@ jobs:
 
       - id: diff
         run: |
-          if [ "$(git add --all --dry-run | head -1 | wc -l)" -eq 1 ]; then
+          if [ "$(git add --all --dry-run ./schema | head -1 | wc -l)" -eq 1 ]; then
             echo "changed=true" >> $GITHUB_OUTPUT;
             echo "version=$(./s21introspector/bin/main.ts static -n -s PRODUCT_VERSION)" >> $GITHUB_OUTPUT;
           else
@@ -47,7 +47,8 @@ jobs:
         run: |
           git config user.name s21toolkit
           git config user.email s21toolkit@github.com
-          git add .
+          git add ./schema
           git commit -m "feat(schema): $VERSION"
-          git tag "v:$VERSION"
+          git push
+          git tag "v/$VERSION"
           git push --tags
