@@ -833,11 +833,23 @@ type AcceleratorQueries {
   """
   getAllProjects(orgUnitId: UUID): [ProjectCard!]!
 
-  """Получение проекта по фильтрам"""
+  """Получение проектов по фильтрам"""
   getProjectsByFilters(projectFilter: ProjectFilterInput!, page: PagingInput): [ProjectCard!]!
 
-  """Получение проекта по фильтрам"""
+  """Получение проектов по фильтрам"""
   getProjectsByUserStageFilters(projectFilter: ProjectFilterInput!, page: PagingInput): [ProjectCard!]!
+
+  """Постраничное получение проектов"""
+  getProjectPageByFilter(projectFilter: ProjectFilterInput!, paging: PagingInput!): ProjectPage!
+
+  """Постраничное получение проектов, которые просматривали пользователя"""
+  getProjectPageViewedByFilter(projectFilter: ProjectFilterInput!, paging: PagingInput!): ProjectPage!
+
+  """Постраничное получение проектов, которые пригласили пользователя"""
+  getProjectPageInvitedByFilter(projectFilter: ProjectFilterInput!, paging: PagingInput!): ProjectPage!
+
+  """Получение проектов, к которым отправлены заявки"""
+  getProjectPageRequestByFilter(projectFilter: ProjectFilterInput!, paging: PagingInput!): ProjectPage!
 
   """Получение проекта по ID"""
   getProjectById(id: UUID!): Project!
@@ -1179,6 +1191,9 @@ type AcceleratorQueries {
 
   """Баллы НТО"""
   getNtoWidgetData: NtoWidget!
+
+  """Модуль ученика"""
+  getAccModuleById(goalId: ID!): StudentModule
 }
 
 """"""
@@ -5598,6 +5613,9 @@ type Branch {
 
   """"""
   name: String!
+
+  """"""
+  description: String
 }
 
 """"""
@@ -21828,6 +21846,12 @@ type InviteRequestModel {
 
   """"""
   inviteStatus: String!
+
+  """"""
+  captain: User
+
+  """"""
+  resume: ResumeModel
 }
 
 """Результат переключения статуса избранного для материала"""
@@ -21971,6 +21995,15 @@ type JoinTeamRequest {
   user: User
 
   """"""
+  inviteId: UUID
+
+  """"""
+  inviteDate: Date
+
+  """"""
+  resume: ResumeModel
+
+  """"""
   teamId: UUID!
 
   """"""
@@ -21999,6 +22032,24 @@ type JoinTeamRequest {
 
   """"""
   read: Boolean!
+}
+
+""""""
+type JoinTeamRequestAdd {
+  """"""
+  joinTeamRequest: JoinTeamRequest
+
+  """"""
+  inviteId: UUID
+
+  """"""
+  inviteDate: Date
+
+  """"""
+  currentUser: User
+
+  """"""
+  resume: ResumeModel
 }
 
 """"""
@@ -30373,6 +30424,21 @@ type Project implements IProject {
 }
 
 """"""
+type ProjectAdd {
+  """"""
+  viewedDate: DateTime
+
+  """"""
+  invitedDate: DateTime
+
+  """"""
+  requestedDate: DateTime
+
+  """"""
+  vacancyName: String
+}
+
+""""""
 input ProjectAssessmentInput {
   """"""
   projectId: UUID!
@@ -30706,7 +30772,7 @@ input ProjectInput {
   regionId: UUID
 
   """"""
-  countryId: UUID!
+  countryId: UUID
 
   """"""
   technologyOtherDesc: String
@@ -30719,6 +30785,15 @@ input ProjectInput {
 
   """"""
   logotypeUrl: String
+}
+
+""""""
+type ProjectPage {
+  """"""
+  projects: [ProjectViewedModel]!
+
+  """"""
+  totalCount: Int!
 }
 
 """Информация о проверках проекта"""
@@ -30942,6 +31017,9 @@ type ProjectViewedModel {
 
   """"""
   projectFlowId: UUID!
+
+  """"""
+  projectAdd: ProjectAdd
 }
 
 """Результаты поиска проектов в глобальном поиске Ш21"""
@@ -32039,6 +32117,15 @@ enum RequestState {
 }
 
 """"""
+type RequestToProjectCount {
+  """"""
+  availableCount: Int!
+
+  """"""
+  maxCount: Int!
+}
+
+""""""
 type RequiredTaskCountByTaskType {
   """Тип Слота Заданий -- информационных, проверочный и тд"""
   taskType: TaskTypeEnum!
@@ -32371,10 +32458,19 @@ type ResumeShortModel {
   aboutMe: String!
 
   """"""
+  resumeURL: String!
+
+  """"""
   inviteId: UUID
 
   """"""
   inviteDate: Date
+
+  """"""
+  inviteReasonDesc: String
+
+  """"""
+  vacancyName: String
 
   """"""
   isFavoriteByCurrentTeam: Boolean!
@@ -44041,6 +44137,18 @@ type StudentTaskByModulePlaylist {
   levels: [LevelModule!]!
 }
 
+""""""
+enum StudentTaskCheckAnswerDateAndNameSortingEnum {
+  """по возрастанию"""
+  ASC
+
+  """по убыванию"""
+  DESC
+
+  """по ФИО ученика"""
+  BY_FIO
+}
+
 """Фильтр поиска Заданий на проверку по времени отправки на проверку"""
 enum StudentTaskCheckFilterEnum {
   """Без фильтра"""
@@ -44504,8 +44612,23 @@ type StudentTasksToCheckResponse {
   """Задания учеников"""
   studentTasks: [StudentTaskToCheck!]!
 
+  """Проверенные задания учеников"""
+  checkedStudentTasks: [StudentTask]
+
   """количество заданий учеников"""
   studentTaskCount: Int!
+
+  """"""
+  stageSubjectGroupName: String
+
+  """"""
+  stageGroupName: String
+
+  """"""
+  shortSubjectName: String
+
+  """"""
+  subjectName: String
 }
 
 """"""
@@ -44541,24 +44664,6 @@ type StudentTasksWithPerformance {
   Количество заданий с определенным статусом и количество заданий с вопросом от ученика
   """
   taskStatusQuantityWithQuestion: TaskStatusQuantityWithQuestion
-}
-
-"""Полная информация по Заданиям студентов в контексте ГКпП"""
-type StudentTasksWithStageSubjectGroupInfo {
-  """Название ГКпП"""
-  stageSubjectGroupName: String
-
-  """Название класса"""
-  stageGroupName: String
-
-  """Короткое название предмета"""
-  shortSubjectName: String
-
-  """Полное название предмета"""
-  fullSubjectName: String
-
-  """Список заданий студентов с информацией по ним"""
-  studentTaskInfoModels: [StudentTaskInfo!]!
 }
 
 """
@@ -48110,18 +48215,6 @@ type TaskCheckQueries {
     page: PagingInput!
   ): StudentTasksToCheckResponse!
 
-  """получение заданий студентов по группе по предмету и заданию"""
-  getStudentTasksByStageSubjectGroupAndTaskV2(
-    """идентификатор группы классов по предмету (ГКпП)"""
-    stageSubjectGroupId: ID!
-
-    """идентификатор задания"""
-    taskId: ID!
-
-    """пейджинг"""
-    page: PagingInput!
-  ): StudentTasksToCheckResponse!
-
   """"""
   getVerifiedTasksByStageSubjectGroupsForTeacher(filterSubjects: [ID], filterStages: [ID]): StageSubjectGroupsBySubjectTeacherResponse!
 
@@ -48188,6 +48281,27 @@ type TaskCheckQueries {
     """Фильтр поиска Заданий на проверку НЕ по времени по свойствам Заданий"""
     studentTaskNonTimeFilter: StudentTaskCheckNonTimeFilterEnum
   ): StudentTasksByStageSubjectGroupForStudentsResponse!
+
+  """получение заданий студентов по группе по предмету и заданию"""
+  getStudentTaskInfos(
+    """идентификатор группы классов по предмету (ГКпП)"""
+    stageSubjectGroupId: ID!
+
+    """идентификатор задания"""
+    taskId: ID!
+
+    """фильтрация по имени"""
+    nameFilter: String
+
+    """Фильтр поиска Заданий на проверку по времени отправки на проверку"""
+    studentTaskFilter: StudentTaskCheckFilterEnum
+
+    """Фильтр поиска Заданий на проверку по свойствам Заданий"""
+    studentTaskNonTimeFilter: StudentTaskCheckNonTimeFilterEnum
+
+    """Сортировка по возрастанию/убыванию заданию студента"""
+    studentTaskCheckAnswerDateAndNameSorting: StudentTaskCheckAnswerDateAndNameSortingEnum
+  ): StudentTasksToCheckResponse!
 }
 
 """
@@ -52928,26 +53042,6 @@ type TeacherQueries {
   ): StudentTaskInfo
 
   """
-  Возвращает полную персональную информацию по Заданиям в контексте Студента, относящимся строго к одной Task
-  """
-  getStudentTaskInfos(
-    """Идентификатор Ученика (students.student_id)"""
-    studentIds: [UUID!]!
-
-    """Идентификатор задания (tasks.task_id)"""
-    taskId: ID!
-
-    """
-    Параметры сортировки по полям StudentTasKWidgetAnswerModel
-    (student_task_widget_answers.modify_time/create_time)
-    """
-    sortingFields: [SortingField!]!
-
-    """поиск по ученику"""
-    nameSearch: String
-  ): StudentTasksWithStageSubjectGroupInfo!
-
-  """
   Возвращает список ВСЕХ предметов, которые имеет право преподавать Учитель
   """
   getMySubjects(
@@ -54333,18 +54427,21 @@ type TeamMemberWithVacancy {
 
   """"""
   vacancy: String
+
+  """"""
+  resume: ResumeModel
 }
 
 """"""
 type TeamMutations {
   """Удаление члена команды капитаном"""
-  removeMemberFromTeamByCaptain(teamId: UUID!, deletedUserId: UUID!, exitReasonId: Int!, exitReasonDescription: String): TeamWithMembers!
+  removeMemberFromTeamByCaptain(teamId: UUID!, deletedUserId: UUID!, exitReasonId: Int, exitReasonDescription: String): TeamWithMembers!
 
   """Выход пользователя из команды"""
-  removeMemberFromTeamByThemselves(teamId: UUID!, exitReasonId: Int!, exitReasonDescription: String): TeamWithMembers!
+  removeMemberFromTeamByThemselves(teamId: UUID!, exitReasonId: Int, exitReasonDescription: String): TeamWithMembers!
 
   """Выход капитана из команды"""
-  removeCaptainFromTeam(teamId: UUID!, exitReasonId: Int!, exitReasonDescription: String): TeamWithMembers
+  removeCaptainFromTeam(teamId: UUID!, exitReasonId: Int, exitReasonDescription: String): TeamWithMembers!
 }
 
 """"""
@@ -54377,11 +54474,17 @@ type TeamQueries {
   """
   getCreatedJoinTeamRequestCount: Int!
 
+  """Количество доступных приглашений"""
+  getAvailableRequestToProjectCount: RequestToProjectCount!
+
   """Получение членов команды с данными о пользователе"""
   getTeamMembersWithVacancyByTeam(teamId: UUID!): [TeamMemberWithVacancy!]! @deprecated(reason: "unused method")
 
   """"""
   getTeamMembersWithVacancyByRole(teamRoleId: Int!): [TeamMemberWithVacancy!]!
+
+  """"""
+  getRequestForUserByProjectId(projectId: UUID!): JoinTeamRequestAdd
 }
 
 """Роль участника в команде"""
@@ -54565,6 +54668,9 @@ type Technology {
 
   """"""
   name: String!
+
+  """"""
+  description: String
 }
 
 """Асинхронная задача на назначение шаблонов траекторий на студентов"""
