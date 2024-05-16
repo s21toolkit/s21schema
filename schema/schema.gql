@@ -2093,6 +2093,9 @@ type AggregatedSkillStudentRadarChart {
 
   """"""
   testFactComplete: Boolean!
+
+  """"""
+  testCompleteResults: [IsSelfAssessmentTestComplete]!
 }
 
 """Агрегированные данные для диаграммы Радар (Паутинка)"""
@@ -5839,6 +5842,9 @@ type BusinessAdminMutations {
   сохранение/изменение бизнес-пользователя с ролями (учитель, ученик, БА) и только в текущей школе
   """
   saveUser(user: UserInput!): User!
+
+  """Установка локали пользователя"""
+  setUserLocale(userId: UUID!, locale: String!): String!
 
   """
   Удаление/деактивация роли Учитель у пользователя в текущей школе. В т.ч. удаление роли Ученик, если она относится к внешнему обучению
@@ -21854,6 +21860,21 @@ type InviteRequestModel {
   resume: ResumeModel
 }
 
+""""""
+type IsSelfAssessmentTestComplete {
+  """"""
+  testId: ID!
+
+  """"""
+  startDate: DateTime!
+
+  """"""
+  finishDate: DateTime!
+
+  """"""
+  isComplete: Boolean!
+}
+
 """Результат переключения статуса избранного для материала"""
 type ItemBatchResult {
   """целевой идентификатор каталога"""
@@ -28039,6 +28060,11 @@ type ParentQueries {
 
   """Возвращает полную информацию о студенте по userId"""
   getStudentsInfo(userId: [UUID!]!): [Student!]!
+
+  """
+  Возвращает результаты по тестам с начала года и с конца, сгруппировав по софт скилам
+  """
+  getStudentAssessmentsTestsResults(studentId: ID!): SelfAssessmentAllTestsResults!
 
   """Статистика. Успеваемость ученика для родителей"""
   getChildAcademicPerformance(startDate: DateTime!, endDate: DateTime!, childUserId: UUID!, subjectId: Int, currentRole: String): [StudentAcademicPerformance!]! @deprecated(reason: "Использовать getChildAcademicPerformanceExpandedV2")
@@ -35545,6 +35571,15 @@ type SelectorByAttestationPeriod {
 }
 
 """"""
+type SelfAssessmentAllTestsResults {
+  """"""
+  studentId: ID!
+
+  """"""
+  softSkillResults: [SelfAssessmentSoftSkillResults]!
+}
+
+""""""
 type SelfAssessmentAnswer {
   """"""
   answerId: ID!
@@ -35608,6 +35643,18 @@ type SelfAssessmentQuestion {
 
   """"""
   testId: ID!
+}
+
+""""""
+type SelfAssessmentSoftSkillResults {
+  """"""
+  softSkillId: ID!
+
+  """"""
+  averageScoreForTest1: Int!
+
+  """"""
+  averageScoreForTest2: Int!
 }
 
 """"""
@@ -42259,6 +42306,11 @@ type StudentQueries {
   """"""
   getStudentAssessmentsTest(studentId: ID!, stageId: ID!): [SelfAssessmentTest!]!
 
+  """
+  Возвращает результаты по тестам с начала года и с конца, сгруппировав по софт скилам
+  """
+  getStudentAssessmentsTestsResults(studentId: ID!): SelfAssessmentAllTestsResults!
+
   """Возвращает класс текущего студента"""
   getStudentStageGroup: StageGroup
 
@@ -42944,6 +42996,9 @@ type StudentQueries {
   Получить список предстоящих событий в экзаменационной среде Ш21 на текущую дату
   """
   getAvailableEventsForToday: [EventInfo!]!
+
+  """Проверить доступ студента к экзамену"""
+  checkExamAccess(token: String!): Boolean!
 
   """Возвращает Задания в контексте студента по фильтрам"""
   getStudentTasksByTaskStatus(
