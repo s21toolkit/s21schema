@@ -11,7 +11,7 @@ permissions:
   contents: write
 
 jobs:
-  publish:
+  try-update-graphql-schema:
     runs-on: ubuntu-latest
 
     steps:
