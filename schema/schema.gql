@@ -1,3 +1,231 @@
+""""""
+type ASAPMessage {
+  """Id виджета"""
+  adtWidgetId: Int
+
+  """Дата начала показа"""
+  startDate: DateTime!
+
+  """Дата завершения показа"""
+  finishDate: DateTime!
+
+  """Флаг отображения даты на виджете"""
+  showFinishDate: Boolean!
+
+  """Флаг закрепленного объявления"""
+  pinned: Boolean!
+
+  """Маленькое изображение"""
+  smallImageUrl: String
+
+  """Короткое название объявления"""
+  smallTitle: String!
+
+  """Ссылка на маленькое объявление"""
+  smallUrl: String
+
+  """Полный заголовок объявления"""
+  fullTitle: String
+
+  """Текст объявления"""
+  fullText: String
+
+  """Url картинки объявления"""
+  fullImageUrl: String
+
+  """Тип объявления"""
+  adtType: ASAPWidgetTypeEnum!
+}
+
+""""""
+type ASAPMutations {
+  """Создание виджета ASAP"""
+  createASAPWidget(input: ASAPWidgetDetailsInput!): ASAPWidgetDetails!
+
+  """Редактирование виджета ASAP"""
+  updateASAPWidget(widgetId: ID, input: ASAPWidgetDetailsInput!): ASAPWidgetDetails!
+
+  """Редактирование виджета ASAP"""
+  deleteASAPWidget(widgetId: ID): Boolean!
+}
+
+""""""
+type ASAPQueries {
+  """Ш21. Фоновые изображения ASAP-виджетов"""
+  getASAPWidgetImages(imageTypes: [ASAPWidgetImageTypeEnum]): [ASAPWidgetImage!]!
+
+  """Ш21. Получение виджета ASAP по ID"""
+  getASAPWidgetById(widgetId: ID!): ASAPWidgetDetails!
+
+  """Ш21. Поиск опубликованных виджетов ASAP по фильтру"""
+  findASAPWidgetsByFilter(searchString: String, schoolIds: [UUID], stageIds: [Int], stageSubjectGroupsIds: [Int], startDate: DateTime, finishDate: DateTime, sorting: [SortingField], page: PagingInput!): [ASAPWidgetDetails!]!
+
+  """"""
+  findASAPWidgetsByFilterCount(searchString: String, schoolIds: [UUID], stageIds: [Int], stageSubjectGroupsIds: [Int], startDate: DateTime, finishDate: DateTime): Int!
+
+  """Ш21. Получение ASAP уведомлений, релевантных для пользователя"""
+  getASAPMessages: [ASAPMessage!]!
+}
+
+"""создание и редактирование Виджета ASAP"""
+type ASAPWidgetDetails {
+  """Id виджета"""
+  adtWidgetId: Int
+
+  """Дата начала показа"""
+  startDate: DateTime!
+
+  """Дата завершения показа"""
+  finishDate: DateTime!
+
+  """Флаг отображения даты на виджете"""
+  showFinishDate: Boolean!
+
+  """Флаг закрепленного объявления"""
+  pinned: Boolean!
+
+  """Маленькое изображение"""
+  smallImageId: Int
+
+  """Короткое название объявления"""
+  smallTitle: String!
+
+  """Ссылка на маленькое объявление"""
+  smallUrl: String
+
+  """Полный заголовок объявления"""
+  fullTitle: String
+
+  """Текст объявления"""
+  fullText: String
+
+  """Url картинки объявления"""
+  fullImageId: Int
+
+  """Тип объявления"""
+  adtType: ASAPWidgetTypeEnum!
+
+  """Автор объявления"""
+  createdBy: String
+
+  """Дата создания объявления"""
+  createdTs: DateTime
+
+  """Автор последнего изменения"""
+  updatedBy: String
+
+  """Дата последнего изменения"""
+  updatedTs: DateTime
+
+  """Дата последнего изменения"""
+  tenantId: UUID!
+
+  """Список связанных кампусов"""
+  schoolIds: [UUID!]!
+
+  """Список связанных параллелей"""
+  stageIds: [Int!]!
+
+  """Список связанных групп по предмету"""
+  stageSubjectGroupIds: [Int!]!
+
+  """Список связанных кампусов"""
+  schools: [School]
+
+  """Список связанных параллелей"""
+  stages: [Stage]
+
+  """Список связанных групп по предмету"""
+  stageSubjectGroups: [StageSubjectGroup]
+
+  """Изображение для виджета ASAP"""
+  widgetImages: [ASAPWidgetImage]
+
+  """Признак доступности для редактирования текущим пользователем"""
+  editable: Boolean
+}
+
+"""создание и редактирование Виджета ASAP"""
+input ASAPWidgetDetailsInput {
+  """Дата начала показа"""
+  startDate: DateTime!
+
+  """Дата завершения показа"""
+  finishDate: DateTime!
+
+  """Флаг отображения даты на виджете"""
+  showFinishDate: Boolean!
+
+  """Флаг закрепленного объявления"""
+  pinned: Boolean!
+
+  """Маленькое изображение"""
+  smallImageId: Int
+
+  """Короткое название объявления"""
+  smallTitle: String!
+
+  """Ссылка на маленькое объявление"""
+  smallUrl: String
+
+  """Полный заголовок объявления"""
+  fullTitle: String
+
+  """Текст объявления"""
+  fullText: String
+
+  """Url картинки объявления"""
+  fullImageId: Int
+
+  """Тип объявления"""
+  adtType: ASAPWidgetTypeEnum!
+
+  """Список связанных кампусов"""
+  schoolIds: [UUID!]!
+
+  """Список связанных параллелей"""
+  stageIds: [Int!]!
+
+  """Список связанных групп по предмету"""
+  stageSubjectGroupIds: [Int!]!
+}
+
+""""""
+type ASAPWidgetImage {
+  """Id фонового изображения"""
+  adtWidgetImageId: Int!
+
+  """Название"""
+  alias: String
+
+  """URL"""
+  url: String!
+
+  """Тип"""
+  imageType: ASAPWidgetImageTypeEnum!
+}
+
+"""Типы изображений"""
+enum ASAPWidgetImageTypeEnum {
+  """"""
+  SMALL
+
+  """"""
+  BIG
+}
+
+"""Типы объявлений"""
+enum ASAPWidgetTypeEnum {
+  """Объявление с изображением"""
+  POPUP_IMG
+
+  """Объявление без изображения"""
+  POPUP_TXT
+
+  """Переход по ссылке"""
+  LINK
+}
+
 """Значение характеристик: Урон, Здоровье и т.д."""
 type AbilityPower {
   """user_ability_id || equipment_ability__id"""
@@ -388,6 +616,9 @@ type AcceleratorMutations {
 
   """Отправка баллов"""
   sendNtoScore(userIds: [UUID!]!, activity: String!): NtoSendScoreResponse!
+
+  """Изменение номера телефона"""
+  editAccMobile(newMobileNumber: String!): Boolean!
 }
 
 """Входная модель фильтра по рассылкам Акселератора"""
@@ -1433,8 +1664,8 @@ input ActivityEventByStudentInputModel {
   """Инпут типа мероприятия"""
   activityType: ActivityTypeInput!
 
-  """Список id школ/кампусов для мероприятия"""
-  schools: [UUID!]!
+  """Кампус для мероприятия"""
+  schoolId: UUID
 
   """Список параллелей для мероприятия"""
   stages: [ID]!
@@ -1487,11 +1718,11 @@ input ActivityEventInput {
   """Список коалиций для мероприятия"""
   coalitions: [ID]!
 
-  """Список id школ/кампусов для мероприятия"""
-  schools: [UUID!]!
+  """Кампус для мероприятия"""
+  schoolId: UUID
 
-  """Список классов для мероприятия"""
-  stageGroups: [ID]!
+  """Список классов по предмету для мероприятия"""
+  stageSubjectGroups: [ID]!
 
   """Список параллелей для мероприятия"""
   stages: [ID]!
@@ -2820,93 +3051,6 @@ type AreaPolygon {
   mapMetrics: MapMetrics!
 }
 
-"""Информация о виджите"""
-type AsapWidgetInfo {
-  """id объявления"""
-  adtWidgetId: Int
-
-  """Маленькое изображение"""
-  shortImg: String
-
-  """Короткое название объявления"""
-  shortTitle: String!
-
-  """Ссылка на маленькое объявление"""
-  shortUrl: String
-
-  """Дата начала показа"""
-  startDate: DateTime
-
-  """Дата завершения показа"""
-  finishDate: DateTime
-
-  """Флаг отображения даты на виджите"""
-  showFinishDate: Boolean!
-
-  """Полный заголовок объявления"""
-  fullTitle: String!
-
-  """Текст объявления"""
-  text: String
-
-  """Url картинки объявления"""
-  fullImgUrl: String
-
-  """Тип объявления"""
-  adtTypeId: Int
-
-  """Группы по предметам"""
-  stages: [ClassSubject]
-
-  """Показывать всем"""
-  isForEveryone: Boolean
-}
-
-"""Список виджитов"""
-type AsapWidgetInfoList {
-  """Список виджетов"""
-  widgetList: [AsapWidgetInfo]
-}
-
-"""создание и редактирование Виджета ASAP"""
-input AsapWidgetInput {
-  """Маленькое изображение"""
-  shortImg: String
-
-  """Короткое название объявления"""
-  shortTitle: String!
-
-  """Ссылка на маленькое объявление"""
-  shortUrl: String
-
-  """Дата начала показа"""
-  startDate: DateTime
-
-  """Дата завершения показа"""
-  finishDate: DateTime
-
-  """Флаг отображения даты на виджете"""
-  showFinishDate: Boolean!
-
-  """Флаг показа для всех"""
-  isForEveryone: Boolean!
-
-  """Полный заголовок объявления"""
-  fullTitle: String!
-
-  """Текст объявления"""
-  text: String
-
-  """Url картинки объявления"""
-  fullImgUrl: String
-
-  """Тип объявления"""
-  adtTypeId: Int
-
-  """Список связанных групп по предмету"""
-  stageSubjectGroupsIds: [ID]
-}
-
 """"""
 input AssignTaskSetToStudentRequest {
   """идентификатор Учебного Модуля (goals.goal_id)"""
@@ -3938,6 +4082,9 @@ type AttestationPeriodFinalMark {
 
   """СРВ"""
   midWeightMark: String
+
+  """прогнозируемая итоговая"""
+  predictedFinalMark: String
 }
 
 """"""
@@ -4188,6 +4335,9 @@ type AttestationPeriodStatisticsMark {
 
   """СРВ"""
   midWeightMark: String
+
+  """прогнозируемая итоговая"""
+  predictedFinalMark: String
 }
 
 """Типы аттестации"""
@@ -6362,6 +6512,9 @@ type BusinessAdminMutations {
   """Вкл\выкл кластера в Ш21"""
   changeClusterState(clusterId: Int!, isActive: Boolean!): Int!
 
+  """Переименование кластера в Ш21"""
+  renameS21Cluster(clusterId: Int!, name: String!, shortName: String!): Int!
+
   """Удалить черновик кластера в Ш21"""
   deleteClusterDraft(clusterId: Int!): Int!
 
@@ -6372,13 +6525,31 @@ type BusinessAdminMutations {
   stageGroupToArchive(stageGroupId: ID!): Boolean!
 
   """Восстановление класса из архива Bootcamp"""
-  stageGroupFromArchive(stageGroupId: ID!): Boolean!
+  stageGroupFromArchive(stageGroupId: ID!): Boolean! @deprecated(reason: "Не поддерживается. Используйте deleteGitlabProjectsV2")
+
+  """"""
+  deleteGitlabProjects(taskId: Int, schoolId: UUID, stageId: Int, stageGroupId: Int, studentState: StudentStateEnum): DeleteGitlabProjectsResponse!
 
   """удаление гитлаб-проектов по параметрам"""
-  deleteGitlabProjects(taskId: Int, schoolId: UUID, stageId: Int, stageGroupId: Int, studentState: StudentStateEnum): DeleteGitlabProjectsResponse!
+  deleteGitlabProjectsV2(taskId: Int, schoolId: UUID!, stageId: ID!, stageGroupId: ID!, studentState: StudentStateEnum): DeleteGitlabProjectsResponse!
 
   """удаление гитлаб-проектов по идентификаторам"""
   deleteGitlabProjectsByExternalSystemProjectIds(projectIds: [Int!]!): DeleteGitlabProjectsResponse!
+
+  """Создание дистанционных периодов"""
+  createPeriodLessonPlans(periodInput: PeriodLessonPlanInput!): Boolean
+
+  """Редактирование дистанционного периода"""
+  updatePeriodLessonPlan(periodInput: PeriodLessonPlanInput!): PeriodLessonPlanExtended!
+
+  """Обновление дистанционного периода (перегенерация планов)"""
+  updatePeriodLessonPlanById(periodLessonPlanId: ID!): PeriodLessonPlanExtended!
+
+  """Обновление дистанционных периодов (перегенерация планов)"""
+  updatePeriodLessonPlansByIds(periodLessonPlanIds: [ID!]!): [PeriodLessonPlanExtended!]!
+
+  """Удаление дистанционного периода"""
+  deletePeriodLessonPlan(periodLessonPlanId: ID!): Boolean
 
   """"""
   createBadgeAward(badgeInput: BadgeAwardInput!): Award!
@@ -6557,7 +6728,13 @@ type BusinessAdminQueries {
   getStudyProgram(academicYearId: ID!): StudyProgram
 
   """
-  Получение рекомендуемого кол-ва дней на учебный модуь в соотношении (Идентификатор цели, кол-во дне на  учебный модуь)
+  Получение списка периодов планирования уроков в учебном году с их вычисляемыми статусами
+  """
+  getPeriodLessonPlansWithStatuses(academicYearId: ID!): [PeriodLessonPlanExtended!]!
+
+  """
+  (periodInput: PeriodLessonPlanInput!)
+   Получение рекомендуемого кол-ва дней на учебный модуь в соотношении (Идентификатор цели, кол-во дне на  учебный модуь)
   """
   getRecommendedDurationForModules(goalIds: [ID!]!, classSubjectId: ID!): [GoalDurationMap!]!
 
@@ -7098,6 +7275,9 @@ type BusinessAdminQueries {
   """список гкпп по классу и предмету параллели"""
   getStageSubjectGroupsByStageGroupAndStageSubjects(stageGroupId: ID!, stageSubjectIds: [ID!]!): [StageSubjectGroup!]!
 
+  """список гкпп по кампусу и параллели"""
+  getStageSubjectGroupsBySchoolIdAndStageId(schoolId: UUID!, stageId: ID!): [StageSubjectGroup!]!
+
   """получить список гкпп по идентификатору класса и строке поиска"""
   getStageSubjectGroupsByStageGroupIdAndFilter(stageGroupId: ID!, pagingInput: PagingInput!, searchString: String): [StageSubjectGroupExtended!]!
 
@@ -7212,17 +7392,11 @@ type BusinessAdminQueries {
   """Получение списка типов мероприятий"""
   getActivityTypes: [ActivityType!]! @deprecated(reason: "use School21:getActivityTypes")
 
-  """Получение списка параллелей для мероприятия"""
-  getStagesByActivityId(activityEventId: ID!): [Stage!]!
-
   """Получение списка уровней студентов для мероприятия"""
   getStudentsLevelsByActivityId(activityEventId: ID!): [ExperienceLevel!]!
 
   """Получение списка уровней студентов"""
   getStudentsLevels: [ExperienceLevel!]!
-
-  """Получение списка классов для мероприятия"""
-  getStageGroupsByActivityId(activityEventId: ID!): [StageGroup!]!
 
   """Получение общего количества студентов, зарегистрированных на экзамен"""
   getCurrentStudentCountByExamID(examId: ID!): Int!
@@ -7272,6 +7446,11 @@ type BusinessAdminQueries {
 
   """Возвращает план на класс по идентификатору группы по предмету"""
   getS21ClassPlanByStageSubjectGroupId(stageSubjectGroupId: ID!): S21ClassPlan!
+
+  """
+  Возвращает перечень проектов доступных для регистрации для заданных параллели и классов по предмету
+  """
+  getGoalsByStageAndStageSubjectGroupIds(stageId: Int, stageSubjectGroupIds: [Int!]!): [S21Goal!]!
 
   """
   Получение списка предметов, принадлежащих образовательному учреждению или его тенантам
@@ -7768,13 +7947,19 @@ type BusinessAdminQueries {
 
     """если true то idForFilter - id параллели, иначе id класса"""
     isStage: Boolean
-  ): LocalMulticampusSettingAndAllStagesAndStageSubjectGroups!
+  ): LocalMulticampusSettingAndAllStagesAndStageSubjectGroups! @deprecated(reason: "Не поддерживается. Используйте findGitlabProjectsV2")
 
-  """поиск гитлаб-проектов по параметрам"""
+  """"""
   findGitlabProjects(taskId: Int, schoolId: UUID, stageId: Int, stageGroupId: Int, studentState: StudentStateEnum, paging: PagingInput!): FindGitlabProjectsResponse!
 
-  """скачивание гитлаб проектов в excel-file"""
+  """поиск гитлаб-проектов по параметрам"""
+  findGitlabProjectsV2(taskId: Int, schoolId: UUID!, stageId: ID!, stageGroupId: ID!, studentState: StudentStateEnum, paging: PagingInput!): FindGitlabProjectsResponse! @deprecated(reason: "Не поддерживается. Используйте loadGitlabProjectsAsExcelFileV2")
+
+  """"""
   loadGitlabProjectsAsExcelFile(taskId: Int, schoolId: UUID, stageId: Int, stageGroupId: Int, studentState: StudentStateEnum): GitlabProjectsExcelFile!
+
+  """скачивание гитлаб проектов в excel-file"""
+  loadGitlabProjectsAsExcelFileV2(taskId: Int, schoolId: UUID!, stageId: ID!, stageGroupId: ID!, studentState: StudentStateEnum): GitlabProjectsExcelFile!
 
   """проверить externalSystemProjectIds на наличие в бд"""
   checkGitlabProjectIdsExistence(projectIds: [Int!]!): GitlabProjectIdsExistenceResponse!
@@ -7899,21 +8084,30 @@ type BusinessAdminQueries {
   getCoalitionMemberInfoModels(coalitionId: Int!, pagingInput: PagingInput!, searchString: String, sortingFields: [SortingField!]): [CoalitionMemberInfoModel!]! @deprecated(reason: "Используйте getLastGivingsV2")
 
   """"""
-  getLastGivings(userFilterInput: UserFilterInput!, pagingInput: PagingInput!): [UserLastGiving!]!
+  getLastGivings(userFilterInput: UserFilterInput!, pagingInput: PagingInput!): [UserLastGiving!]! @deprecated(reason: "Используйте getLastGivingsV3")
+
+  """"""
+  getLastGivingsV2(userFilterInput: UserFilterInput!, pagingInput: PagingInput!, sortingFields: [SortingField!]): [UserLastGiving!]!
 
   """
   Получить краткую информацию о пользователе + информация о последних награждениях(любых) этого пользователя
+  Ищет только активных студентов
   """
-  getLastGivingsV2(userFilterInput: UserFilterInput!, pagingInput: PagingInput!, sortingFields: [SortingField!]): [UserLastGiving!]!
+  getLastGivingsV3(userFilterInput: UserFilterInput!, pagingInput: PagingInput!, sortingFields: [SortingField!]): UserLastGivingsResponse!
 
   """Получить краткую информацию о пользователе + история его награждений"""
   getUserGivingsHistoryByUserId(userId: UUID!, pagingInput: PagingInput!, sortingFields: [SortingField!]!): UserGivingsHistoryModel!
 
-  """Получить кол-во пользователей найденных по данным параметрам фильтра"""
-  getUsersCountByFilter(userFilterInput: UserFilterInput!): Int!
+  """
+  Получить кол-во пользователей найденных по данным параметрам фильтра, ищет только активных студентов
+  """
+  getUsersCountByFilter(userFilterInput: UserFilterInput!): Int! @deprecated(reason: "Используйте validateLoginsForAwardsV2")
+
+  """"""
+  validateLoginsForAwards(logins: [String!]!): LoginValidationResponse!
 
   """провалидировать логины пользователей"""
-  validateLoginsForAwards(logins: [String!]!): LoginValidationResponse!
+  validateLoginsForAwardsV2(logins: [String!]!): LoginValidationResponseV2!
 
   """Обзор работы пользователей платформы."""
   getSchoolMonitoring(schoolMonitoringInput: SchoolMonitoringInput, currentRole: String): [SchoolMonitoring!]!
@@ -8728,6 +8922,15 @@ type CalendarThematicPlan {
 
   """Редактор плана"""
   updatedUser: PlanningUserInfo
+
+  """Возможно ли редактирование КТП пользователем запрашивающим модель."""
+  isEditableByUser: Boolean
+
+  """Идентификатор текущей темы для КТП"""
+  currentTopicId: ID
+
+  """Идентификатор текущего урока для КТП"""
+  currentLessonId: ID
 }
 
 """Фильтр для выборки тематических планов"""
@@ -9025,6 +9228,30 @@ type ChangeLessonLearningActivityResult {
 }
 
 """"""
+enum ChangeRequestStatusType {
+  """"""
+  CHECK_IN_PROGRESS
+
+  """"""
+  ACCEPTED
+
+  """"""
+  REJECTED
+
+  """"""
+  CANCELLED
+}
+
+""""""
+enum ChangeRequestType {
+  """"""
+  CREATE
+
+  """"""
+  UPDATE
+}
+
+""""""
 input ChangeScopeAndStatusForContentEntitiesRequest {
   """
   Тип сущности, по которой мы изменяем скоуп или статус производства контента
@@ -9114,6 +9341,9 @@ input ChangeStudentTaskStatusInput {
 
   """Критерии оценивания"""
   criteriaEvaluations: [EvaluatedTaskCriterionInput!]!
+
+  """Данные по модели для электронного журнала"""
+  studentTaskLessonInputModel: StudentTaskLessonInputModel
 }
 
 """"""
@@ -9134,6 +9364,9 @@ input ChangeStudentTaskStatusesRequest {
 type ChangeStudentTaskStatusesResponse {
   """"""
   studentTasksInfos: [StudentTaskInfo!]!
+
+  """"""
+  eJournalStudentMarks: [EJournalStudentMark!]!
 }
 
 """"""
@@ -10116,6 +10349,9 @@ type ClusterSummaryModel {
   """Название кластера"""
   name: String!
 
+  """Короткое название(одна из специализаций)"""
+  shortName: String!
+
   """Дата последнего редактирования"""
   lastEditDate: DateTime
 
@@ -10932,6 +11168,9 @@ enum ConfigurationPropertyInputType {
 
   """Переключатель"""
   SWITCHER
+
+  """Правила выставления оценок"""
+  MARK_RULES
 }
 
 """"""
@@ -13536,6 +13775,15 @@ type DateIntervals {
 }
 
 """"""
+input DatePeriodLessonPlanInput {
+  """"""
+  startDate: Date!
+
+  """"""
+  endDate: Date!
+}
+
+""""""
 scalar DateTime
 
 """Дедлайн для Ш21"""
@@ -14466,6 +14714,27 @@ type EJournalConfiguredFinalStudentMarkTypesForStageSubjectGroupResponse {
   error: EJournalError
 }
 
+"""Модель систем оценивания, сконфигурированных для школы"""
+type EJournalConfiguredGovernmentMarkTypesForSchool {
+  """Идентификатор школы"""
+  schoolId: ID!
+
+  """Сконфигурированные для школы #schoolId системы оценивания"""
+  configuredGovernmentMarkTypes: [EJournalGovernmentMarkType!]!
+}
+
+"""Модель ответа на запрос сконфигурированных систем оценивания для ГКпП"""
+type EJournalConfiguredGovernmentMarkTypesForSchoolResponse {
+  """Тело ответа"""
+  data: EJournalConfiguredGovernmentMarkTypesForSchool
+
+  """Признак успешности выполнения запроса"""
+  isSuccess: Boolean!
+
+  """Описание ошибки, возникшей в ходе выполнения запроса"""
+  error: EJournalError
+}
+
 """Модель систем оценивания, сконфигурированных для ГКпП"""
 type EJournalConfiguredGovernmentMarkTypesForStageSubjectGroup {
   """Идентификатор ГКпП"""
@@ -14868,6 +15137,12 @@ type EJournalFinalStudentMarks {
 
   """Средние взвешенные оценки (СРВ) учеников за аттестационные периоды"""
   studentAverageWeightedMarks: [EJournalAverageWeightedStudentMark!]!
+
+  """Возможные итоговые учеников за аттестационные периоды"""
+  studentPredictedFinalMarks: [EJournalPredictedFinalStudentMark!]!
+
+  """Информация о пользователях"""
+  usersInfo: [EJournalUserInfo!]
 }
 
 """Модель ответа на запрос списка итоговых оценок учеников"""
@@ -15048,6 +15323,23 @@ type EJournalMutations {
   saveStudentVideoLessonVisit(lessonId: ID!): Boolean
 }
 
+"""Модель прогнозируемой итоговой оценки ученика для ЭЖ"""
+type EJournalPredictedFinalStudentMark {
+  """Идентификатор ученика, для которого рассчитана оценка"""
+  studentId: ID!
+
+  """
+  Идентификатор типа периода, за который рассчитана прогнозируемая оценка
+  """
+  finalPeriodType: FinalPeriodType!
+
+  """Идентификатор периода, за который рассчитана прогнозируемая оценка"""
+  finalPeriodId: ID!
+
+  """Значение прогнозируемой итоговой оценки"""
+  predictedFinalMarkValue: String
+}
+
 """"""
 type EJournalQueries {
   """Получение списка разрешений ЭЖ ГКпП для текущего пользователя"""
@@ -15078,6 +15370,12 @@ type EJournalQueries {
   для проставления итоговых отметок ученикам
   """
   getAvailableFinalMarksByStageSubjectGroup(stageSubjectGroupId: ID!): EJournalConfiguredGovernmentMarkTypesForStageSubjectGroupResponse!
+
+  """
+  Получение доступных в переданной школы систем оценивания, оценки которых можно использовать
+  для проставления итоговых отметок ученикам
+  """
+  getAvailableFinalMarksBySchool(schoolId: ID!): EJournalConfiguredGovernmentMarkTypesForSchoolResponse!
 
   """
   Получение доступных в переданной ГКпП систем оценивания, оценки которых можно использовать
@@ -15323,6 +15621,21 @@ input EJournalUpdateStudentVisitStatusInput {
 
   """"""
   lateTime: Int
+}
+
+""""""
+type EJournalUserInfo {
+  """"""
+  userId: ID!
+
+  """"""
+  firstName: String!
+
+  """"""
+  middleName: String
+
+  """"""
+  lastName: String!
 }
 
 """
@@ -16035,6 +16348,12 @@ type EventQueries {
 
   """Получение количества отзывов по идентификатору мероприятия"""
   getActivityEventFeedbackCount(activityEventId: ID!): Int!
+
+  """Получение списка параллелей для мероприятия"""
+  getStagesByEventId(eventId: ID!): [Stage!]!
+
+  """Получение списка классов по предмету для мероприятия"""
+  getStageSubjectGroupsByEventId(eventId: ID!): [StageSubjectGroup!]!
 }
 
 """Данные о структуре события"""
@@ -16175,6 +16494,9 @@ input ExamEventsSearchParametersInput {
   """Группы по предметам"""
   stageSubjectGroupIds: [ID]
 
+  """Параллели"""
+  stages: [ID]
+
   """Дата начала периода поиска экзаменов"""
   beginDate: DateTime
 
@@ -16224,7 +16546,10 @@ input ExamInput {
   stopRegisterDate: DateTime
 
   """Группы по предметам"""
-  stageSubjectGroups: [ID]
+  stageSubjectGroups: [ID!]!
+
+  """Параллели"""
+  stages: [ID!]!
 
   """Факт включения прокторинга"""
   isProctoring: Boolean
@@ -16581,9 +16906,7 @@ type ExamStatusInfo {
   """Выолняется ли данный экзамен в рамках курса"""
   isExamInCourse: Boolean
 
-  """
-  Экзамен происходит с применением одной из существующих систем прокторинга
-  """
+  """признак включения прокторинга для экзамена"""
   isProctoring: Boolean
 }
 
@@ -18155,6 +18478,9 @@ type FinalMarkStageSubject {
 
   """Наименование предмета"""
   subjectName: String!
+
+  """Наименование тенанта"""
+  tenantShortName: String
 }
 
 """Данные по финальным оценкам"""
@@ -18377,6 +18703,9 @@ type FunctionalRole {
 
   """"""
   permissions: [Permission!]!
+
+  """"""
+  applicableRole: String
 
   """"""
   dateStart: DateTime
@@ -19637,8 +19966,8 @@ type GlobalCourseGoal {
   """Тип выполнения"""
   executionType: ModuleExecutionType
 
-  """дедлайн проекта"""
-  deadlineFree: Boolean
+  """Какие периоды учитываются в проекте"""
+  periodSettings: PeriodSettings
 }
 
 """Модель ввода для целей глобального курса"""
@@ -19675,8 +20004,8 @@ input GlobalCourseGoalInput {
   """Порядковый номер цели"""
   order: Int!
 
-  """дедлайн проекта"""
-  deadlineFree: Boolean
+  """Какие периоды учитываются в проекте"""
+  periodSettings: PeriodSettings
 }
 
 """Результат поиска глобальных курсов по заданным фильтрам"""
@@ -23155,6 +23484,24 @@ type LessonLengthType {
   length: Int
 }
 
+""""""
+input LessonMarkInputModel {
+  """Идентификатор урока"""
+  lessonId: ID!
+
+  """Идентификатор формы контроля, за которую проставлена оценка"""
+  learningActivityId: ID!
+
+  """Идентификатор оценки"""
+  governmentMarkId: Int!
+
+  """Точка? Временная оценка"""
+  temporaryMarkDate: Date
+
+  """Дата и время первичного проставления оценки"""
+  createdTs: DateTime!
+}
+
 """Заметка с данными урока"""
 type LessonNoteExtended {
   """Уникальный идентификатор заметки. Например, LessonNote#getLessonNoteId"""
@@ -24164,7 +24511,7 @@ type LocalCourseGoal {
   isContentAvailable: Boolean!
 
   """Правила подсчета даты и времени изменённого модуля/проекта"""
-  rules: StagePlanRules!
+  rules: LocalCourseRules!
 
   """Тип выполнения"""
   executionType: ModuleExecutionType
@@ -24177,8 +24524,8 @@ type LocalCourseGoal {
   """
   equivalentConstructors: Boolean
 
-  """дедланй проекта внутри курса"""
-  deadlineFree: Boolean
+  """Какие периоды учитываются в проекте"""
+  periodSettings: PeriodSettings
 
   """Порядковый номер"""
   order: Int
@@ -24277,8 +24624,8 @@ input LocalCourseGoalInput {
   """Порядковый номер цели"""
   order: ID!
 
-  """Наличие дедлайнов в проекте курса"""
-  deadlineFree: Boolean
+  """Какие периоды учитываются в проекте"""
+  periodSettings: PeriodSettings
 }
 
 """Информация по локальному курсу в окне Projects"""
@@ -24333,6 +24680,32 @@ input LocalCourseInput {
 
   """Цели плана"""
   localCourseGoals: [LocalCourseGoalInput!]!
+}
+
+"""Правила подсчета дат для проекта"""
+type LocalCourseRules {
+  """
+  "Начать с ..."
+  """
+  ruleBeginFrom: Int!
+
+  """
+  "Часы на проект"
+  """
+  ruleProjectHours: Int!
+
+  """
+  "Регистрация"
+  """
+  ruleSignUpFrom: Int!
+
+  """
+  "Проверка"
+  """
+  ruleCheckFrom: Int!
+
+  """Какие периоды учитываются в проекте"""
+  periodSettings: PeriodSettings!
 }
 
 """Модель для отображения процесса сохранения локального курса"""
@@ -24455,6 +24828,38 @@ type LoginValidationResponse {
 
   """Если хотя бы один логин не был найден тут будет true"""
   hasNotFound: Boolean!
+}
+
+"""Результат валидации логинов пользователей"""
+type LoginValidationResponseV2 {
+  """Логины прошли валидацию, здесь не может быть повторяющихся значений"""
+  validLogins: [String!]!
+
+  """
+  Логины которые встречаются несколько раз,здесь могут быть повторяющихся значений
+  """
+  duplicateLogins: [String!]!
+
+  """Логина которые ненайдены, здесь не может быть повторяющихся значений"""
+  notFoundLogins: [String!]!
+
+  """Логины из других кампусов, здесь не может быть повторяющихся значений"""
+  otherCampusesLogins: [String!]!
+
+  """
+  Валидные логины для начисления коинов, здесь не может быть повторяющихся значений
+  """
+  validLoginsForCoalitionsPoints: [String!]!
+
+  """
+  Логины которые не состоят в коалиции, здесь не может быть повторяющихся значений
+  """
+  notInCoalitionLogins: [String!]!
+
+  """
+  Логины у которых нет активного турнира, здесь не может быть повторяющихся значений
+  """
+  notActiveTournamentLogins: [String!]!
 }
 
 """"""
@@ -25462,6 +25867,75 @@ type MobilePhoneEditInfo {
   smsVerificationEnabled: Boolean!
 }
 
+"""Параметры сотрудника, которые изменяются через заявку"""
+type ModifiedUserData {
+  """Почта сотрудника"""
+  email: String
+
+  """Фамилия сотрудника"""
+  lastName: String
+
+  """Имя сотрудника"""
+  firstName: String
+
+  """Отчество сотрудника"""
+  middleName: String
+
+  """Список профилей доступа"""
+  userFroleSets: [ModifiedUserFroleSet!]
+}
+
+"""Параметры сотрудника, которые изменяются через заявку"""
+input ModifiedUserDataInput {
+  """Почта сотрудника"""
+  email: String
+
+  """Фамилия сотрудника"""
+  lastName: String!
+
+  """Имя сотрудника"""
+  firstName: String!
+
+  """Отчество сотрудника"""
+  middleName: String
+
+  """Список профилей доступа"""
+  userFroleSets: [ModifiedUserFroleSetInput!]!
+}
+
+"""Параметры сотрудника, которые изменяются через заявку"""
+type ModifiedUserDataResult {
+  """"""
+  oldModifiedUserData: ModifiedUserData
+
+  """"""
+  newModifiedUserData: ModifiedUserData!
+}
+
+"""Параметры профилей доступа сотрудника, которые изменяются через заявку"""
+type ModifiedUserFroleSet {
+  """Идентификатор профиля доступа"""
+  functionalRoleSetId: ID!
+
+  """Идентификатор продукта/кампуса"""
+  orgUnitId: ID!
+
+  """Наименование профиля доступа и продукта/кампуса"""
+  functionalRoleSetWithCampusName: String
+
+  """Подробная информация о профиле доступа и продукте/кампусе"""
+  userFroleSet: UserFroleSet!
+}
+
+"""Параметры профилей доступа сотрудника, которые изменяются через заявку"""
+input ModifiedUserFroleSetInput {
+  """Идентификатор профиля доступа"""
+  functionalRoleSetId: ID!
+
+  """Идентификатор продукта/кампуса"""
+  orgUnitId: ID!
+}
+
 """"""
 type ModularPlanningQueries {
   """Получение информации о модулях из дефолтных Систем заданий"""
@@ -26367,6 +26841,9 @@ input MultipleTextAnswerBodyInput {
 """"""
 type Mutation {
   """"""
+  userChangeRequest: UserChangeRequestMutations
+
+  """"""
   sc21ProjectFlow: SC21ProjectFlowMutations
 
   """"""
@@ -26398,6 +26875,9 @@ type Mutation {
 
   """"""
   trajectory: TrajectoryMutations
+
+  """"""
+  ASAP: ASAPMutations
 
   """"""
   bigChallenge: BigChallengeMutations
@@ -27023,6 +27503,21 @@ enum OnboardingType {
 
   """Онбординг для показа уведомлений об успешном связывании SberID"""
   SBERID_LINKED
+
+  """
+  Онбординг для показа уведомления о добавлении информации по ЭЖД в Проверке Заданий Учителем
+  """
+  EJ_INFO
+
+  """
+  Онбординг для показа уведомления о проверке рекомендуемой оценки в Проверке Заданий Учителем
+  """
+  CHECK_MARK
+
+  """
+  Онбродинг для показа уведомления о подтверждении оценивания в Проверке Заданий Учителем
+  """
+  CONFIRM_CHECK
 }
 
 """Информация по возвращенному календарному событию"""
@@ -28529,6 +29024,97 @@ type PeriodInfo {
   endTimestamp: Int!
 }
 
+"""Период для создания планов уроков"""
+type PeriodLessonPlan {
+  """Идентификатор дистанционного периода"""
+  periodLessonPlanId: ID
+
+  """Идентификатор группы класса по предмету"""
+  stageSubjectGroupId: ID
+
+  """Признак видео-урока"""
+  isVideoLesson: Boolean
+
+  """Дата начала периода"""
+  startDate: Date!
+
+  """Дата окончания периода"""
+  endDate: Date!
+
+  """Признак активности/неактивности периода"""
+  isActive: Boolean
+}
+
+"""
+Сопоставление периода для создания планов уроков c его вычисляемым статусом
+"""
+type PeriodLessonPlanExtended {
+  """Период для создания планов уроков"""
+  periodLessonPlan: PeriodLessonPlan!
+
+  """
+  Статус соответствующей задачи обновления дистанционного периода из таблицы period_lesson_plan_tasks
+  """
+  taskStatus: String
+
+  """Cтатус периода планирования уроков"""
+  periodStatus: Int!
+
+  """Признак того, что период был сокращен при редактировании"""
+  isReducingInterval: Boolean
+
+  """Название группы класса по предмету"""
+  stageSubjectGroupName: String
+
+  """Название класса"""
+  stageGroupName: String
+
+  """Название параллели"""
+  stageName: String
+
+  """Идентификатор класса"""
+  stageGroupId: ID
+
+  """Идентификатор параллели"""
+  stageId: ID
+
+  """Идентификатор учебного года"""
+  academicYearId: ID
+}
+
+""""""
+input PeriodLessonPlanInput {
+  """"""
+  periodLessonPlanId: ID
+
+  """"""
+  stageSubjectGroupIds: [ID!]!
+
+  """"""
+  dates: [DatePeriodLessonPlanInput!]!
+
+  """"""
+  isVideoLesson: Boolean!
+
+  """"""
+  timeZone: String!
+}
+
+"""настройки периодов проектов в курсе"""
+enum PeriodSettings {
+  """Все периоды включены"""
+  ON
+
+  """Аналог марафона"""
+  EXECUTION_AND_DURATION
+
+  """Только период регистрации"""
+  ONLY_REGISTRATION
+
+  """Периоды выключены"""
+  OFF
+}
+
 """"""
 type Permission {
   """"""
@@ -29686,6 +30272,9 @@ type PlanningStageSubjectGroupInfo {
 
   """Предмет ГКПП"""
   subject: Subject!
+
+  """Может ли пользователь создавать КТП для данной ГКпП"""
+  canUserCreateCTP: Boolean
 }
 
 """"""
@@ -31244,6 +31833,9 @@ type PythonTranslationResult {
 """"""
 type Query {
   """"""
+  userChangeRequest: UserChangeRequestQueries
+
+  """"""
   student: StudentQueries
 
   """"""
@@ -31251,6 +31843,9 @@ type Query {
 
   """"""
   mediateka: MediatekaQueries!
+
+  """"""
+  s21StudentTaskFiles: S21StudentTaskFiles
 
   """"""
   parent: ParentQueries
@@ -31283,7 +31878,13 @@ type Query {
   trajectory: TrajectoryQueries
 
   """"""
+  ASAP: ASAPQueries
+
+  """"""
   calendarEventS21: CalendarEventS21Queries
+
+  """"""
+  s21BaTaskFiles: S21BaTaskFilesQueries
 
   """"""
   bigChallenge: BigChallengeQuery
@@ -32652,6 +33253,14 @@ enum RpType {
   PRP
 }
 
+""""""
+type S21BaTaskFilesQueries {
+  """
+  S21. Получение файлов, прикрепленных к текущей опубликованной версии задания по его идентификатору
+  """
+  getTaskContentFiles(taskId: ID!): [TaskFile!]!
+}
+
 """План на класс"""
 type S21ClassPlan {
   """Идентификатор плана на класс"""
@@ -32848,6 +33457,47 @@ type S21ClassPlanSavingProgress {
 
   """Является ли процесс сохранения возвращением к предыдущей версии"""
   isRollback: Boolean!
+}
+
+"""Цели"""
+type S21Goal {
+  """Идентификатор цели"""
+  goalId: ID
+
+  """Название цели"""
+  goalName: String!
+
+  """Тип проекта (групповой, индивидуальный)"""
+  assignmentType: TaskAssignmentEnum
+
+  """
+  "Регистрация"
+  """
+  signUpDate: DateTime
+
+  """
+  "Начало выполнения"
+  """
+  beginDate: DateTime
+
+  """
+  "Дедлайн"
+  """
+  deadlineDate: DateTime
+
+  """
+  "Проверка"
+  """
+  checkDate: DateTime
+
+  """Тип выполнения"""
+  executionType: ModuleExecutionType
+
+  """Флаг, указывающий на игнорирование любых дедлайнов для модуля"""
+  deadlineFree: Boolean!
+
+  """Просмотр контента"""
+  isContentAvailable: Boolean!
 }
 
 """Массовая выдача награды ученикам"""
@@ -33256,6 +33906,14 @@ type S21StudentPublicProfileBasicInfo {
 
   """Школа"""
   school: School
+}
+
+""""""
+type S21StudentTaskFiles {
+  """
+  S21. Получение файлов, прикрепленных к версии, которую на данный момент выполняет студент
+  """
+  getTaskContentFiles(studentAnswerId: ID!): [TaskFile!]!
 }
 
 """"""
@@ -33942,12 +34600,6 @@ type School21Mutations {
   """Модератор отклоняет заявку на расформирование команды"""
   rejectTeamDisbandRequest(teamDisbandRequestId: ID!): DisbandRequestStatus!
 
-  """Создание виджета ASAP"""
-  createAsapWidget(input: AsapWidgetInput!): AsapWidgetInfo!
-
-  """Редактирование виджета ASAP"""
-  updateAsapWidget(widgetId: ID, input: AsapWidgetInput!): AsapWidgetInfo!
-
   """S21. Перевод студентов из класса в класс"""
   transferStudentsToNewStageGroup(oldStageGroupId: ID!, newStageGroupId: ID!, studentIds: [UUID!]!, stageSubjectGroupIds: [ID!]): TransferResult!
 
@@ -34036,6 +34688,9 @@ type School21Mutations {
 
   """очистка всех сохраненных связей для кампуса и его активация"""
   clearMulticampusSchoolStageDependenciesAndActivate(schoolId: UUID!): Boolean
+
+  """S21 сохранение/изменение пользователя"""
+  saveS21User(user: UserInput!): User!
 }
 
 """"""
@@ -34326,9 +34981,6 @@ type School21Queries {
   """S21. Хлебные крошки в админке"""
   getBreadCrumbs(itemId: ID!, planType: PlanTypeForCondition!, planItemType: PlanItemType!): BreadCrumbsPlanItem
 
-  """S21. Виджеты ASAP для редактирования"""
-  getAllAsapWidgets: AsapWidgetInfoList!
-
   """S21. Получить общую статистику по слотам студента"""
   getCommonP2pStatistic(startDate: Date!, endDate: Date!, userId: UUID!): P2pCommonStatistic!
 
@@ -34503,6 +35155,11 @@ type School21Queries {
 
   """Получение публичного профиля пользователя по userID"""
   getBasePublicProfile(userId: UUID!): BasePublicProfile!
+
+  """
+  S21 получить список профилей, доступных для назначения на указанную орг.единицу и роль
+  """
+  getAvailableFroleSetsWithRole(appicableRole: ROLES!): [FunctionalRoleSet!]!
 }
 
 """"""
@@ -37047,6 +37704,9 @@ type StageSubjectFinalMarks {
   """Наименование предмета"""
   subjectName: String!
 
+  """Наименование тенанта"""
+  tenantShortName: String
+
   """Итоговые оценки за АП"""
   marks: [AttestationPeriodFinalMark!]!
 
@@ -37358,6 +38018,9 @@ type StageSubjectStatisticsMarks {
 
   """Годовые оценки (за экзамен, аттестационные в зависимости от настроек)"""
   yearMarks: [YearStatisticsMark!]!
+
+  """Наименование тенанта"""
+  tenantShortName: String
 }
 
 """Модель подгруппы гкпп"""
@@ -37751,6 +38414,9 @@ type StatisticsMarkStageSubject {
 
   """Наименование предмета"""
   subjectName: String!
+
+  """Наименование тенанта"""
+  tenantShortName: String
 }
 
 """Данные по финальным оценкам"""
@@ -40240,6 +40906,15 @@ type StudentLessonCompact {
   studentPlanModuleCounter: Int
 }
 
+""""""
+type StudentLessonData {
+  """урок"""
+  lesson: Lesson
+
+  """запланирован ли урок"""
+  isPlanned: Boolean
+}
+
 """Информация со статусом по уроку"""
 type StudentLessonProgressInfo {
   """идентификатор урока"""
@@ -40271,6 +40946,15 @@ type StudentLightMarkModel {
 
   """Активность (домашняя, классная работа)"""
   learningActivity: LearningActivity
+}
+
+""""""
+type StudentMark {
+  """"""
+  studyActivities: [StudyActivity]
+
+  """"""
+  studentLessons: [StudentLessonData]
 }
 
 """Материалы к домашнему заданию и к уроку"""
@@ -40533,6 +41217,9 @@ type StudentModule {
 
   """Прогноз прохождения модуля"""
   probability: Boolean
+
+  """Ссылка на геймифицированный контент (для гейм-модулей)"""
+  gameLink: String
 }
 
 """Полная информация по Учебному Модулю в контексте Студента"""
@@ -41116,8 +41803,11 @@ type StudentMutations {
   """Старт экзамена студентом с последующей выдачей ему первого задания"""
   startExam(examEventId: ID!, goalId: ID!): ExamTaskWithStatuses
 
-  """Получение очередного задания во время прохождения экзамена"""
-  handleCurrentExamTask(examEventId: ID!, goalId: ID!, skip: Boolean, next: Boolean): ExamTaskWithStatuses
+  """S21. Скип текущего задания во время прохождения экзамена"""
+  skipCurrentExamTask(examEventId: ID!, goalId: ID!): ExamTaskWithStatuses!
+
+  """S21. Получение следующего задания во время прохождения экзамена"""
+  pullNextExamTask(examEventId: ID!, goalId: ID!): ExamTaskWithStatuses!
 
   """Завершение экзамена"""
   finishExam(examEventId: ID!): ExamResult!
@@ -42173,9 +42863,6 @@ type StudentQueries {
   """"""
   getInternshipReviewDataInfo(goalId: ID!): InternshipStudentReviewInfo!
 
-  """"""
-  getAsapWidgetList: AsapWidgetInfoList!
-
   """Получение студенческого модуля в контексте студента по идентификатору"""
   getStudentModuleByStudentGoalId(studentGoalId: ID!): StudentModule!
 
@@ -42698,15 +43385,15 @@ type StudentQueries {
   """
   Получение статуса текущего экзамена студента (если вернул null - текущий или слудеющий экзамен не найден)
   """
-  getExamTestStatusInfo(examEventId: Int): ExamTestStatusInfo @deprecated(reason: "migrated into mutation handleCurrentExamTask")
-
-  """"""
-  getExamTask(examEventId: ID!, goalId: ID!, skip: Boolean, next: Boolean): ExamTaskWithStatuses
+  getExamTestStatusInfo(examEventId: Int): ExamTestStatusInfo
 
   """
   Получение статуса проверки автотестов на отправленное экзаменационное задание
   """
   getExamAnswerStatus(examEventId: ID!, goalId: ID!, currentLevelId: ID!, taskId: ID!): TaskStatusEnum
+
+  """S21. Получение текущего задания во время прохождения экзамена"""
+  getCurrentExamTask(examEventId: ID!, goalId: ID!): ExamTaskWithStatuses!
 
   """
   Проверка существования заявки пользователя на расформирование указанной команды
@@ -43236,7 +43923,7 @@ type StudentQueries {
 
   """получение параметров для прокторинга"""
   getProctoringParameters(
-    """id события"""
+    """id экзамена"""
     examId: ID!
 
     """Ссылка на прохождение экзамена в системе"""
@@ -44363,6 +45050,18 @@ type StudentTaskInfo {
   currentClassSubject: ClassSubject
 }
 
+""""""
+input StudentTaskLessonInputModel {
+  """Идентификатор задания"""
+  taskId: ID!
+
+  """Идентификатор студента"""
+  studentId: UUID!
+
+  """"""
+  lessonMarkInputModel: [LessonMarkInputModel!]!
+}
+
 """Модель для Чанки Light"""
 type StudentTaskLightStatisticsModel {
   """"""
@@ -44516,6 +45215,9 @@ type StudentTaskToCheck {
 
   """превысило 7 дней в статусе (для статуса "на проверке")"""
   expire7Days: Boolean
+
+  """список соответствия критериям"""
+  studentCriteriaValues: [StudentCriteriaValue]
 }
 
 """"""
@@ -44630,6 +45332,15 @@ type StudentTaskWithCounters {
 }
 
 """"""
+type StudentTaskWithCriterias {
+  """"""
+  studentTask: StudentTask!
+
+  """"""
+  studentCriteriaValues: [StudentCriteriaValue]
+}
+
+""""""
 type StudentTasksByStageSubjectGroupForStudentsResponse {
   """"""
   stageSubjectGroup: StageSubjectGroup!
@@ -44668,22 +45379,22 @@ type StudentTasksToCheckResponse {
   studentTasks: [StudentTaskToCheck!]!
 
   """Проверенные задания учеников"""
-  checkedStudentTasks: [StudentTask]
+  checkedStudentTasks: [StudentTaskWithCriterias!]!
+
+  """Назначенные задания студента"""
+  assignedStudentTasks: [StudentTask!]!
 
   """количество заданий учеников"""
   studentTaskCount: Int!
 
   """"""
-  stageSubjectGroupName: String
+  taskInfo: TaskInfoToCheck
 
   """"""
-  stageGroupName: String
+  studentMark: StudentMark
 
   """"""
-  shortSubjectName: String
-
-  """"""
-  subjectName: String
+  defaultSchoolMarks: [SchoolMark]!
 }
 
 """"""
@@ -45207,6 +45918,21 @@ type StudentsManagement {
 
   """"""
   countOfStudents: Int!
+}
+
+""""""
+type StudyActivity {
+  """Учебная активность"""
+  learningActivity: LearningActivity
+
+  """Тип формы контроля"""
+  formControlTypes: [FormControlTypeEnum]
+
+  """Система оценивания"""
+  governmentMarkType: GovernmentMarkType
+
+  """Система оценивания"""
+  schoolMarks: [SchoolMark]
 }
 
 """Учебный Модуль без персональной информации"""
@@ -47272,10 +47998,31 @@ type SystemAdminQueries {
   getFunctionalRolesByOrgUnitIds(orgUnitIds: [ID!]!): [FunctionalRole!]! @deprecated(reason: "Использовать getFunctionalRolesByFilter")
 
   """Возвращает список функциональных ролей по фильтру"""
-  getFunctionalRolesByFilter(orgUnitIds: [ID!]!, textSearch: String, paging: PagingInput): [FunctionalRole!]!
+  getFunctionalRolesByFilter(
+    """"""
+    orgUnitIds: [ID!]!
+
+    """"""
+    textSearch: String
+
+    """Добавляем фильтры по уровню применимости, если передали в запросе"""
+    applicableRole: String
+
+    """"""
+    isScopeGlobal: Boolean
+
+    """"""
+    isScopeProduct: Boolean
+
+    """"""
+    isScopeSchool: Boolean
+
+    """"""
+    paging: PagingInput
+  ): [FunctionalRole!]!
 
   """Количество доступных функциональных ролей по фильтру"""
-  getFunctionalRolesByFilterCount(orgUnitIds: [ID!]!, textSearch: String): Int!
+  getFunctionalRolesByFilterCount(orgUnitIds: [ID!]!, textSearch: String, applicableRole: String, isScopeGlobal: Boolean, isScopeProduct: Boolean, isScopeSchool: Boolean): Int!
 
   """Возвращает школу с Планами на ступень по идентфиикатору Школы"""
   getStudyStepPlansBySchoolId(schoolId: UUID!): School!
@@ -48132,6 +48879,9 @@ type Task {
 
   """Ш21. Тип загружаемого решения"""
   taskSolutionType: TaskSolutionTypeEnum
+
+  """Идентификатор группы по заданию в user group service"""
+  taskUserGroupId: UUID
 }
 
 """Форма работы"""
@@ -48978,6 +49728,24 @@ input TaskInfoFileInput {
 
   """"""
   fileOrder: Int!
+}
+
+""""""
+type TaskInfoToCheck {
+  """"""
+  task: Task
+
+  """"""
+  stageSubjectGroupName: String
+
+  """"""
+  stageGroupName: String
+
+  """"""
+  shortSubjectName: String
+
+  """"""
+  subjectName: String
 }
 
 """Задание внутри Слота"""
@@ -56194,6 +56962,82 @@ type UserBgStickerPart {
   rewardDate: DateTime
 }
 
+"""Информация о запросе по созданию/изменению заявки по сотруднику"""
+type UserChangeRequest {
+  """Идентификатор заявки"""
+  id: ID!
+
+  """Логин автора заявки"""
+  authorLogin: String!
+
+  """Дата создания заявки"""
+  createTime: DateTime!
+
+  """Тип заявки (создание/изменение)"""
+  changeRequestType: ChangeRequestType!
+
+  """Логин изменяемого сотрудника"""
+  userLogin: String!
+
+  """Идентификатор изменямого сотрудника"""
+  userId: UUID
+
+  """Тип заявки (создание/изменение)"""
+  changeRequestStatusType: ChangeRequestStatusType!
+
+  """Изменения, которые сделаны в рамках заявки"""
+  modifiedUserDataResult: ModifiedUserDataResult!
+}
+
+"""Запрос на создание/изменение заявки по сотруднику"""
+input UserChangeRequestInput {
+  """Логин изменяемого сотрудника"""
+  userLogin: String!
+
+  """Тип заявки (создание/изменение)"""
+  changeRequestType: ChangeRequestType!
+
+  """Параметры сотрудника, которые изменяются через заявку"""
+  modifiedUserData: ModifiedUserDataInput!
+}
+
+""""""
+type UserChangeRequestMutations {
+  """Создание заявки на создание/изменение сотрудника"""
+  createUserChangeRequest(userChangeRequest: UserChangeRequestInput!): UserChangeRequest!
+
+  """Редактирование заявки на создание/изменение сотрудника"""
+  editUserChangeRequest(userChangeRequestId: ID!, modifiedUserData: ModifiedUserDataInput!): UserChangeRequest!
+
+  """Отмена заявки на создание/изменение сотрудника"""
+  cancelUserChangeRequest(userChangeRequestId: ID!): Boolean!
+
+  """Подтверждение заявки на создание/изменение сотрудника"""
+  confirmUserChangeRequest(userChangeRequestId: ID!): UserChangeRequest
+
+  """Отклонение заявки на создание/изменение сотрудника"""
+  rejectUserChangeRequest(userChangeRequestId: ID!, reason: String): UserChangeRequest
+}
+
+""""""
+type UserChangeRequestQueries {
+  """Получение флага заявки находящейся в работе по указанному пользователю"""
+  getUserHasChangeRequest(userLogin: String!): Boolean!
+
+  """Получение заявки на создание/изменение пользователя по ее ид"""
+  getUserChangeRequest(userChangeRequestId: ID!): UserChangeRequest
+
+  """
+  Получение списка заявок на создание/изменение пользователей по параметрам
+  """
+  getUserChangeRequests(textSearch: String, sortingFields: [SortingField], paging: PagingInput, filterMyRequests: Boolean, filterByStatus: ChangeRequestStatusType): [UserChangeRequest]!
+
+  """
+  Получение количества заявок на создание/изменение пользователей по параметрам
+  """
+  getUserChangeRequestsCount(textSearch: String, filterMyRequests: Boolean, filterByStatus: ChangeRequestStatusType): Int!
+}
+
 """Инфа по пользователю и его монетам"""
 type UserCoins {
   """идентификатор пользователя"""
@@ -56832,6 +57676,22 @@ type UserLastGiving {
 
   """последнее награждение(нуль если еще ничем не награждали)"""
   lastGiving: Giving
+}
+
+""""""
+type UserLastGivingsResponse {
+  """Все последние награждения по фильтру (с пагинацией)"""
+  allLastGivings: [UserLastGiving!]!
+
+  """
+  Кол-во тех кому можно выдать очки коалиции(все по фильтру, без учета пагинации)
+  """
+  studentsForCoalitionPointsCount: Int!
+
+  """
+  Логины тез кому нель выдать очки коалиции(не в коалиции или без турнира, все по фильтру, без учета пагинации)
+  """
+  nonAwardedLogins: [String!]!
 }
 
 """"""

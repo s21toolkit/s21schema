@@ -36,6 +36,10 @@ fragment MediatekaMediaFragment on ContentItem {
   description
   fileSize
   subtitleLink
+  subtitleLinks {
+    languageCode
+    subtitleLink
+  }
   itemBookmarked
   stages {
     id

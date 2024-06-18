@@ -1,0 +1,11 @@
+query getTaskContentFiles($studentAnswerId: ID!) {
+  s21StudentTaskFiles {
+    getTaskContentFiles(studentAnswerId: $studentAnswerId) {
+      fileName
+      filePath
+      fileSize
+      extension
+      fileOrder
+    }
+  }
+}
