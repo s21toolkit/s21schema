@@ -44027,6 +44027,9 @@ type StudentQueries {
   """"""
   getUserTournamentWidget(userId: UUID, schoolId: ID): UserTournamentWidget!
 
+  """Получить участников моей коалиции"""
+  getMyCoalitionMembers(page: PagingInput): [CoalitionMember!]!
+
   """
   Возвращает текущий турнир. Если текущего нет, возвращает последний турнир ученика. Либо null если нет обоих
   """
@@ -58831,13 +58834,10 @@ type UserTournamentWidget {
   """
   lastTournamentResult: UserTournamentResult
 
-  """Последний турнир пользоввателя"""
-  lastTournament: GameTournament
+  """Последний турнир пользователя"""
+  lastTournament: GameTournament @deprecated(reason: "Вынесено в StudentQueries из-за проблем с кэшированием")
 
-  """
-  Получить участников моей коалиции
-  если {page==null} то вернутся первые 20 участников
-  """
+  """"""
   getMyCoalitionMembers(page: PagingInput): [CoalitionMember!]!
 }
 
