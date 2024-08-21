@@ -1,11 +1,3 @@
-fragment GroupProjectStatistics on GroupProjectStatistics {
-  inProgressTeams
-  evaluationTeams
-  finishedTeams
-  acceptedTeams
-  failedTeams
-}
-
 fragment TimelineItemChildren on ProjectTimelineItem {
   type
   elementType
@@ -20,19 +12,6 @@ fragment ProjectReviewsInfo on ProjectReviewsInfo {
   relevantReviewByStudentsCount
   reviewByInspectionStaffCount
   relevantReviewByInspectionStaffCount
-}
-
-fragment ProjectStatistics on ProjectStatistics {
-  registeredStudents
-  inProgressStudents
-  evaluationStudents
-  finishedStudents
-  acceptedStudents
-  failedStudents
-  retriedStudentsPercentage
-  groupProjectStatistics {
-    ...GroupProjectStatistics
-  }
 }
 
 fragment TimelineItem on ProjectTimelineItem {
@@ -108,9 +87,6 @@ fragment ModuleCoverInfo on ModuleCoverInformation {
   }
   timeline {
     ...TimelineItem
-  }
-  projectStatistics {
-    ...ProjectStatistics
   }
 }
 

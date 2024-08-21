@@ -400,6 +400,9 @@ enum AcceleratorMilestone {
 
   """"""
   THIRD
+
+  """"""
+  FOURTH
 }
 
 """"""
@@ -514,6 +517,9 @@ type AcceleratorMutations {
 
   """Сохранение оценки по итоговому заданию проектной деятельности"""
   saveAcceleratorProjectAssessment(projectAssessmentInput: ProjectAssessmentInput!): String!
+
+  """Перевод проекта на следующий этап"""
+  projectTransferToNextStage(projectStageInput: ProjectStageInput!): String!
 
   """
   Метрики
@@ -2321,6 +2327,9 @@ type AggregatedSkillStudentRadarChart {
 
   """Агрегированные данные по цифровым навыкам"""
   digitalSkillData: [StudentRadarChartBySkill!]!
+
+  """"""
+  stageGroupId: ID!
 
   """"""
   testFactComplete: Boolean!
@@ -5799,6 +5808,9 @@ type BreadCrumbsPlanItem {
 
   """Название сущности в курсе"""
   courseItemName: String
+
+  """Тип выполнения"""
+  executionType: ModuleExecutionType
 }
 
 """"""
@@ -8311,6 +8323,15 @@ type BusinessWidgetInfo {
   Нетипизированная информация для бизнесс-виджета (используется только если ContentWidgetTypeEnum=Business)
   """
   businessInfo: String!
+}
+
+"""S21. Занятые временные промежутки в календаре"""
+type BusyTimeInterval {
+  """Дата и время начала"""
+  start: DateTime!
+
+  """Дата и время завершения"""
+  end: DateTime!
 }
 
 """"""
@@ -10901,6 +10922,9 @@ type Complaint {
 
   """Причины жалобы"""
   selectedReasons: [ComplaintReason!]!
+
+  """Класс создателя жалобы"""
+  stageGroup: String
 }
 
 """Статус жалобы"""
@@ -10913,6 +10937,51 @@ enum ComplaintAndSystemErrorStatus {
 
   """Не обработана"""
   UNPROCESSED
+}
+
+""""""
+input ComplaintExportFilterInput {
+  """Фильтры по дате создания жалобы"""
+  dateFrom: DateTime
+
+  """"""
+  dateTo: DateTime
+
+  """Фильтр по статусу жалоб"""
+  filterStatus: ComplaintAndSystemErrorStatus
+
+  """Фильтр по идентификатору модуля"""
+  moduleId: ID
+
+  """Фильтр по идентификатору предмета"""
+  subjectId: ID
+}
+
+""""""
+input ComplaintFilterInput {
+  """Фильтры по дате создания жалобы"""
+  dateFrom: DateTime
+
+  """"""
+  dateTo: DateTime
+
+  """Фильтр по статусу жалоб"""
+  filterStatus: ComplaintAndSystemErrorStatus
+
+  """Строка поиска по почте и комментарию"""
+  textSearch: String
+
+  """Фильтр по идентификатору задания"""
+  taskId: ID
+
+  """Фильтр по идентификатору модуля"""
+  moduleId: ID
+
+  """Фильтр по идентификатору предмета"""
+  subjectId: ID
+
+  """Параметры пагинации"""
+  paging: PagingInput
 }
 
 """"""
@@ -12796,6 +12865,9 @@ type CourseCoverInformation {
   """Идентификатор локального курса"""
   localCourseId: ID
 
+  """ИД глобального курса"""
+  globalCourseId: ID
+
   """Наименование курса"""
   courseName: String!
 
@@ -13051,6 +13123,14 @@ type CourseMutations {
   rollbackLocalCourseToLastSuccessVersion(localCourseId: ID!): Boolean!
 
   """
+  Сохранение настроек условий фильтрации для модуля (проекта, цели) в локальном курсе
+  """
+  saveEvaluationRulesForLocalCourseGoal(localCourseGoalId: ID!, conditionType: ConditionType!, evaluationRules: [EvaluationRuleGroupInput!]!): [EvaluationRuleGroup!]!
+
+  """Сохранение параметров команды в модуле локального курса"""
+  saveTeamSettingsInLocalCourseGoal(localCourseGoalId: ID!, teamSettings: TeamSettingsInput!, isMulticampusEnabled: Boolean): Boolean!
+
+  """
   -----------------------------Мутации студента-----------------------------
    регистрация на курс студентом
   """
@@ -13061,6 +13141,18 @@ type CourseMutations {
 
   """Начать новую попытку прохождения курса"""
   retryCourse(localCourseId: ID!): Boolean
+}
+
+"""Статус публикации курса"""
+enum CoursePublishedStatus {
+  """Опубликован"""
+  PUBLISHED
+
+  """НЕ опубликован"""
+  UNPUBLISHED
+
+  """Все"""
+  ALL
 }
 
 """"""
@@ -13084,6 +13176,9 @@ type CourseQueries {
 
     """Список курсов которые надо исключить из выдачи"""
     filterExceptCourses: [ID]
+
+    """Статус публикации курса"""
+    coursePublishedStatus: CoursePublishedStatus
 
     """Список полей сортировки"""
     sortingFields: [SortingField]
@@ -13152,6 +13247,30 @@ type CourseQueries {
   ): LocalCourseS21SavingProgress!
 
   """
+  Получение информации по локальному курсу в окне Projects для определённого студента
+  """
+  getLocalCourseGoalsByStudent(localCourseId: ID!, studentId: UUID!, sortingFields: [SortingField!]!): LocalCourseGoals!
+
+  """
+  Получение информации по обложке локального курса для определённого студента
+  """
+  getCourseCoverInformationByStudent(localCourseId: ID!, studentId: UUID!): CourseCoverInformation!
+
+  """
+  Получение статистики по попыткам прохождения курса для определённого студента
+  """
+  getCourseAttemptStatisticByStudent(localCourseId: ID!, studentId: UUID!): [StudentCourseAttemptStatistic]
+
+  """Получение условий выполнения курса для определённого студента"""
+  loadCourseEvaluationRulesByStudent(localCourseId: ID!, studentId: UUID!): [StudentEvaluationRuleGroup!]!
+
+  """Получить информацию по ретраям курса студента"""
+  getCourseRetryInfoByStudent(localCourseId: ID!, studentId: UUID!): StudentGoalRetryInfo!
+
+  """Получить информацию о попытке прохождения курса"""
+  getAttemptInfo(studentCourseAttemptId: ID!): StudentCourseAttempt!
+
+  """
   -----------------------------Запросы студента-----------------------------
    Получение информации по локальному курсу в окне Projects
   """
@@ -13168,6 +13287,12 @@ type CourseQueries {
 
   """Получение информации по обложке локального курса"""
   getCourseCoverInformation(localCourseId: ID!): CourseCoverInformation!
+
+  """
+  Получение списка модулей курса для дашборда, в зависимости от id глобального курса.
+  Сортировка реализована только по полю localizedType - для идентичности с дашбордом по планам
+  """
+  getCourseModulesForDashboard(globalCourseId: ID!, paging: PagingInput, sorting: SortingField): DashboardCourseModules!
 }
 
 """Тип для работы с поиском курсов"""
@@ -13652,6 +13777,30 @@ type DailyTraffic {
 
   """Время авторизации в ШЦП (в секундах)"""
   periodAuthorizSDP: String!
+}
+
+"""модель курса для dashboard"""
+type DashboardCourseModules {
+  """модули плана"""
+  dashboardPlanItemModels: [DashboardPlanItem]!
+
+  """общее количество проектов в курсе"""
+  count: Int!
+
+  """наименование курса"""
+  name: String!
+
+  """признак оцениваемый ли курс"""
+  isGradedCourse: Boolean!
+
+  """xp"""
+  pointTask: Int
+
+  """процент выполнения"""
+  percentageOfCompletion: Int
+
+  """автоматическая настройка весов"""
+  isAutoWeightsSetting: Boolean
 }
 
 """модель элемента плана для dashboard"""
@@ -18139,6 +18288,12 @@ enum FileExtensionEnum {
 
   """"""
   TIFF
+
+  """"""
+  PY
+
+  """"""
+  IPYNB
 }
 
 """"""
@@ -19541,20 +19696,27 @@ type GitlabFileTemplate {
 
 """Ссылки на проект в гитлаб"""
 type GitlabLink {
-  """Идентификатор проекта в гитлаб"""
+  """Идентификатор проекта в гитлаб, если проект удален, то будет -1"""
   id: Int!
 
   """Наличие открытых Merge-request в проект"""
   hasOpenedMR: Boolean!
 
-  """SSH-ссылка для клонирования"""
+  """
+  SSH-ссылка для клонирования, если проект удален, то будет ""
+  """
   sshLink: String!
 
-  """HTTP-ссылка для открытия в интерфейсе гитлаб"""
+  """
+  HTTP-ссылка для открытия в интерфейсе гитлаб, если проект удален, то будет ""
+  """
   httpsLink: String!
 
   """Токен для раннеров"""
   runnersToken: String!
+
+  """Удален ли этот проект"""
+  projectDeleted: Boolean!
 }
 
 """Ссылки на проект в гитлаб"""
@@ -19720,6 +19882,9 @@ enum GitlabProjectLinksReadyToUseStatus {
 
   """перезапущен форк"""
   RESTARTED
+
+  """проект удален в гитлабе"""
+  DELETED
 }
 
 """"""
@@ -19934,22 +20099,22 @@ type GlobalCourseGoal {
   """
   "Начать с ..."
   """
-  beginFrom: Int!
+  beginFrom: Int
 
   """
   "Часы на проект"
   """
-  projectHours: Int!
+  projectHours: Int
 
   """
   "Регистрация"
   """
-  signUpFrom: Int!
+  signUpFrom: Int
 
   """
   "Проверка"
   """
-  checkFrom: Int!
+  checkFrom: Int
 
   """Просмотр контента"""
   isContentAvailable: Boolean!
@@ -19981,22 +20146,22 @@ input GlobalCourseGoalInput {
   """
   "Начать с ..."
   """
-  beginFrom: Int!
+  beginFrom: Int
 
   """
   "Часы на проект"
   """
-  projectHours: Int!
+  projectHours: Int
 
   """
   "Регистрация"
   """
-  signUpFrom: Int!
+  signUpFrom: Int
 
   """
   "Проверка"
   """
-  checkFrom: Int!
+  checkFrom: Int
 
   """Просмотр контента"""
   isContentAvailable: Boolean!
@@ -20202,19 +20367,11 @@ type GlobalPlanMutations {
   """
   saveCourseEvaluationRulesForStageSubjectGroupPlan(stageSubjectGroupPlanCourseId: ID!, conditionType: ConditionType!, evaluationRules: [EvaluationRuleGroupInput!]!): [EvaluationRuleGroup!]!
 
-  """
-  Сохранение настроек условий фильтрации для модуля (проекта, цели) в локальном курсе
-  """
-  saveEvaluationRulesForLocalCourseGoal(localCourseGoalId: ID!, conditionType: ConditionType!, evaluationRules: [EvaluationRuleGroupInput!]!): [EvaluationRuleGroup!]!
-
   """Сохранение параметров команды в модуле плана на параллель"""
   saveTeamSettingsInStageSubjectPlanGoal(stageSubjectPlanGoalId: ID!, teamSettings: TeamSettingsInput!, isMulticampusEnabled: Boolean): Boolean!
 
   """Сохранение параметров команды в модуле плана на класс"""
   saveTeamSettingsInStageSubjectGroupPlanGoal(stageSubjectGroupPlanGoalId: ID!, teamSettings: TeamSettingsInput!, isMulticampusEnabled: Boolean): Boolean!
-
-  """Сохранение параметров команды в модуле локального курса"""
-  saveTeamSettingsInLocalCourseGoal(localCourseGoalId: ID!, teamSettings: TeamSettingsInput!, isMulticampusEnabled: Boolean): Boolean!
 }
 
 """"""
@@ -21151,11 +21308,11 @@ type GroupProjectInfo {
 """Статистика по групповому проекту с информацией о командах"""
 type GroupProjectStatistics {
   """
-  Количество команд, выполняющих проект и ещё не перешедщих в стадию проверки
+  Количество команд, выполняющих проект и ещё не перешедших в стадию проверки
   """
   inProgressTeams: Int!
 
-  """Количество команд, находящихся в стадии проверки проекто"""
+  """Количество команд, находящихся в стадии проверки проекта"""
   evaluationTeams: Int!
 
   """Количество команд, завершивших выполнение проекта"""
@@ -23224,6 +23381,21 @@ enum LearningProgramStatus {
 }
 
 """"""
+enum LearningStatusEnum {
+  """Обучение начато"""
+  STARTED
+
+  """Завершение обучения"""
+  COMPLETION_IN_PROGRESS
+
+  """Обучение успешно завершено"""
+  COMPLETED
+
+  """Обучение завершено с ошибкой"""
+  COMPLETION_FAILED
+}
+
+""""""
 enum LearningTypeEnum {
   """Основное обучение"""
   BASE_LEARNING
@@ -24589,8 +24761,25 @@ type LocalCourseGoalInformation {
   """Всего количество попыток выполнения на модуль"""
   retrySettings: ModuleAttemptsSettings
 
-  """deadline в проекте глобального курса"""
-  deadlineFree: Boolean
+  """Настройки периодов в проекте глобального курса"""
+  periodSettings: PeriodSettings
+
+  """Дата изменения статуса"""
+  statusUpdateDate: DateTime
+
+  """
+  Максимальное количество баллов, которые мог набрать студент в курсе по указанному проекту
+  """
+  courseGoalTotalPoint: Int
+
+  """статус проекта"""
+  goalStatus: GoalStatus
+
+  """ID проекта студента"""
+  studentGoalId: ID!
+
+  """Список попыток прохождения проекта"""
+  studentGoalAttempts: [StudentGoalAttemptShortInfo!]
 }
 
 """"""
@@ -24687,22 +24876,22 @@ type LocalCourseRules {
   """
   "Начать с ..."
   """
-  ruleBeginFrom: Int!
+  ruleBeginFrom: Int
 
   """
   "Часы на проект"
   """
-  ruleProjectHours: Int!
+  ruleProjectHours: Int
 
   """
   "Регистрация"
   """
-  ruleSignUpFrom: Int!
+  ruleSignUpFrom: Int
 
   """
   "Проверка"
   """
-  ruleCheckFrom: Int!
+  ruleCheckFrom: Int
 
   """Какие периоды учитываются в проекте"""
   periodSettings: PeriodSettings!
@@ -24920,6 +25109,15 @@ type MarkEntry {
 
   """"""
   endDate: Date
+}
+
+""""""
+type MarkHistory {
+  """"""
+  eJournalStudentMark: EJournalStudentMark
+
+  """"""
+  lesson: Lesson
 }
 
 """
@@ -25733,6 +25931,12 @@ type MilestoneReport {
 
   """Список участников проекта"""
   memberModelList: [TeamMember]
+
+  """Наименование ТБ"""
+  terbank: String
+
+  """Этап"""
+  milestone: String
 }
 
 """"""
@@ -25757,6 +25961,72 @@ input MilestoneReportFilter {
 
   """Проектный поток"""
   projectFlowId: UUID
+
+  """Массив ID проектных потоков"""
+  projectFlow: [UUID]
+
+  """Массив ID регионов проекта"""
+  region: [UUID]
+
+  """ID ТБ"""
+  terbank: [UUID]
+
+  """Этап"""
+  milestone: String
+
+  """Дата с загрузки презентации"""
+  answerDateFrom: DateTime
+
+  """Дата по загрузки презентации"""
+  answerDateTo: DateTime
+
+  """Признак загрузки презентации"""
+  addFile: Boolean
+
+  """Массив id проектов"""
+  projectId: [UUID]
+}
+
+""""""
+input MisprintExportFilterInput {
+  """Фильтры по дате создания жалобы"""
+  dateFrom: DateTime
+
+  """"""
+  dateTo: DateTime
+
+  """Фильтр по статусу жалоб"""
+  filterStatus: ComplaintAndSystemErrorStatus
+
+  """Фильтр по идентификатору модуля"""
+  moduleId: ID
+
+  """Фильтр по идентификатору предмета"""
+  subjectId: ID
+}
+
+""""""
+input MisprintFilterInput {
+  """Фильтры по дате создания жалобы"""
+  dateFrom: DateTime
+
+  """"""
+  dateTo: DateTime
+
+  """Фильтр по статусу жалоб"""
+  filterStatus: ComplaintAndSystemErrorStatus
+
+  """Строка поиска"""
+  textSearch: String
+
+  """Фильтр по идентификатору задания"""
+  taskId: ID
+
+  """Фильтр по идентификатору модуля"""
+  moduleId: ID
+
+  """Параметры пагинации"""
+  paging: PagingInput
 }
 
 """Причина ошибки в тексте задания"""
@@ -25816,10 +26086,69 @@ type MisprintReport {
   School: School
 }
 
+"""Сообщение пользователя об ошибке в тексте задания"""
+type MisprintReportBTC {
+  """Идентификатор сообщения"""
+  id: ID!
+
+  """В каком задании содержится ошибка в тексте."""
+  task: Task
+
+  """
+  В каком модуле содержится ошибка в тексте или находится задание с ошибкой.
+  """
+  module: StudyModule
+
+  """Пользователь, оставивиший сообщение об ошибку в тексте."""
+  user: User!
+
+  """Текст в котором содержится ошибка в тексте."""
+  text: String!
+
+  """Исправление, которое предложил пользователь."""
+  correctText: String!
+
+  """С какого символа начинается опечатка."""
+  selectionStart: Int!
+
+  """Длина выделенного текста опечатки."""
+  selectionLength: Int!
+
+  """Дата и время сообщения об ошибке в тексте в UTC."""
+  createTs: DateTime!
+
+  """Причины опечатки"""
+  reasonIds: [ID!]!
+
+  """Комментарий исполнителя"""
+  executorComment: String
+
+  """Статус жалобы"""
+  status: ComplaintAndSystemErrorStatus!
+
+  """путь к скриншоту в файлохранилище"""
+  screenshotUrl: String
+
+  """url страницы, на которую была написана жалоба"""
+  pageUrl: String
+
+  """Роль пользователя."""
+  userRole: ROLES
+
+  """Школа пользователя."""
+  School: School
+
+  """Класс создателя жалобы"""
+  stageGroup: String
+}
+
 """"""
 input MisprintReportInput {
   """"""
   taskId: ID
+
+  """"""
+  moduleId: ID
 
   """"""
   reasonIds: [ID!]!
@@ -31514,6 +31843,15 @@ input ProjectRoleInput {
   canDo: String
 }
 
+""""""
+input ProjectStageInput {
+  """"""
+  projectId: [UUID]!
+
+  """"""
+  milestone: AcceleratorMilestone!
+}
+
 """Статус проекта"""
 enum ProjectState {
   """"""
@@ -31523,17 +31861,17 @@ enum ProjectState {
   CLOSED
 }
 
-"""Статистика с информацией о студетах, связанных с проектом"""
+"""Статистика с информацией о студентах, связанных с проектом"""
 type ProjectStatistics {
   """Количество студентов, зарегистрированных на групповой проект"""
   registeredStudents: Int!
 
   """
-  Количество студентов, выполняющих проект и ещё не перешедщих в стадию проверки
+  Количество студентов, выполняющих проект и ещё не перешедших в стадию проверки
   """
   inProgressStudents: Int!
 
-  """Количество студентов, находящихся в стадии проверки проекто"""
+  """Количество студентов, находящихся в стадии проверки проекта"""
   evaluationStudents: Int!
 
   """Количество студентов, завершивших выполнение проекта"""
@@ -32939,6 +33277,24 @@ type ResumeForStudent {
 
   """"""
   projectName: String
+
+  """"""
+  email: String
+
+  """"""
+  telegram: String
+
+  """"""
+  vkontakte: String
+
+  """"""
+  eduDocs: [EducationDocument]!
+
+  """"""
+  resumeURL: String!
+
+  """"""
+  resumeFileName: String!
 }
 
 """"""
@@ -33494,7 +33850,10 @@ type S21Goal {
   executionType: ModuleExecutionType
 
   """Флаг, указывающий на игнорирование любых дедлайнов для модуля"""
-  deadlineFree: Boolean!
+  deadlineFree: Boolean
+
+  """Какие периоды учитываются в проекте"""
+  periodSettings: PeriodSettings
 
   """Просмотр контента"""
   isContentAvailable: Boolean!
@@ -33666,6 +34025,9 @@ enum S21NotificationEnum {
 
   """"""
   S21_PLATFORM_TASK_UPDATED
+
+  """"""
+  S21_GITLAB_TASK_UPDATED
 }
 
 """"""
@@ -33693,6 +34055,27 @@ type S21NotificationReport {
 
   """"""
   groupNames: [String!]!
+}
+
+"""S21. Тип выполнения модуля"""
+enum S21ProjectExecutionType {
+  """Экзаменационный модуль (используется S21)"""
+  EXAM
+
+  """Индивидуальный проект (используется S21)"""
+  INDIVIDUAL
+
+  """Групповой проект (используется S21)"""
+  GROUP
+
+  """Модуль/Проект экзаменационного теста (используется S21)"""
+  EXAM_TEST
+
+  """Модуль/Проект стажировка (используется S21)"""
+  INTERNSHIP
+
+  """Курс (используется S21)"""
+  COURSE
 }
 
 """"""
@@ -34054,6 +34437,11 @@ type SC21BaTaskCheckQueries {
 
   """S21. Получения отзыва сотрудника"""
   getFeedbackFromStaff(filledChecklistId: ID!): FeedbackFromStaff!
+
+  """
+  S21. Получение занятых промежутков времени для проверяемого и проверяющего при назначение доп. проверки
+  """
+  getBusyTimeIntervals(currentDateTime: DateTime!, studentAnswerId: ID!, verifierLogin: String!, verifierSchoolId: UUID!): [BusyTimeInterval!]!
 }
 
 """"""
@@ -34107,7 +34495,10 @@ type SC21StudentTaskCheckMutations {
   markFileSolutionPending(taskId: ID!, initialFileEvents: [StudyProcessFileInitialInput!]!): [StudyProcessFile!]!
 
   """S21. Сохранить файл решения задания"""
-  markFileSolutionUploaded(taskId: ID!, fileUploadEvents: [StudyProcessFileUploadInput!]!): [StudyProcessFile!]!
+  markFileSolutionUploaded(taskId: ID!, fileUploadEvents: [StudyProcessFileUploadInput!]!): [StudyProcessFile!]! @deprecated
+
+  """S21. Обновление статуса"""
+  markFileSolutionUploadedStatus(taskId: ID!, studyProcessFileIds: [ID!]!): [StudyProcessFile!]!
 
   """S21. Пользователь отменил загрузку файла решения задания"""
   markFileSolutionUploadCancelled(taskId: ID!, studyProcessFileId: ID!): StudyProcessFile!
@@ -34146,6 +34537,9 @@ type SC21StudentTaskCheckQueries {
 
   """S21. Получить тип загружаемого решения задания"""
   getTaskSolutionType(taskId: ID!): TaskSolutionTypeEnum!
+
+  """S21. Доступен ли Open Api"""
+  isOpenApiAllowed: Boolean!
 }
 
 """Все школы (безопасные, без доп.инфы)"""
@@ -35137,7 +35531,12 @@ type School21Queries {
   ): Int!
 
   """В плане на класс есть проекты с дедлайнами"""
-  getS21ClassPlanHasDeadline(classPlanId: ID!): Boolean!
+  getS21ClassPlanHasDeadline(classPlanId: ID!): Boolean! @deprecated(reason: "use getS21ClassHasDeadline")
+
+  """
+  В классе (в плане или назначенных на класс курсах) есть проекты с дедлайнами
+  """
+  getS21ClassHasDeadline(classId: ID!): Boolean!
 
   """получение настроек мультикампусности"""
   getMulticampusSettings(
@@ -35160,6 +35559,15 @@ type School21Queries {
   S21 получить список профилей, доступных для назначения на указанную орг.единицу и роль
   """
   getAvailableFroleSetsWithRole(appicableRole: ROLES!): [FunctionalRoleSet!]!
+
+  """S21 получить информацию по стажировке студента администратором"""
+  getInternshipReviewDataInfoByStudent(goalId: ID!, studentId: UUID!): InternshipStudentReviewInfo!
+
+  """Получение попыток прохождения курса"""
+  getStudentCourseFinalScoreByLoginAndGoalId(login: String!, localCourseId: ID!): StudentCourseFinalScore!
+
+  """Получение статистики по попыткам студента на модуле для студента"""
+  getGoalAttemptStatisticByStudent(goalId: ID!, studentId: UUID!): [StudentGoalAttemptStatistic]
 }
 
 """"""
@@ -36962,6 +37370,12 @@ type StageGroup {
 
   """"""
   lessonTimeslotsGroupId: ID @deprecated(reason: "Используйте StageGroupWithTimeslotSetId")
+
+  """Статус обучения"""
+  learningStatus: LearningStatusEnum!
+
+  """Дата завершения обучения"""
+  learningCompleteTs: DateTime
 }
 
 """"""
@@ -37007,6 +37421,12 @@ type StageGroupAggregated {
 
   """Активный или удаленный"""
   isActive: Boolean!
+
+  """Статус обучения"""
+  learningStatus: LearningStatusEnum!
+
+  """Дата завершения обучения"""
+  learningCompleteTs: DateTime
 }
 
 """Общая информация по классу"""
@@ -37106,6 +37526,12 @@ type StageGroupExtended {
 
   """является ли интенсивом"""
   isItIntensiveStage: Boolean
+
+  """Статус обучения"""
+  learningStatus: LearningStatusEnum!
+
+  """Дата завершения обучения"""
+  learningCompleteTs: DateTime
 }
 
 """Дата и время завершения обучения в классе"""
@@ -37627,22 +38053,22 @@ type StagePlanRules {
   """
   "Начать с ..."
   """
-  ruleBeginFrom: Int!
+  ruleBeginFrom: Int
 
   """
   "Часы на проект"
   """
-  ruleProjectHours: Int!
+  ruleProjectHours: Int
 
   """
   "Регистрация"
   """
-  ruleSignUpFrom: Int!
+  ruleSignUpFrom: Int
 
   """
   "Проверка"
   """
-  ruleCheckFrom: Int!
+  ruleCheckFrom: Int
 
   """Флаг, указывающий на игнорирование любых дедлайнов для модуля"""
   deadlineFree: Boolean!
@@ -38222,9 +38648,6 @@ type StatisticReportQueries {
 
   """"""
   getTeacherTrainingsDetailedReportFeatureFlagsPerSchool: [FeatureFlagsPerSchool!]! @deprecated(reason: "Под удаление. EDU-44903")
-
-  """"""
-  getStatisticsEntrantFeatureFlagsPerSchool: [FeatureFlagsPerSchool!]! @deprecated(reason: "Под удаление. EDU-44903")
 
   """"""
   getOverviewFeatureFlagsPerSchool: [FeatureFlagsPerSchool!]! @deprecated(reason: "Под удаление. EDU-44903")
@@ -39258,6 +39681,39 @@ type StudentCompletedGoalsInfo {
 }
 
 """Информация о попытке прохождения курса"""
+type StudentCourseAttempt {
+  """Идентификатор попытки выполнения модуля студента"""
+  studentCourseAttemptId: ID!
+
+  """Процент пройденного"""
+  finalPercentage: Int!
+
+  """Количество баллов полученное за попытку"""
+  pointProject: Int!
+
+  """Порог прохождения"""
+  percentageOfCompletion: Int!
+}
+
+"""Информация о попытке прохождения курса"""
+type StudentCourseAttemptHeader {
+  """Идентификатор попытки выполнения модуля студента"""
+  studentCourseAttemptId: ID
+
+  """Дата и время попытки"""
+  resultDate: DateTime
+
+  """Процент пройденного"""
+  finalPercentage: Int
+
+  """Количество баллов полученное за попытку"""
+  pointProject: Int
+
+  """Результат попытки"""
+  resultCourseCompletion: CompletionResultStatus
+}
+
+"""Информация о попытке прохождения курса"""
 type StudentCourseAttemptStatistic {
   """Дата и время попытки"""
   resultDate: DateTime!
@@ -39270,6 +39726,35 @@ type StudentCourseAttemptStatistic {
 
   """Результат попытки"""
   completionResultStatus: CompletionResultStatus!
+}
+
+"""Финальный результат за курс"""
+type StudentCourseFinalScore {
+  """Идентификатор студенческого курса"""
+  studentCourseId: ID!
+
+  """Статус модуля"""
+  courseStatus: CourseStatus
+
+  """Тип формулы финальной сборки"""
+  attemptCountingFormula: AttemptCountingFormulaEnum
+
+  """Начисленный фактический бал выполнения задания"""
+  finalPoint: Int
+
+  """Процент выполнения"""
+  finalPercentage: Int
+
+  """
+  Процент, который необходимо набрать чтобы задание считалось выполненным
+  """
+  percentageOfCompletion: Int!
+
+  """Дата и время расчета оценки за проект"""
+  resultDate: DateTime
+
+  """Информация о попытке прохождения модуля"""
+  studentAttemptList: [StudentCourseAttemptHeader!]!
 }
 
 """Курс назначенный на студента"""
@@ -40089,6 +40574,21 @@ type StudentGoalAttemptHeader {
   resultModuleCompletion: ResultModuleCompletion
 }
 
+"""Результаты попытки прохождения студентом проекта"""
+type StudentGoalAttemptShortInfo {
+  """ID попытки студенческого проекта"""
+  studentGoalAttemptId: ID!
+
+  """Дата окончания выполнения"""
+  resultDate: Date
+
+  """Результат проверки"""
+  attemptStatusId: Int!
+
+  """Итоговый балл за выполнение проекта"""
+  finalPercentageProject: Int
+}
+
 """Информация о попытке прохождения модуля"""
 type StudentGoalAttemptStatistic {
   """Идентификатор попытки выполнения модуля студента"""
@@ -40105,6 +40605,9 @@ type StudentGoalAttemptStatistic {
 
   """Результат попытки"""
   resultModuleCompletion: ResultModuleCompletion!
+
+  """Процент за выполнение задания"""
+  percentageOfCompletion: Int
 }
 
 """Статус попытки выполнения проекта студентом"""
@@ -41220,6 +41723,9 @@ type StudentModule {
 
   """Ссылка на геймифицированный контент (для гейм-модулей)"""
   gameLink: String
+
+  """формула подсчета оценки при повторном прохождении проекта"""
+  attemptCountingFormula: AttemptCountingFormulaEnum
 }
 
 """Полная информация по Учебному Модулю в контексте Студента"""
@@ -42527,17 +43033,11 @@ input StudentProgressSearchModulesInput {
 
 """Проект студента с привязкой к планам"""
 type StudentProjectForBA {
-  """Идентификатор модуля студента (student_goal_id)"""
-  studentGoalId: ID!
+  """ID проекта (goalId, localCourseId)"""
+  projectId: ID!
 
-  """Идентификатор задания относительно студента (student_task_id)"""
-  studentTaskId: ID
-
-  """Информация о модуле"""
-  project: Goal!
-
-  """Информация о задании"""
-  task: TaskWithAssignmentType!
+  """Наименования модуля"""
+  projectName: String!
 
   """Начисленный фактический бал выполнения задания"""
   finalPoint: Int
@@ -42559,6 +43059,36 @@ type StudentProjectForBA {
 
   """Информация о классе"""
   stageGroup: StageGroup!
+
+  """Тип модуля"""
+  projectExecutionType: S21ProjectExecutionType!
+
+  """Список проектов в курсе"""
+  studentProjectsInCourse: [StudentProjectInCourse!]!
+}
+
+""""""
+type StudentProjectInCourse {
+  """Идентификатор модуля студента (student_goal_id)"""
+  studentGoalId: ID!
+
+  """ID модуля"""
+  goalId: ID!
+
+  """Наименования модуля"""
+  projectName: String!
+
+  """Дата перевода проекта в текущий статус"""
+  statusCreationTime: Date
+
+  """Статус проекта студента"""
+  studentProjectStatus: StudentProjectStatus
+
+  """Процент выполнения"""
+  finalPercentage: Int
+
+  """Тип модуля"""
+  projectExecutionType: S21ProjectExecutionType!
 }
 
 """Информация о проекте студента (в том числе не начатого)"""
@@ -43437,7 +43967,12 @@ type StudentQueries {
   getClosestDeadlinePopup: DeadlineStudentInfo
 
   """Получение полной информации на странице проекта"""
-  getModuleCoverInformation(goalId: ID!): ModuleCoverInformation @deprecated(reason: "Актуальная версия квери getProjectAttemptEvaluationsInfo_V1")
+  getModuleCoverInformation(goalId: ID!): ModuleCoverInformation
+
+  """
+  Получение статистики по проекту (для индивидуальных и групповых проектов)
+  """
+  getProjectStatistics(goalId: ID!): ProjectStatistics @deprecated(reason: "Актуальная версия квери getProjectAttemptEvaluationsInfo_V1")
 
   """"""
   getProjectEvaluationsInfo(studentAnswerId: ID!): ProjectEvaluationsInfo!
@@ -44139,6 +44674,9 @@ type StudentRadarChartBySkill {
   maxTaskCount: Int!
 
   """"""
+  achievedLevel: Float!
+
+  """"""
   completedTaskCount: Int!
 
   """"""
@@ -44149,6 +44687,9 @@ type StudentRadarChartBySkill {
 
   """"""
   level4CompletedTasksCount: Int!
+
+  """"""
+  stageGroupId: ID!
 }
 
 """Агрегированные данные по предмету для диаграммы Радар (Паутинка)"""
@@ -45341,6 +45882,9 @@ type StudentTaskWithCriterias {
 
   """"""
   studentCriteriaValues: [StudentCriteriaValue]
+
+  """"""
+  markHistory: [MarkHistory]
 }
 
 """"""
@@ -46583,6 +47127,9 @@ input StudyProcessFileInitialInput {
 
   """Путь к файлу в файловом сервисе"""
   relativePath: String!
+
+  """fileSize"""
+  fileSize: Int
 }
 
 """"""
@@ -50428,15 +50975,6 @@ enum TaskWidgetStatusEnum {
   FAILED
 }
 
-""""""
-type TaskWithAssignmentType {
-  """"""
-  taskId: ID!
-
-  """"""
-  assignmentType: TaskAssignmentEnum!
-}
-
 """Задание с колличеством студентов группы выполнивших его"""
 type TaskWithCompletedByStudentsInGroupAttribute {
   """Задание"""
@@ -54257,6 +54795,23 @@ type TeacherQueries {
     softSkillId: ID
   ): AggregatedSkillStudentRadarChart!
 
+  """
+  Возвращает агрегированные данные по навыкам для диаграммы Радар (Паутинка)
+  """
+  getStudentsSkillRadarChartData(
+    """Идентификатор класса по предмету"""
+    stageGroupIds: [ID!]!
+  ): [AggregatedSkillStudentRadarChart!]!
+
+  """Возвращает иден"""
+  getClassSubjectGroupsForTeacher(
+    """"""
+    academicYearId: ID!
+
+    """Идентификатор навыка"""
+    teacherId: ID!
+  ): [StageGroupInfo!]!
+
   """Возвращает кол-во модулей назначенных на класс"""
   getGoalsNumberByStageGroupId(
     """Идентификатор класса"""
@@ -57382,6 +57937,9 @@ type UserExperience {
 
   """Очки, используемые для проверки code review в S21. {default = 5}"""
   codeReviewPoints: Int!
+
+  """S21. Консистентный ли баланс у пользователя"""
+  isReviewPointsConsistent: Boolean
 }
 
 """"""
@@ -57782,6 +58340,9 @@ type UserMutations {
   """создание жалобы"""
   createComplaint(complaint: ComplaintInput!): Boolean!
 
+  """создание жалобы в Bootcamp"""
+  createComplaintBTC(complaint: ComplaintInput!): Boolean!
+
   """создание системной ошибки"""
   createSystemError(systemError: SystemErrorInput!): Boolean!
 
@@ -57797,11 +58358,20 @@ type UserMutations {
   """Изменение статуса и комментария исполнителя у жалоб"""
   updateComplaint(complaintId: ID!, executorComment: String, status: ComplaintAndSystemErrorStatus!): Boolean!
 
+  """Изменение статуса и комментария исполнителя у жалоб в Bootcamp"""
+  updateComplaintBTC(complaintId: ID!, executorComment: String, status: ComplaintAndSystemErrorStatus!): Boolean!
+
+  """Массовое изменение статуса у жалоб в Bootcamp"""
+  updateComplaintsStatusBTC(complaintIds: [ID!]!, status: ComplaintAndSystemErrorStatus!): Boolean!
+
   """Изменение статуса и комментария исполнителя у ошибок"""
   updateSystemError(systemErrorId: ID!, executorComment: String, status: ComplaintAndSystemErrorStatus!): Boolean!
 
   """Изменение статуса и комментария исполнителя у опечаток"""
   updateMisprint(misprintId: ID!, executorComment: String, status: ComplaintAndSystemErrorStatus!): Boolean!
+
+  """Массовое изменение статуса у опечаток в Bootcamp"""
+  updateMisprintsStatusBTC(misprintIds: [ID!]!, status: ComplaintAndSystemErrorStatus!): Boolean!
 
   """
   Делает запрос на редактирование телефона, возвращает сколько времени будет действовать код
@@ -58140,6 +58710,9 @@ type UserQueries {
   """Справочник причин жалоб"""
   getComplaintReasons(filterSystemComplaints: Boolean): [ComplaintReason!]!
 
+  """Справочник причин жалоб в Bootcamp"""
+  getComplaintReasonsBTC: [ComplaintReason!]!
+
   """
   проверяет, превысил ли пользователь лимит на жалобы на задание или матариал каталога
   """
@@ -58170,6 +58743,12 @@ type UserQueries {
 
     """Параметры пагинации"""
     paging: PagingInput
+  ): [Complaint!]!
+
+  """Просмотр жалоб в Bootcamp"""
+  getComplaintsBTC(
+    """Фильтр по поиску жалоб в Bootcamp"""
+    complaintFilter: ComplaintFilterInput!
   ): [Complaint!]!
 
   """просмотр системных ошибок"""
@@ -58212,6 +58791,12 @@ type UserQueries {
   ): [MisprintReport!]!
 
   """"""
+  getMisprintReportsBTC(
+    """Фильтр по поиску опечаток в Bootcamp"""
+    misprintFilter: MisprintFilterInput!
+  ): [MisprintReportBTC!]!
+
+  """"""
   getMisprintReportsCount(
     """Фильтры по дате создания жалобы"""
     dateFrom: DateTime
@@ -58227,6 +58812,12 @@ type UserQueries {
 
     """Строка поиска"""
     textSearch: String
+  ): Int!
+
+  """"""
+  getMisprintReportsCountBTC(
+    """Фильтр по поиску опечаток в Bootcamp"""
+    misprintFilter: MisprintFilterInput!
   ): Int!
 
   """Просмотр рейтингов"""
@@ -58269,6 +58860,12 @@ type UserQueries {
 
     """Строка поиска"""
     textSearch: String
+  ): Int!
+
+  """Запрос количества жалоб в Bootcamp"""
+  countComplaintsBTC(
+    """Фильтр по поиску жалоб в Bootcamp"""
+    complaintFilter: ComplaintFilterInput!
   ): Int!
 
   """Запрос количества системных ошибок"""
@@ -58552,6 +59149,18 @@ type UserQueries {
 
   """Получения записи вебинара в Webinar.ru"""
   getWebinarRuRecord(lessonPlanId: ID!): WebinarRecord!
+
+  """Отчет по жалобам пользователей в Bootcamp"""
+  exportComplaintsBTC(
+    """Фильтр по выгрузке жалоб в excel"""
+    complaintFilter: ComplaintExportFilterInput!
+  ): ReportExcelFile!
+
+  """Отчет по опечаткам в Bootcamp"""
+  exportMisprintReportsBTC(
+    """Фильтр по выгрузке опечаток в excel"""
+    misprintFilter: MisprintExportFilterInput!
+  ): ReportExcelFile!
 }
 
 """Место и ряд пользователя в лидерборде"""

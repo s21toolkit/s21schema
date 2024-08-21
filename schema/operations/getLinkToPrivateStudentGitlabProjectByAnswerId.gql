@@ -1,8 +1,9 @@
-query getLinkToPrivateStudentGitlabProjectByAnswerId($studentAnswerId: ID!) {
+query getLinkToPrivateStudentGitlabProjectByAnswerId($answerId: ID!) {
   student {
-    getLinkToPrivateStudentGitlabProjectByAnswerId(answerId: $studentAnswerId) {
+    getPrivateGitlabProjectLinkInfoByAnswerId(answerId: $answerId) {
       httpsLink
       sshLink
+      status
     }
   }
 }

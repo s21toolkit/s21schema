@@ -1,0 +1,28 @@
+fragment GroupProjectStatistics on GroupProjectStatistics {
+  inProgressTeams
+  evaluationTeams
+  finishedTeams
+  acceptedTeams
+  failedTeams
+}
+
+fragment ProjectStatistics on ProjectStatistics {
+  registeredStudents
+  inProgressStudents
+  evaluationStudents
+  finishedStudents
+  acceptedStudents
+  failedStudents
+  retriedStudentsPercentage
+  groupProjectStatistics {
+    ...GroupProjectStatistics
+  }
+}
+
+query getProjectStatistics($goalId: ID!) {
+  student {
+    getProjectStatistics(goalId: $goalId) {
+      ...ProjectStatistics
+    }
+  }
+}

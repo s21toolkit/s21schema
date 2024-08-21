@@ -6,6 +6,7 @@ fragment StudyProcessFile on StudyProcessFile {
   updateDateTime
   creatorLogin
   fileExtension
+  fileSize
 }
 
 mutation markFileSolutionPending($taskId: ID!, $initialFileEvents: [StudyProcessFileInitialInput!]!) {

@@ -6,6 +6,7 @@ fragment StudyProcessFile on StudyProcessFile {
   updateDateTime
   creatorLogin
   fileExtension
+  fileSize
 }
 
 mutation markFileSolutionFailedToUpload($taskId: ID!, $fileCancelEvent: [StudyProcessFileFailOrCancelInput!]!) {

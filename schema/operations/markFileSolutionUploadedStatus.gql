@@ -6,11 +6,15 @@ fragment StudyProcessFile on StudyProcessFile {
   updateDateTime
   creatorLogin
   fileExtension
+  fileSize
 }
 
-mutation markFileSolutionUploaded($taskId: ID!, $fileUploadEvents: [StudyProcessFileUploadInput!]!) {
+mutation markFileSolutionUploadedStatus($taskId: ID!, $studyProcessFileIds: [ID!]!) {
   sc21StudentTaskCheck {
-    markFileSolutionUploaded(taskId: $taskId, fileUploadEvents: $fileUploadEvents) {
+    markFileSolutionUploadedStatus(
+      taskId: $taskId
+      studyProcessFileIds: $studyProcessFileIds
+    ) {
       ...StudyProcessFile
     }
   }

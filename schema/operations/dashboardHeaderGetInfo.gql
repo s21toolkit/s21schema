@@ -50,6 +50,7 @@ query dashboardHeaderGetInfo {
       cookiesCount
       coinsCount
       codeReviewPoints
+      isReviewPointsConsistent
     }
   }
 }

@@ -1,0 +1,5 @@
+query getIsApiDocumentationEnabled {
+  sc21StudentTaskCheck {
+    isOpenApiAllowed
+  }
+}

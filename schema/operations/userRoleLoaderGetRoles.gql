@@ -33,5 +33,10 @@ query userRoleLoaderGetRoles {
     getCurrentUserSchoolRoles {
       schoolId
     }
+    getCurrentUserRoles {
+      orgUnitId
+      orgUnitShortName
+      roleCode
+    }
   }
 }

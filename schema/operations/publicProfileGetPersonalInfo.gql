@@ -18,6 +18,7 @@ query publicProfileGetPersonalInfo($userId: UUID!, $studentId: UUID!, $login: St
       cookiesCount
       coinsCount
       codeReviewPoints
+      isReviewPointsConsistent
     }
     getEmailbyUserId(userId: $userId)
     getClassRoomByLogin(login: $login) {

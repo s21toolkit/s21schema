@@ -1,0 +1,5 @@
+mutation SetDefaultRole($role: ROLES!, $orgUnitId: ID) {
+  user {
+    setUserRoleDefaultContext_v2(role: $role, orgUnitId: $orgUnitId)
+  }
+}
