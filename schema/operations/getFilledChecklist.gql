@@ -66,13 +66,14 @@ fragment FilledChecklistModuleInfo on ModuleInfoP2P {
 }
 
 fragment FormChecklist on Checklist {
-  language
   introduction
   guidelines
   sectionList {
     ...FormChecklistSection
   }
   quickActions
+  availableLanguages
+  languageCode
 }
 
 fragment ChecklistSolutionInfo on SolutionInfo {
@@ -96,9 +97,12 @@ fragment ChecklistSolutionInfo on SolutionInfo {
   }
 }
 
-query getFilledChecklist($filledChecklistId: ID!) {
+query getFilledChecklist($filledChecklistId: ID!, $languageCodeType: LanguageCodeType) {
   student {
-    getP2pInfo(filledChecklistId: $filledChecklistId) {
+    getP2pInfo(
+      filledChecklistId: $filledChecklistId
+      languageCodeType: $languageCodeType
+    ) {
       id
       solutionInfo {
         ...ChecklistSolutionInfo

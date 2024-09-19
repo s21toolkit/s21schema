@@ -10,6 +10,7 @@ fragment CodeReviewCurrentTaskInfo on StudentTask {
       codeReviewDuration
       codeReviewCost
     }
+    translatedData
   }
 }
 
@@ -27,9 +28,12 @@ fragment CodeReviewProjectInfo on StudentModule {
   }
 }
 
-query getCodeReviewProjectInfo($studentGoalId: ID!) {
+query getCodeReviewProjectInfo($studentGoalId: ID!, $language: String) {
   student {
-    getStudentModuleByStudentGoalId(studentGoalId: $studentGoalId) {
+    getStudentModuleByStudentGoalId(
+      studentGoalId: $studentGoalId
+      language: $language
+    ) {
       ...CodeReviewProjectInfo
     }
   }

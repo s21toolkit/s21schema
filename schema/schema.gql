@@ -4962,7 +4962,7 @@ type AwardV2 {
   rewardCount: Int
 }
 
-""""""
+"""Информация об ученике Bootcamp-а для сохранения"""
 input BTCStudentsInfoInputModel {
   """Идентификатор ученика"""
   studentId: UUID!
@@ -4975,9 +4975,12 @@ input BTCStudentsInfoInputModel {
 
   """Формат обучения - очно/дистанционно"""
   isStudyOnline: Boolean
+
+  """Флаг, указывающий, что Буткемп-мастер не определен для ученика"""
+  isBmMasterUndefined: Boolean
 }
 
-""""""
+"""Информация об ученике Bootcamp-а"""
 type BTCStudentsInfoModel {
   """Идентификатор записи об ученике в Моем классе"""
   studentInfoId: ID!
@@ -4993,6 +4996,9 @@ type BTCStudentsInfoModel {
 
   """Формат обучения - очно/дистанционно"""
   isStudyOnline: Boolean
+
+  """Флаг, указывающий, что Буткемп-мастер не определен для ученика"""
+  isBmMasterUndefined: Boolean
 }
 
 """"""
@@ -5750,7 +5756,7 @@ type BookmarkStatistics {
   totalItems: Int!
 }
 
-""""""
+"""Информация о Bootcamp-мастере"""
 type BootcampMasterModel {
   """Идентификатор Буткемп-мастера"""
   bmId: UUID!
@@ -6563,6 +6569,15 @@ type BusinessAdminMutations {
   """Удаление дистанционного периода"""
   deletePeriodLessonPlan(periodLessonPlanId: ID!): Boolean
 
+  """Создание новой записи в student_whiteList"""
+  insertNewStudent(studentWhiteListInputModel: StudentWhiteListInputModel!): Boolean
+
+  """Изменение признака разрешения для студента в student_whiteList"""
+  updateAllowedStatusByMobilePhoneOrEmailOrUtmSource(email: String, mobilePhone: String, utmSource: String, allowed: Boolean!): Boolean
+
+  """Удаление записи в student_whiteList"""
+  deleteStudentByMobilePhoneOrEmailOrUtmSource(mobilePhone: String, email: String, utmSource: String): Boolean
+
   """"""
   createBadgeAward(badgeInput: BadgeAwardInput!): Award!
 
@@ -6729,6 +6744,9 @@ type BusinessAdminQueries {
   Возвращает Классы по Предмету по массиву идентификаторов (stage_subject_groups.stage_subject_group_id)
   """
   getClassSubjectsByIds(classSubjectIds: [ID!]!): [ClassSubject!]!
+
+  """Возвращает Классы по Предмету по массиву идентификаторов goalids"""
+  findStageSubjectGroupPlanByGoalIds(goalIds: [ID!]!): [ClassSubject!]!
 
   """
   Возвращает развернутую информацию о предмете класса, его модулях и количестве заданий в их плейлистах
@@ -7992,6 +8010,18 @@ type BusinessAdminQueries {
 
   """Получение списка классов, переведенных в архив Bootcamp"""
   getArchiveStageGroups(stageGroupIds: [ID!]!): [ID!]!
+
+  """Получения списка студентов из student_whiteList"""
+  getAllInStudentWhiteList(
+    """Начало диапазона даты создания записи"""
+    createDateFrom: DateTime
+
+    """Конец диапазона даты создания записи"""
+    createDateTo: DateTime
+
+    """Смешение"""
+    paging: PagingInput
+  ): [StudentWhiteListModel!]!
 
   """"""
   getBadges: [Badge!]!
@@ -9562,6 +9592,9 @@ type Checklist {
   """Язык"""
   language: String!
 
+  """Язык"""
+  languageCode: LanguageCodeType!
+
   """Дата создания"""
   createTime: DateTime!
 
@@ -9570,6 +9603,9 @@ type Checklist {
 
   """Набор допустимых быстрых действий"""
   quickActions: [QuickAction!]!
+
+  """Список доступных языков чеклиста"""
+  availableLanguages: [LanguageCodeType!]
 }
 
 """Заполненный чек-лист"""
@@ -18294,6 +18330,21 @@ enum FileExtensionEnum {
 
   """"""
   IPYNB
+
+  """"""
+  CSV
+
+  """"""
+  FIG
+
+  """"""
+  SKETCH
+
+  """"""
+  PSD
+
+  """"""
+  AI
 }
 
 """"""
@@ -22787,6 +22838,558 @@ type LandingTemplate {
 
   """"""
   title: String!
+}
+
+"""Справочники с языками"""
+enum LanguageCodeType {
+  """"""
+  AA
+
+  """"""
+  AB
+
+  """"""
+  AE
+
+  """"""
+  AF
+
+  """"""
+  AK
+
+  """"""
+  AM
+
+  """"""
+  AN
+
+  """"""
+  AR
+
+  """"""
+  AS
+
+  """"""
+  AV
+
+  """"""
+  AY
+
+  """"""
+  AZ
+
+  """"""
+  BA
+
+  """"""
+  BE
+
+  """"""
+  BG
+
+  """"""
+  BI
+
+  """"""
+  BM
+
+  """"""
+  BN
+
+  """"""
+  BO
+
+  """"""
+  BR
+
+  """"""
+  BS
+
+  """"""
+  CA
+
+  """"""
+  CE
+
+  """"""
+  CH
+
+  """"""
+  CO
+
+  """"""
+  CR
+
+  """"""
+  CS
+
+  """"""
+  CU
+
+  """"""
+  CV
+
+  """"""
+  CY
+
+  """"""
+  DA
+
+  """"""
+  DE
+
+  """"""
+  DV
+
+  """"""
+  DZ
+
+  """"""
+  EE
+
+  """"""
+  EL
+
+  """"""
+  EN
+
+  """"""
+  EO
+
+  """"""
+  ES
+
+  """"""
+  ET
+
+  """"""
+  EU
+
+  """"""
+  FA
+
+  """"""
+  FF
+
+  """"""
+  FI
+
+  """"""
+  FJ
+
+  """"""
+  FO
+
+  """"""
+  FR
+
+  """"""
+  FY
+
+  """"""
+  GA
+
+  """"""
+  GD
+
+  """"""
+  GL
+
+  """"""
+  GN
+
+  """"""
+  GU
+
+  """"""
+  GV
+
+  """"""
+  HA
+
+  """"""
+  HE
+
+  """"""
+  HI
+
+  """"""
+  HO
+
+  """"""
+  HR
+
+  """"""
+  HT
+
+  """"""
+  HU
+
+  """"""
+  HY
+
+  """"""
+  HZ
+
+  """"""
+  IA
+
+  """"""
+  ID
+
+  """"""
+  IE
+
+  """"""
+  IG
+
+  """"""
+  II
+
+  """"""
+  IK
+
+  """"""
+  IO
+
+  """"""
+  IS
+
+  """"""
+  IT
+
+  """"""
+  IU
+
+  """"""
+  JA
+
+  """"""
+  JV
+
+  """"""
+  KA
+
+  """"""
+  KG
+
+  """"""
+  KI
+
+  """"""
+  KJ
+
+  """"""
+  KK
+
+  """"""
+  KL
+
+  """"""
+  KM
+
+  """"""
+  KN
+
+  """"""
+  KO
+
+  """"""
+  KR
+
+  """"""
+  KS
+
+  """"""
+  KU
+
+  """"""
+  KV
+
+  """"""
+  KW
+
+  """"""
+  KY
+
+  """"""
+  LA
+
+  """"""
+  LB
+
+  """"""
+  LG
+
+  """"""
+  LI
+
+  """"""
+  LN
+
+  """"""
+  LO
+
+  """"""
+  LT
+
+  """"""
+  LU
+
+  """"""
+  LV
+
+  """"""
+  MG
+
+  """"""
+  MH
+
+  """"""
+  MI
+
+  """"""
+  MK
+
+  """"""
+  ML
+
+  """"""
+  MN
+
+  """"""
+  MR
+
+  """"""
+  MS
+
+  """"""
+  MT
+
+  """"""
+  MY
+
+  """"""
+  NA
+
+  """"""
+  NB
+
+  """"""
+  ND
+
+  """"""
+  NE
+
+  """"""
+  NG
+
+  """"""
+  NL
+
+  """"""
+  NN
+
+  """"""
+  NO
+
+  """"""
+  NR
+
+  """"""
+  NV
+
+  """"""
+  NY
+
+  """"""
+  OC
+
+  """"""
+  OJ
+
+  """"""
+  OM
+
+  """"""
+  OR
+
+  """"""
+  OS
+
+  """"""
+  PA
+
+  """"""
+  PI
+
+  """"""
+  PL
+
+  """"""
+  PS
+
+  """"""
+  PT
+
+  """"""
+  QU
+
+  """"""
+  RM
+
+  """"""
+  RN
+
+  """"""
+  RO
+
+  """"""
+  RU
+
+  """"""
+  RW
+
+  """"""
+  SA
+
+  """"""
+  SC
+
+  """"""
+  SD
+
+  """"""
+  SE
+
+  """"""
+  SG
+
+  """"""
+  SI
+
+  """"""
+  SK
+
+  """"""
+  SL
+
+  """"""
+  SM
+
+  """"""
+  SN
+
+  """"""
+  SO
+
+  """"""
+  SQ
+
+  """"""
+  SR
+
+  """"""
+  SS
+
+  """"""
+  ST
+
+  """"""
+  SU
+
+  """"""
+  SV
+
+  """"""
+  SW
+
+  """"""
+  TA
+
+  """"""
+  TE
+
+  """"""
+  TG
+
+  """"""
+  TH
+
+  """"""
+  TI
+
+  """"""
+  TK
+
+  """"""
+  TL
+
+  """"""
+  TN
+
+  """"""
+  TO
+
+  """"""
+  TR
+
+  """"""
+  TS
+
+  """"""
+  TT
+
+  """"""
+  TW
+
+  """"""
+  TY
+
+  """"""
+  UG
+
+  """"""
+  UK
+
+  """"""
+  UR
+
+  """"""
+  UZ
+
+  """"""
+  VE
+
+  """"""
+  VI
+
+  """"""
+  VO
+
+  """"""
+  WA
+
+  """"""
+  WO
+
+  """"""
+  XH
+
+  """"""
+  YI
+
+  """"""
+  YO
+
+  """"""
+  ZA
+
+  """"""
+  ZH
+
+  """"""
+  ZU
 }
 
 """"""
@@ -34427,13 +35030,15 @@ type SC21BaTaskCheckQueries {
   getCountPointsInfo(taskId: ID!, sectionId: Int!): CountInfo!
 
   """S21. Запрос последнего созданного чеклиста к заданию"""
-  getLatestChecklistForTask(taskId: ID!): Checklist
+  getLatestChecklistForTask(taskId: ID!, languageCodeType: LanguageCodeType): Checklist
 
   """S21. Получение информации для назначения дополнительной проверки"""
   getAdditionalCheckInitialData(studentAnswerId: ID!): AdditionalCheckInitialData!
 
-  """S21. Получение информации о Р2Р проверки. Возвращает чек-лист"""
-  getP2pInfo(filledChecklistId: ID!): FilledChecklist!
+  """
+  S21. Получение информации о Р2Р проверки с указанием языка. Возвращает чек-лист
+  """
+  getP2pInfo(filledChecklistId: ID!, languageCodeType: LanguageCodeType): FilledChecklist!
 
   """S21. Получения отзыва сотрудника"""
   getFeedbackFromStaff(filledChecklistId: ID!): FeedbackFromStaff!
@@ -35468,6 +36073,9 @@ type School21Queries {
 
     """id задания"""
     taskId: ID!
+
+    """язык, на котором отобразить задание"""
+    language: String
   ): [StudentTask!]!
 
   """Получение дедлайнов по фильтрам"""
@@ -35568,6 +36176,16 @@ type School21Queries {
 
   """Получение статистики по попыткам студента на модуле для студента"""
   getGoalAttemptStatisticByStudent(goalId: ID!, studentId: UUID!): [StudentGoalAttemptStatistic]
+
+  """
+  Получение всех языков, которые уже опубликованы для текущей активной контент версии
+  """
+  getImportedLanguagesForCurrentVersion(taskId: ID!): [String]!
+
+  """
+  Получение всех языков, которые уже опубликованы для текущей активной контент версии для код ревью по студенческому голу
+  """
+  getImportedLanguagesForCurrentVersionByStudentGoalId(studentGoalId: ID!): [String]!
 }
 
 """"""
@@ -42307,13 +42925,13 @@ type StudentMutations {
   ): String!
 
   """Старт экзамена студентом с последующей выдачей ему первого задания"""
-  startExam(examEventId: ID!, goalId: ID!): ExamTaskWithStatuses
+  startExam(examEventId: ID!, goalId: ID!, language: String): ExamTaskWithStatuses
 
   """S21. Скип текущего задания во время прохождения экзамена"""
-  skipCurrentExamTask(examEventId: ID!, goalId: ID!): ExamTaskWithStatuses!
+  skipCurrentExamTask(examEventId: ID!, goalId: ID!, language: String): ExamTaskWithStatuses!
 
   """S21. Получение следующего задания во время прохождения экзамена"""
-  pullNextExamTask(examEventId: ID!, goalId: ID!): ExamTaskWithStatuses!
+  pullNextExamTask(examEventId: ID!, goalId: ID!, language: String): ExamTaskWithStatuses!
 
   """Завершение экзамена"""
   finishExam(examEventId: ID!): ExamResult!
@@ -42574,6 +43192,9 @@ type StudentMutations {
 
   """"""
   saveSelfAssessmentAverageValue(selfAssessmentAverageInputList: [SelfAssessmentAverageInput!]!): [SelfAssessmentAverage!]!
+
+  """Сохранение информации по ученику Bootcamp"""
+  saveSelfCheckInStudInfoBTC(studentsInfo: BTCStudentsInfoInputModel!, trajectoryTemplateId: ID!): Boolean
 
   """Пометить результат как просмотренный"""
   markTournamentResultAsShown(userTournamentResultIds: [UUID!]!): [UserTournamentResult!]!
@@ -43394,7 +44015,7 @@ type StudentQueries {
   getInternshipReviewDataInfo(goalId: ID!): InternshipStudentReviewInfo!
 
   """Получение студенческого модуля в контексте студента по идентификатору"""
-  getStudentModuleByStudentGoalId(studentGoalId: ID!): StudentModule!
+  getStudentModuleByStudentGoalId(studentGoalId: ID!, language: String): StudentModule!
 
   """получение условий выполнения проекта"""
   loadTaskEvaluationRules(goalId: ID!): [StudentEvaluationRuleGroup!]!
@@ -43673,7 +44294,7 @@ type StudentQueries {
   """
   S21. Получение информации о P2P проверке (заполненный чек-лист по ответу студента)
   """
-  getP2pInfo(filledChecklistId: ID!): FilledChecklist!
+  getP2pInfo(filledChecklistId: ID!, languageCodeType: LanguageCodeType): FilledChecklist!
 
   """Загрузить информацию о итогах модуля."""
   getStudentGoalSummary(goalId: ID!): StudentGoalSummary!
@@ -43923,7 +44544,7 @@ type StudentQueries {
   getExamAnswerStatus(examEventId: ID!, goalId: ID!, currentLevelId: ID!, taskId: ID!): TaskStatusEnum
 
   """S21. Получение текущего задания во время прохождения экзамена"""
-  getCurrentExamTask(examEventId: ID!, goalId: ID!): ExamTaskWithStatuses!
+  getCurrentExamTask(examEventId: ID!, goalId: ID!, language: String): ExamTaskWithStatuses!
 
   """
   Проверка существования заявки пользователя на расформирование указанной команды
@@ -44464,6 +45085,12 @@ type StudentQueries {
     """Ссылка на прохождение экзамена в системе"""
     sessionURL: String!
   ): ProctoringParameters!
+
+  """Получение флага заполненности данных стундента Bootcamp"""
+  getIsFilledStudInfoFlagBTC(userId: UUID!): Boolean
+
+  """Получение информации об учениках Bootcamp"""
+  getBTCStudentsInfoByStudentId(userId: UUID!): BTCStudentsInfoModel
 
   """Все бейджи, с флагом, выданные или нет"""
   getBadges: [UserBadgeAward!]!
@@ -45762,6 +46389,9 @@ type StudentTaskToCheck {
 
   """список соответствия критериям"""
   studentCriteriaValues: [StudentCriteriaValue]
+
+  """история оценок из электронного журнала"""
+  markHistory: [MarkHistory]
 }
 
 """"""
@@ -46235,6 +46865,57 @@ enum StudentVisitStatus {
 
   """Опоздал"""
   WAS_LATE
+}
+
+""""""
+input StudentWhiteListInputModel {
+  """Номер телефона"""
+  mobilePhone: String
+
+  """Признак разрешения"""
+  allowed: Boolean
+
+  """Идентификатор шаблона траектории"""
+  trajectoryTemplateId: ID
+
+  """Описание"""
+  note: String
+
+  """E-mail"""
+  email: String
+
+  """Значение метки utm_source"""
+  utmSource: String
+}
+
+""""""
+type StudentWhiteListModel {
+  """Номер телефона"""
+  mobilePhone: String
+
+  """Признак разрешения"""
+  allowed: Boolean!
+
+  """Идентификатор шаблона траектории"""
+  trajectoryTemplateId: ID
+
+  """Идентификатор пользователя"""
+  userId: UUID
+
+  """Описание"""
+  note: String
+
+  """E-mail"""
+  email: String
+
+  """Значение метки utm_source"""
+  utmSource: String
+
+  """Дата и время создания"""
+  createTs: DateTime!
+
+  """Дата и время последнего изменения"""
+  lastModifyTs: DateTime
 }
 
 """"""
@@ -48052,7 +48733,7 @@ type SystemAdminMutations {
   createGitlabRepositoryTag(projectId: ID!, tagName: String, branchName: String): GitlabRepositoryTag!
 
   """Импорт / Публикация гитлаб контента в файловой системе"""
-  publishGitlabContent(taskId: ID!, ref: String, dockerImageName: String): PublishContentResponse!
+  publishGitlabContent(taskId: ID!, ref: String, dockerImageName: String, languages: [String]): PublishContentResponse!
 
   """Запуск тестового пайплайна при публикации в гитлабе"""
   runTrialAutotestsPipelineForTask(taskId: ID!): GitlabPipeline! @deprecated(reason: "Под удаление. Не используется нигде в проекте. Делалась для пробы интеграции с гитлаб пайплайнамми")
@@ -48749,6 +49430,9 @@ type SystemAdminQueries {
   """Получение всех тэгов из репозитория gitlab"""
   getGitlabRepositoryTags(taskId: ID!): [GitlabRepositoryTag!]!
 
+  """Получение всех доступных языков для публикации"""
+  getGitlabLanguagesToPublish(taskId: ID!, ref: String!): [String!]!
+
   """Получение текущих настроек"""
   getCheckSequenceSettings(taskId: ID!): CheckSequenceSettings!
 
@@ -49432,6 +50116,9 @@ type Task {
 
   """Идентификатор группы по заданию в user group service"""
   taskUserGroupId: UUID
+
+  """Перевод контента задания на другой язык, если он был запрошен"""
+  translatedData: String
 }
 
 """Форма работы"""
@@ -52854,7 +53541,7 @@ type TeacherQueries {
   getTasksConsistencyInfo(taskIds: [ID!]!): [TaskInModuleConsistency!]!
 
   """"""
-  getTaskMeta(taskId: ID!): Task!
+  getTaskMeta(taskId: ID!, language: String): Task!
 
   """"""
   getAllExistedTasksQuantity(
@@ -56829,6 +57516,17 @@ type TrajectoryQueries {
   Получение списка профессий/ролей/подразделений, полученных из АС Пульс по типу справочника
   """
   findPulseJobCodeByJobCodeType(pulseJobCodeType: [PulseJobCodeType!]!): [PulseJobCode]!
+
+  """Получение списка шаблонов траекторий, у которых есть класс"""
+  getAllTrajectoryTemplatesWithStageGroup(trajectoryTemplateType: TrajectoryTemplateType): [TrajectoryTemplate]!
+
+  """Получение типов шаблонов траекторий Bootcamp"""
+  getTrajectoryTemplateTypes: [TrajectoryTemplateType]!
+
+  """
+  Получение рекомендованого шаблона траектории на основании данных из АС Пульс
+  """
+  getRecommendedTrajectoryTemplate(trajectoryTemplateType: TrajectoryTemplateType!, userId: ID!, studentId: ID!): TrajectoryTemplate
 }
 
 """Шаблон траектории Bootcamp"""
@@ -56874,6 +57572,9 @@ type TrajectoryTemplate {
 
   """Список предметов шаблона траектории"""
   trajectoryTemplateGoals: [TrajectoryTemplateGoal]
+
+  """Тип шаблона траектории"""
+  trajectoryTemplateType: TrajectoryTemplateType
 }
 
 """Модуль по предмету входящему в шаблон траектории Bootcamp"""
@@ -56981,6 +57682,9 @@ input TrajectoryTemplateInputModel {
 
   """Список предметов шаблона траектории"""
   trajectoryTemplateGoals: [TrajectoryTemplateGoalInputModel]
+
+  """Тип шаблона траектории"""
+  trajectoryTemplateType: TrajectoryTemplateType
 }
 
 """
@@ -57013,6 +57717,29 @@ enum TrajectoryTemplateStatus {
 
   """Шаблон полностью заполнен и может использоваться"""
   PUBLISHED
+}
+
+"""Тип шаблона траектории Bootcamp"""
+enum TrajectoryTemplateType {
+  """
+  Тип "Адаптация"
+  """
+  ADAPTATION
+
+  """
+  Тип "Квалификация"
+  """
+  QUALIFICATION
+
+  """
+  Тип "Внешний"
+  """
+  EXTERNAL
+
+  """
+  Тип "Стажировка"
+  """
+  INTERNSHIP
 }
 
 """
@@ -58222,6 +58949,9 @@ input UserInput {
 
   """"""
   userFroleSets: [UserFroleSetInput!]
+
+  """"""
+  isTrustEmail: Boolean
 }
 
 """Инфа по пользователю и его последнем награждении"""
@@ -59149,6 +59879,12 @@ type UserQueries {
 
   """Получения записи вебинара в Webinar.ru"""
   getWebinarRuRecord(lessonPlanId: ID!): WebinarRecord!
+
+  """Получение списка всех городов учеников"""
+  getBTCStudentCities: [String!]!
+
+  """Получение списка всех Буткемп-мастеров"""
+  getBootcampMastersList: [BootcampMasterModel!]!
 
   """Отчет по жалобам пользователей в Bootcamp"""
   exportComplaintsBTC(

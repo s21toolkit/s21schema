@@ -1,0 +1,7 @@
+query getCoreReviewImportedLanguagesForCurrentVersion($studentGoalId: ID!) {
+  school21 {
+    getImportedLanguagesForCurrentVersionByStudentGoalId(
+      studentGoalId: $studentGoalId
+    )
+  }
+}

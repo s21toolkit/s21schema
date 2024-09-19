@@ -1,0 +1,5 @@
+query getImportedLanguagesForCurrentVersion($taskId: ID!) {
+  school21 {
+    getImportedLanguagesForCurrentVersion(taskId: $taskId)
+  }
+}
