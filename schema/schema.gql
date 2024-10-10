@@ -14392,6 +14392,20 @@ type DeleteGitlabProjectsResponse {
   success: Boolean!
 }
 
+""""""
+input DetailTrajectoryBTCInputModel {
+  """
+  Траектории, фильтр по траекториям. Null, если не нужно фильтровать по траекториям
+  """
+  trajectories: [String!]
+
+  """Начало диапазона плановой даты начала обучения"""
+  planStartDateFrom: Date
+
+  """Конец диапазона плановой даты начала обучения"""
+  planStartDateTo: Date
+}
+
 """Уровень сложности задания"""
 enum DifficultyLevelEnum {
   """"""
@@ -16002,6 +16016,18 @@ type ElectronicJournalQueries {
 
   """Катаолог учебных активностей для школы"""
   getLearningActivitiesBySchool(schoolId: UUID!): [LearningActivity!]!
+}
+
+"""Статусы верификации университетсклй почты"""
+enum EmailConfirmationStatus {
+  """Не подтверждена"""
+  NOT_CONFIRMED
+
+  """Ожилание получения кода подтверждения"""
+  WAITING_FOR_CONFIRMATION_CODE
+
+  """Почта подтверждена"""
+  CONFIRMED
 }
 
 """"""
@@ -18031,6 +18057,33 @@ enum FeedbackCategoryValueEnum {
   EXCELLENT
 }
 
+""""""
+input FeedbackFilterInputModel {
+  """Строка поиска"""
+  textSearch: String
+
+  """Идентификатор задания"""
+  taskId: ID
+
+  """Модуль в котором оставили отзыв"""
+  moduleId: ID
+
+  """Рейтинг"""
+  rating: Int
+
+  """Фильтры по дате создания жалобы"""
+  dateFrom: DateTime
+
+  """"""
+  dateTo: DateTime
+
+  """Параметры пагинации"""
+  paging: PagingInput
+
+  """"""
+  rootPath: String
+}
+
 """S21. Форма для обратной связи"""
 type FeedbackForm {
   """ID формы для обратной связи"""
@@ -18130,6 +18183,27 @@ type FeedbackOnParticipant {
 
   """Роль участника в команде"""
   role: TeamRole
+}
+
+""""""
+type FeedbackReportBTC {
+  """"""
+  feedbackId: ID!
+
+  """"""
+  task: Task!
+
+  """"""
+  user: User!
+
+  """"""
+  createTs: DateTime!
+
+  """"""
+  comment: String
+
+  """"""
+  rating: Int!
 }
 
 """S21. Тип секции у вопроса в опросе"""
@@ -43196,6 +43270,17 @@ type StudentMutations {
   """Сохранение информации по ученику Bootcamp"""
   saveSelfCheckInStudInfoBTC(studentsInfo: BTCStudentsInfoInputModel!, trajectoryTemplateId: ID!): Boolean
 
+  """
+  Сохранение информации по соответствию ученика и его университетской почты
+  """
+  saveStudentUniversityEmail(studentUniversityEmailInputModel: StudentUniversityEmailInputModel!): ID!
+
+  """Установка флага показа страницы с верификацией почты"""
+  setIsVisibleEmailVerificationPageFlag(studentId: UUID!, isVisible: Boolean): Boolean
+
+  """Изменение статуса подтверждения университетской почты"""
+  setEmailConfirmationStatus(studentId: UUID!, status: EmailConfirmationStatus!): Boolean
+
   """Пометить результат как просмотренный"""
   markTournamentResultAsShown(userTournamentResultIds: [UUID!]!): [UserTournamentResult!]!
 }
@@ -43590,6 +43675,39 @@ input StudentProgressFilterBTCInput {
   planStartDateTo: Date
 }
 
+""""""
+input StudentProgressFilterBTCInputModelV2 {
+  """Идентификаторы параллелей"""
+  stageIds: [ID!]!
+
+  """Идентификаторы классов"""
+  stageGroupIds: [ID!]!
+
+  """Идентификаторы модулей"""
+  goalIds: [ID!]!
+
+  """Идентификаторы пользоваталей"""
+  userIds: [ID!]!
+
+  """Формат прохождения"""
+  isStudyOnline: Boolean
+
+  """Буткемп-мастер"""
+  bootcampMaster: UUID
+
+  """Город ученика"""
+  studentCity: String
+
+  """Пагинация"""
+  paging: PagingInput!
+
+  """Имена колонок, которые следует возвращать"""
+  filters: [String!]
+
+  """Детализация фильтра (Если не null -> По траектории студента)"""
+  detailTrajectory: DetailTrajectoryBTCInputModel
+}
+
 """Фильтр для запроса прогресса учащихся (по пересечению)"""
 input StudentProgressFilterInput {
   """Идентификатор школы"""
@@ -43629,6 +43747,89 @@ input StudentProgressFilterInput {
 
   """Конец диапазона плановой даты начала обучения"""
   planStartDateTo: Date
+}
+
+""""""
+type StudentProgressForBTCModel {
+  """Идентификатор студента (students.student_id)"""
+  studentId: ID!
+
+  """Идентификатор пользователя (users.user_id)"""
+  userId: ID!
+
+  """Фамилия ученика"""
+  lastName: String!
+
+  """Имя ученика"""
+  firstName: String!
+
+  """Отчество ученика"""
+  middleName: String
+
+  """Логин ученика"""
+  login: String
+
+  """Email ученика"""
+  email: String
+
+  """
+  Прогресс прохождения всех запланированных модулей в процентах.
+  (достигнутый уровень/целевой уровень)
+  """
+  progress: Int
+
+  """
+  Прогресс прохождения всех модулей в процентах. (пройденные уровени модулей / запланированные уровени модулей)
+  """
+  progressByTrajectory: Int
+
+  """Прогресс по фильтру относительно выбранных в фильтре модулей"""
+  progressByFilter: Int
+
+  """Плановая дата начла"""
+  planStartDate: DateTime
+
+  """Фактическая дата начала"""
+  realStartDate: DateTime
+
+  """Плановая дата окончания"""
+  personalEndDate: DateTime
+
+  """Фактическая дата окончания"""
+  realEndDate: DateTime
+
+  """"""
+  personalStartDate: Date
+
+  """Плановая трудоёмкость (часы)"""
+  laboriousness: Int
+
+  """Плановая трудоёмкость (дни)"""
+  laboriousnessDays: Int
+
+  """Фактическая трудоемкость (часы)"""
+  actualLaboriousness: Int
+
+  """Траектория"""
+  trajectory: String
+
+  """Прогресс по модулям"""
+  studyModuleProgress: [StudentStudyModuleProgress]
+
+  """информация пользователя из АС Пульс"""
+  pulsePerson: PulsePersonSmallModel
+
+  """Дата последнего входа"""
+  lastAuthorizationDate: DateTime
+
+  """Формат обучения"""
+  isStudyOnline: Boolean
+
+  """Имя Буткемп-мастера"""
+  bootcampMaster: String
+
+  """Город ученика"""
+  studentCity: String
 }
 
 """Фильтр для запроса доступных модулей для прогресса учащихся"""
@@ -45091,6 +45292,20 @@ type StudentQueries {
 
   """Получение информации об учениках Bootcamp"""
   getBTCStudentsInfoByStudentId(userId: UUID!): BTCStudentsInfoModel
+
+  """Получение списка всех университетов для Bootcamp"""
+  getAllUniversities: [UniversityModel!]!
+
+  """Получение списка доменов запрашиваемого университета для Bootcamp"""
+  getUniversityDomains(
+    """id университета"""
+    universityId: ID!
+  ): [UniversityDomainModel!]!
+
+  """
+  Получение информации об университетской почте ученика по идентификатору ученика
+  """
+  getStudentUniversityEmailInfo(studentId: UUID): StudentUniversityEmailModel
 
   """Все бейджи, с флагом, выданные или нет"""
   getBadges: [UserBadgeAward!]!
@@ -46838,6 +47053,67 @@ input StudentTrajectoryTemplateAssignmentInputModel {
 
   """Способ применения шаблона траектории"""
   assignmentMode: TrajectoryAssignmentMode!
+}
+
+"""Информация по верификации университетской почты ученика"""
+input StudentUniversityEmailInputModel {
+  """Идентификатор связи ученика и его университетской почты"""
+  studentUniversityEmailId: ID
+
+  """Идентификатор ученика"""
+  studentId: UUID!
+
+  """Идентификатор университета ученика"""
+  universityId: ID
+
+  """Университетская почта"""
+  email: String
+
+  """Флаг показа страницы с верификацией университетской почты"""
+  isVisible: Boolean
+
+  """
+  Комментарий с названием университета ученика, если такого не нашлось в справочнике с университетами
+  """
+  comment: String
+
+  """Статус подтверждения университетской почты учеником"""
+  confirmationStatus: EmailConfirmationStatus
+
+  """Флаг указания отсутсвия почты у ученика"""
+  isEmailAbsent: Boolean
+}
+
+"""Информация об университетской почте ученика"""
+type StudentUniversityEmailModel {
+  """Идентификатор связи ученика и его университетской почты"""
+  studentUniversityEmailId: ID
+
+  """Идентификатор ученика"""
+  studentId: UUID!
+
+  """Идентификатор университета ученика"""
+  universityId: ID
+
+  """Университетская почта"""
+  email: String
+
+  """Флаг показа страницы с верификацией университетской почты"""
+  isVisible: Boolean
+
+  """
+  Комментарий с названием университета ученика, если такого не нашлось в справочнике с университетами
+  """
+  comment: String
+
+  """Статус подтверждения университетской почты учеником"""
+  confirmationStatus: EmailConfirmationStatus
+
+  """Время создания записи"""
+  createTs: DateTime
+
+  """Время модификации записи"""
+  modifyTs: DateTime
 }
 
 """"""
@@ -54969,6 +55245,14 @@ type TeacherQueries {
   """
   getStudentsProgressForBTCV2(filter: StudentProgressFilterBTCInput!): [StudentPersonalProgress!]!
 
+  """
+  Получить прогресс учащихся для проекта Bootcamp (версия 3, использующая report-service, объединен в один запрос)
+  """
+  getStudentProgressForBM(filter: StudentProgressFilterBTCInputModelV2!): [StudentProgressForBTCModel!]!
+
+  """Получить кол-во учеников по фильтру"""
+  getStudentProgressForBMCount(filter: StudentProgressFilterBTCInputModelV2!): Int!
+
   """Получить прогресс учащихся по траекториям для проекта Bootcamp"""
   getStudentsProgressByTrajectoryForBTC(filter: StudentProgressFilterInput!): [StudentPersonalProgressByTrajectory!]!
 
@@ -55863,6 +56147,11 @@ type TeacherQueries {
 
   """Эскпорт прогресса учащихся в файл для проекта Bootcamp V2"""
   exportStudentProgressForBTCV2(exportRequest: StudentPersonalProgressExportBTCInput!): ReportExcelFile!
+
+  """
+  Эскпорт прогресса учащихся в формате Excel для проекта Bootcamp (версия 3, использующая report-service, объединен в один запрос)
+  """
+  exportStudentProgressForBTCV3(exportRequest: StudentProgressFilterBTCInputModelV2!): ReportExcelFile!
 }
 
 """"""
@@ -57521,12 +57810,15 @@ type TrajectoryQueries {
   getAllTrajectoryTemplatesWithStageGroup(trajectoryTemplateType: TrajectoryTemplateType): [TrajectoryTemplate]!
 
   """Получение типов шаблонов траекторий Bootcamp"""
-  getTrajectoryTemplateTypes: [TrajectoryTemplateType]!
+  getTrajectoryTemplateTypes: [TrajectoryTemplateType]! @deprecated(reason: "Использовать getRecommendedTrajectoryTemplateV2")
+
+  """"""
+  getRecommendedTrajectoryTemplate(trajectoryTemplateType: TrajectoryTemplateType!, userId: ID!, studentId: ID!): TrajectoryTemplate
 
   """
   Получение рекомендованого шаблона траектории на основании данных из АС Пульс
   """
-  getRecommendedTrajectoryTemplate(trajectoryTemplateType: TrajectoryTemplateType!, userId: ID!, studentId: ID!): TrajectoryTemplate
+  getRecommendedTrajectoryTemplateV2(userId: ID!, studentId: ID!): TrajectoryTemplate
 }
 
 """Шаблон траектории Bootcamp"""
@@ -57814,6 +58106,27 @@ type UniversityActiveStudentsCount {
 
   """"""
   registeredStudentsCount: Int!
+}
+
+"""Домен университет, к которому относится пользователь Bootcamp"""
+type UniversityDomainModel {
+  """Идентификатор домена университета"""
+  universityDomainId: ID!
+
+  """Имя домена университета"""
+  domain: String!
+
+  """Идентификатор университета, к которому относится домен"""
+  universityId: ID!
+}
+
+"""Университет, к которому относится пользователь Bootcamp"""
+type UniversityModel {
+  """Идентификатор университета"""
+  universityId: ID!
+
+  """Название университета"""
+  universityName: String!
 }
 
 """"""
@@ -59079,6 +59392,14 @@ type UserMutations {
   """Оставить отзыв задании (Лайк/Дизлайк)"""
   saveFeedback(feedback: FeedbackInput!): Boolean!
 
+  """
+  Оставить отзыв на задании (Лайк/Дизлайк) используется командой Bootcamp
+  """
+  saveFeedbackBTC(feedback: FeedbackInput!): Boolean!
+
+  """Удалить отзыв на задании (Лайк/Дизлайк) используется командой Bootcamp"""
+  deleteFeedbackBTC(taskId: ID!): Boolean!
+
   """Удалить отзыв о задании (Лайк/Дизлайк)"""
   deleteFeedback(taskId: ID!): Boolean!
 
@@ -59886,6 +60207,21 @@ type UserQueries {
   """Получение списка всех Буткемп-мастеров"""
   getBootcampMastersList: [BootcampMasterModel!]!
 
+  """Просмотр рейтингов БМ/Дашбоды/Рейтинги"""
+  getFeedbackReport(filter: FeedbackFilterInputModel): [FeedbackReportBTC!]!
+
+  """Получение отзыва для ученика БМ/Дашбоды/Рейтинги"""
+  getFeedbackBTC(taskId: ID!): Feedback
+
+  """Просмотр конкретного рейтинга БМ/Дашбоды/Рейтинги"""
+  getFeedbackReportById(feedbackId: ID!): FeedbackReportBTC!
+
+  """Получение фильтра для построения дашборда"""
+  getFeedbackReportFilter: [Task!]!
+
+  """Подсчет результатов удовлетворяющих фильтру"""
+  countFeedbacksBTC(filter: FeedbackFilterInputModel): Int!
+
   """Отчет по жалобам пользователей в Bootcamp"""
   exportComplaintsBTC(
     """Фильтр по выгрузке жалоб в excel"""
@@ -59897,6 +60233,9 @@ type UserQueries {
     """Фильтр по выгрузке опечаток в excel"""
     misprintFilter: MisprintExportFilterInput!
   ): ReportExcelFile!
+
+  """"""
+  exportFeedbackReport(filter: FeedbackFilterInputModel): ReportExcelFile!
 }
 
 """Место и ряд пользователя в лидерборде"""
