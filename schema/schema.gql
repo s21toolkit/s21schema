@@ -21728,6 +21728,9 @@ type HolyGraphItemCourseInfo {
   """Продолжительность проекта в часах"""
   duration: Int
 
+  """Обязателен ли проект(высчитывается по зависимостям в конструкторах)"""
+  isMandatory: Boolean
+
   """Дата проекта"""
   projectDate: DateTime
 
@@ -21899,8 +21902,11 @@ type HolyGraphNodeItem {
   """Детальная информация о курсе"""
   course: HolyGraphItemCourseInfo
 
-  """Элементы от которых зависит текущий"""
+  """Элементы, от которых зависит текущий"""
   parentNodeCodes: [String!]!
+
+  """Элементы, которые зависят от текущего"""
+  childrenNodeCodes: [String!]!
 }
 
 """Координаты группы"""
@@ -21946,6 +21952,29 @@ type HolyGraphQueries {
     """Id класса студента"""
     stageGroupId: Int
   ): HolyGraphJSON
+
+  """Получить опубликованный шаблон графа прогресса студента"""
+  getStudentGraphTemplate(
+    """Id студента"""
+    studentId: UUID
+
+    """Id класса студента"""
+    stageGroupId: Int
+  ): HolyGraphJSON
+
+  """
+  Обогатить узел графа информацией о статусе прохождения проектов студентом
+  """
+  getStudentStateGraphNode(
+    """шаблон узла графа"""
+    graphNode: JsonNode!
+
+    """Id студента"""
+    studentId: UUID
+
+    """Id класса студента"""
+    stageGroupId: Int
+  ): HolyGraphNode
 
   """Получить список архивных версий графа для указанной параллели"""
   getArchivedGraphVersions(

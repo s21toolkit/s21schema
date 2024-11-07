@@ -1,0 +1,25 @@
+query ProjectMapGetStudentStateGraphNode($graphNode: JsonNode!, $studentId: UUID, $stageGroupId: Int) {
+  holyGraph {
+    getStudentStateGraphNode(
+      graphNode: $graphNode
+      studentId: $studentId
+      stageGroupId: $stageGroupId
+    ) {
+      id
+      items {
+        id
+        goal {
+          projectState
+          duration
+          projectDate
+        }
+        course {
+          projectState
+          localCourseId
+          duration
+          projectDate
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,52 @@
+query ProjectMapGetStudentGraphTemplate($studentId: UUID, $stageGroupId: Int) {
+  holyGraph {
+    getStudentGraphTemplate(studentId: $studentId, stageGroupId: $stageGroupId) {
+      edges {
+        id
+        source
+        target
+        sourceHandle
+        targetHandle
+      }
+      nodes {
+        id
+        label
+        position {
+          x
+          y
+        }
+        items {
+          id
+          code
+          handles
+          entityType
+          entityId
+          parentNodeCodes
+          childrenNodeCodes
+          skills {
+            id
+            name
+            color
+            textColor
+          }
+          goal {
+            projectId
+            projectName
+            projectDescription
+            projectPoints
+            goalExecutionType
+            isMandatory
+          }
+          course {
+            projectId
+            projectName
+            projectDescription
+            projectPoints
+            courseType
+            isMandatory
+          }
+        }
+      }
+    }
+  }
+}
