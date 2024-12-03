@@ -74,6 +74,7 @@ fragment ExamInfo on StudentModule {
   goalExecutionType
   isRetryAvailable
   durationFromStageSubjectGroupPlan
+  isDeadlineFree
   courseBaseParameters {
     isGradedCourse
   }

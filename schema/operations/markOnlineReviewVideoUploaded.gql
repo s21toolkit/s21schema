@@ -4,14 +4,14 @@ fragment OnlineReviewVideoInfo on OnlineReviewVideo {
   status
   statusDetails
   updateDateTime
+  fileSize
 }
 
-mutation markOnlineReviewVideoUploaded($filledChecklistId: ID!, $onlineReviewId: ID!, $videoSize: Int!) {
+mutation markOnlineReviewVideoUploaded($filledChecklistId: ID!, $onlineReviewId: ID!) {
   school21 {
     markP2pCheckVideoUploaded(
       filledChecklistId: $filledChecklistId
       onlineReviewId: $onlineReviewId
-      videoSize: $videoSize
     ) {
       ...OnlineReviewVideoInfo
     }

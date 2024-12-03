@@ -1,11 +1,12 @@
 fragment OnlineReviewInfo on OnlineReview {
   isOnline
-  video {
+  videos {
     onlineVideoId
     link
     status
     statusDetails
     updateDateTime
+    fileSize
   }
 }
 

@@ -34,6 +34,7 @@ fragment InternshipChecklist on FilledChecklist {
   receivedPoint
   receivedPercentage
   quickAction
+  checkType
 }
 
 fragment InternshipP2PEvaluation on P2PEvaluationInfo {

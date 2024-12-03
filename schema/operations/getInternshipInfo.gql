@@ -169,6 +169,8 @@ query getInternshipInfo($goalId: ID!) {
     getP2PChecksInfo(goalId: $goalId) {
       ...P2PInfo
     }
+  }
+  s21Internship {
     getInternshipDataById(goalId: $goalId) {
       ...InternshipApplicantInfo
     }

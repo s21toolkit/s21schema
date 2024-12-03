@@ -9,7 +9,7 @@ fragment StudyProcessFile on StudyProcessFile {
   fileSize
 }
 
-mutation markFileSolutionUploadedStatus($taskId: ID!, $studyProcessFileIds: [ID!]!) {
+mutation markFileSolutionUploadedStatus($taskId: ID!, $studyProcessFileIds: ID!) {
   sc21StudentTaskCheck {
     markFileSolutionUploadedStatus(
       taskId: $taskId

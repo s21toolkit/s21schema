@@ -2,6 +2,7 @@ query userGetTheme($userId: UUID!) {
   user {
     getUserViewSettings(userId: $userId) {
       isDarkThemeEnabled
+      schoolViewSettingType
     }
   }
 }

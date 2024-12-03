@@ -1,0 +1,5 @@
+query AttachedFilesWidgetGetProjectsSelection($entityId: ID!) {
+  selection {
+    getSelectionByEntity(entityId: $entityId, entityType: MODULE)
+  }
+}

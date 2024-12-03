@@ -265,6 +265,23 @@ type AcademicYearSubjects {
   subjects: [Subject!]!
 }
 
+"""Сообщение GigaChat, отправленное пользователем или полученное в ответ"""
+input AccGigaChatMessageInput {
+  """текст сообщения"""
+  content: String!
+}
+
+"""Ответ GigaChat"""
+type AccGigaChatResponse {
+  """текст ответа"""
+  content: String!
+
+  """
+  приложенное изображение (если запрос содержал "нарисуй...") в формате jpeg, закодированное base64, необязательное поле
+  """
+  imgData: String
+}
+
 """"""
 type AccNote {
   """Идентификатор заметки"""
@@ -1431,6 +1448,9 @@ type AcceleratorQueries {
 
   """Модуль ученика"""
   getAccModuleById(goalId: ID!): StudentModule
+
+  """отправить запрос в GigaChat и получить ответ"""
+  getAccGigaChatResponse(messages: [AccGigaChatMessageInput!]!): [AccGigaChatResponse!]!
 }
 
 """"""
@@ -4574,6 +4594,15 @@ type AvailableCodeReviews {
   limitInfo: CodeReviewLimitInfo!
 }
 
+""""""
+type AvailablePublicationActions {
+  """"""
+  isPublishAvailable: Boolean!
+
+  """"""
+  isUnPublishAvailable: Boolean!
+}
+
 """Доступные области видимости и пресеты"""
 type AvailableScopes {
   """"""
@@ -5772,6 +5801,9 @@ type BootcampMasterModel {
 
   """Отчество Буткемп-мастера"""
   middleName: String
+
+  """Ссылка на аватар профиля"""
+  avatarUrl: String
 }
 
 """"""
@@ -5817,6 +5849,18 @@ type BreadCrumbsPlanItem {
 
   """Тип выполнения"""
   executionType: ModuleExecutionType
+}
+
+""""""
+type BtcStudentCityModel {
+  """Идентификатор города"""
+  studentCityId: ID!
+
+  """Название города"""
+  cityName: String!
+
+  """Формат обучения учеников в Bootcamp в этом городе (очно/дистанционно)"""
+  isStudyOnline: Boolean
 }
 
 """"""
@@ -6181,15 +6225,6 @@ type BusinessAdminMutations {
     copyStageSubjectGroups: Boolean!
   ): ID!
 
-  """Сохранение плана на параллель"""
-  saveS21StagePlan(planGoalInputModels: [S21StagePlanGoalInput!]!, globalPlanId: ID, stagePlanId: ID): S21StagePlan!
-
-  """Публикация плана на параллель"""
-  publishS21StagePlanByGlobalPlanIds(globaPlanIds: [ID!]!): [S21StagePlan!]!
-
-  """Сброс плана на параллель до состояния глобального плана"""
-  resetS21StagePlan(stagePlanId: ID!): S21StagePlan!
-
   """
   Добавить емейл психолога (для оказания помощи при издевательствах) с привязкой к классам
   """
@@ -6205,9 +6240,6 @@ type BusinessAdminMutations {
   Удалить емейл психолога (для оказания помощи при издевательствах) с привязкой к классам
   """
   removeStageGroupPsychologistEmail(email: String!): String!
-
-  """Сохранение плана на класс"""
-  saveS21ClassPlan(classPlan: S21ClassPlanInput!): S21ClassPlan!
 
   """Изменение проектов в плане на класс"""
   saveClassPlanProjects(classPlan: S21ClassPlanInput!): S21ClassPlan!
@@ -6546,13 +6578,19 @@ type BusinessAdminMutations {
   stageGroupFromArchive(stageGroupId: ID!): Boolean! @deprecated(reason: "Не поддерживается. Используйте deleteGitlabProjectsV2")
 
   """"""
-  deleteGitlabProjects(taskId: Int, schoolId: UUID, stageId: Int, stageGroupId: Int, studentState: StudentStateEnum): DeleteGitlabProjectsResponse!
+  deleteGitlabProjects(taskId: Int, schoolId: UUID, stageId: Int, stageGroupId: Int, studentState: StudentStateEnum): DeleteGitlabProjectsResponse! @deprecated(reason: "Не поддерживается. Используйте deleteGitlabProjectsV3")
+
+  """"""
+  deleteGitlabProjectsV2(taskId: Int, schoolId: UUID!, stageId: ID!, stageGroupId: ID!, studentState: StudentStateEnum): DeleteGitlabProjectsResponse!
 
   """удаление гитлаб-проектов по параметрам"""
-  deleteGitlabProjectsV2(taskId: Int, schoolId: UUID!, stageId: ID!, stageGroupId: ID!, studentState: StudentStateEnum): DeleteGitlabProjectsResponse!
+  deleteGitlabProjectsV3(goalId: Int, schoolId: UUID!, stageId: ID!, stageGroupId: ID!, studentState: StudentStateEnum): DeleteGitlabProjectsResponse!
 
   """удаление гитлаб-проектов по идентификаторам"""
   deleteGitlabProjectsByExternalSystemProjectIds(projectIds: [Int!]!): DeleteGitlabProjectsResponse!
+
+  """S21. Удаление файлов из проектов с платформенным типом решения"""
+  deletePlatfProjectSolutions(studentAnswerIds: [Int!]!): DeletePlatfProjectSolutionsResponse!
 
   """Создание дистанционных периодов"""
   createPeriodLessonPlans(periodInput: PeriodLessonPlanInput!): Boolean
@@ -6569,6 +6607,12 @@ type BusinessAdminMutations {
   """Удаление дистанционного периода"""
   deletePeriodLessonPlan(periodLessonPlanId: ID!): Boolean
 
+  """Сохранение настроек праздничных тем"""
+  saveS21GlobalSchoolViews(s21SchoolViews: [S21SchoolViewSettingsInput!]!): [S21SchoolViewSettings!]!
+
+  """Сохранение настроек праздничных тем"""
+  saveS21SchoolViews(s21SchoolViews: [S21SchoolViewSettingsInput!]!): [S21SchoolViewSettings!]!
+
   """Создание новой записи в student_whiteList"""
   insertNewStudent(studentWhiteListInputModel: StudentWhiteListInputModel!): Boolean
 
@@ -6577,6 +6621,21 @@ type BusinessAdminMutations {
 
   """Удаление записи в student_whiteList"""
   deleteStudentByMobilePhoneOrEmailOrUtmSource(mobilePhone: String, email: String, utmSource: String): Boolean
+
+  """Сохранение нового университета с доменами"""
+  createUniversitiesWithDomains(universityInfoInputModel: UniversityInfoInputModel!): ID!
+
+  """Обновление информации по университету"""
+  updateUniversityWithDomains(universityInfoInputModel: UniversityInfoInputModel!): UniversityInfoModel!
+
+  """Обновление выданного сертификата ученику"""
+  updateCertificateTemplateForStudent(
+    """ID студента"""
+    studentId: UUID!
+
+    """ID выданного сертификата"""
+    issuedId: ID!
+  ): IssuedCertificateModel!
 
   """"""
   createBadgeAward(badgeInput: BadgeAwardInput!): Award!
@@ -7445,17 +7504,8 @@ type BusinessAdminQueries {
   """
   loadTaskEvaluationRuleGroupsFromLocalCourse(localCourseGoalId: ID!, conditionType: ConditionType!): EvaluationRuleGroupsWithEquivalentFlag!
 
-  """Возвращает план на параллель по идентификатору"""
-  getS21StagePlan(stagePlanId: ID!): S21StagePlan!
-
   """Возвращает план на параллель по идентификатору c групповыми проектами"""
   getS21StageGroupPlan(stagePlanId: ID!, schoolId: UUID): S21StagePlan!
-
-  """Возвращает план на параллель по идентификатору глобального плана"""
-  getS21StagePlanByGlobalPlanId(globalPlanId: ID!): S21StagePlan!
-
-  """Возвращает все существующие планы на параллель"""
-  getS21StagePlans(schoolId: UUID): [S21StagePlan!]!
 
   """
   Получение списка адресов психологов с перечнем класов привязанных к адресу психолога
@@ -7464,15 +7514,6 @@ type BusinessAdminQueries {
 
   """Получение параметров расчета навыков за проверку задания"""
   getTaskAdditionalAttributes(taskId: ID!): AdditionalAttributes!
-
-  """Возвращает план на класс по идентификатору"""
-  getS21ClassPlan(classPlanId: ID!): S21ClassPlan!
-
-  """Возвращает план на класс по идентификатору плана на параллель"""
-  getS21ClassPlanByStagePlanId(stagePlanId: ID!, classSubjectId: ID!): S21ClassPlan!
-
-  """Возвращает все существующие планы на класс"""
-  getS21ClassPlans: [S21ClassPlanByStagesSubjects!]!
 
   """Возвращает план на класс по идентификатору группы по предмету"""
   getS21ClassPlanByStageSubjectGroupId(stageSubjectGroupId: ID!): S21ClassPlan!
@@ -7524,7 +7565,7 @@ type BusinessAdminQueries {
   loadStudentsTeamS21Report(stageId: ID!, stageSubjectGroupId: ID, goalId: ID, timeZone: String, schoolId: UUID): ReportExcelFile! @deprecated(reason: "use school21 query")
 
   """Запрос всех групп класса по предмету для школы"""
-  findAllStageSubjectGroupsOfSchool(schoolId: UUID): [StageSubjectGroup!]!
+  findAllStageSubjectGroupsOfSchool(schoolId: UUID, stageId: ID): [StageSubjectGroup!]!
 
   """
   Получение информации о команде в групповом задании по ид проверяемого ответа
@@ -7935,9 +7976,6 @@ type BusinessAdminQueries {
   """"""
   validateUserInvitePhone(field: String!, checkUserDraft: Boolean): UserDraftOperationsResult!
 
-  """Получить текущий статус по процессу сохранения плана на класс"""
-  getS21ClassPlanSavingProgress(stageSubjectGroupPlanId: Int!): S21ClassPlanSavingProgress!
-
   """Получение списка правил из Конструктора расписаний"""
   getScheduleConstraints: [ScheduleConstraint!]!
 
@@ -7980,16 +8018,22 @@ type BusinessAdminQueries {
   ): LocalMulticampusSettingAndAllStagesAndStageSubjectGroups! @deprecated(reason: "Не поддерживается. Используйте findGitlabProjectsV2")
 
   """"""
-  findGitlabProjects(taskId: Int, schoolId: UUID, stageId: Int, stageGroupId: Int, studentState: StudentStateEnum, paging: PagingInput!): FindGitlabProjectsResponse!
-
-  """поиск гитлаб-проектов по параметрам"""
-  findGitlabProjectsV2(taskId: Int, schoolId: UUID!, stageId: ID!, stageGroupId: ID!, studentState: StudentStateEnum, paging: PagingInput!): FindGitlabProjectsResponse! @deprecated(reason: "Не поддерживается. Используйте loadGitlabProjectsAsExcelFileV2")
+  findGitlabProjects(taskId: Int, schoolId: UUID, stageId: Int, stageGroupId: Int, studentState: StudentStateEnum, paging: PagingInput!): FindGitlabProjectsResponse! @deprecated(reason: "Не поддерживается. Используйте findGitlabProjectsV3")
 
   """"""
-  loadGitlabProjectsAsExcelFile(taskId: Int, schoolId: UUID, stageId: Int, stageGroupId: Int, studentState: StudentStateEnum): GitlabProjectsExcelFile!
+  findGitlabProjectsV2(taskId: Int, schoolId: UUID!, stageId: ID!, stageGroupId: ID!, studentState: StudentStateEnum, paging: PagingInput!): FindGitlabProjectsResponse!
+
+  """поиск гитлаб-проектов по параметрам"""
+  findGitlabProjectsV3(goalId: Int, schoolId: UUID!, stageId: ID!, stageGroupId: ID!, studentState: StudentStateEnum, paging: PagingInput!): FindGitlabProjectsResponse! @deprecated(reason: "Не поддерживается. Используйте loadGitlabProjectsAsExcelFileV2")
+
+  """"""
+  loadGitlabProjectsAsExcelFile(taskId: Int, schoolId: UUID, stageId: Int, stageGroupId: Int, studentState: StudentStateEnum): GitlabProjectsExcelFile! @deprecated(reason: "Не поддерживается. Используйте loadGitlabProjectsAsExcelFileV3")
+
+  """"""
+  loadGitlabProjectsAsExcelFileV2(taskId: Int, schoolId: UUID!, stageId: ID!, stageGroupId: ID!, studentState: StudentStateEnum): GitlabProjectsExcelFile!
 
   """скачивание гитлаб проектов в excel-file"""
-  loadGitlabProjectsAsExcelFileV2(taskId: Int, schoolId: UUID!, stageId: ID!, stageGroupId: ID!, studentState: StudentStateEnum): GitlabProjectsExcelFile!
+  loadGitlabProjectsAsExcelFileV3(goalId: Int, schoolId: UUID!, stageId: ID!, stageGroupId: ID!, studentState: StudentStateEnum): GitlabProjectsExcelFile!
 
   """проверить externalSystemProjectIds на наличие в бд"""
   checkGitlabProjectIdsExistence(projectIds: [Int!]!): GitlabProjectIdsExistenceResponse!
@@ -8000,7 +8044,12 @@ type BusinessAdminQueries {
   findStageGroupsByGoalIdsFromStageSubjectGroupPlan(goalIds: [ID!]!): [StageGroupInfo!]!
 
   """Получение списка всех городов учеников"""
-  getBTCStudentCities: [String!]!
+  getBTCStudentCities: [String!]! @deprecated(reason: "Использовать getBTCStudentCitiesV2 с возвратом доплнительной информации по городу")
+
+  """
+  Получение списка всех городов учеников с дополнительной информацией по городу
+  """
+  getBtcStudentCitiesV2: [BtcStudentCityModel!]!
 
   """Получение списка всех Буткемп-мастеров"""
   getBootcampMastersList: [BootcampMasterModel!]!
@@ -8008,8 +8057,19 @@ type BusinessAdminQueries {
   """Получение списка учеников Bootcamp по student id"""
   getBTCStudentsInfoForMyClasses(studentIds: [UUID!]!): [BTCStudentsInfoModel!]!
 
+  """
+  Получение студентов с полученными сертификатами по их траектории для определенного класса
+  """
+  getCertificateForStudentsStageGroups(stageGroupIds: [ID!]!): [IssuedCertificateModel!]
+
   """Получение списка классов, переведенных в архив Bootcamp"""
   getArchiveStageGroups(stageGroupIds: [ID!]!): [ID!]!
+
+  """Получение настроек праздничных тем"""
+  getS21GlobalSchoolViewSettings: [S21SchoolViewSettings!]!
+
+  """Получение настроек праздничных тем"""
+  getS21SchoolViewSettings: [S21SchoolViewSettings!]!
 
   """Получения списка студентов из student_whiteList"""
   getAllInStudentWhiteList(
@@ -8022,6 +8082,36 @@ type BusinessAdminQueries {
     """Смешение"""
     paging: PagingInput
   ): [StudentWhiteListModel!]!
+
+  """Получение списка университетов и их почтовых доменов"""
+  getAllUniversitiesInfo(universityInfoFilter: UniversityInfoFilterModel!): [UniversityInfoModel!]!
+
+  """Получение списка всех университетов для Bootcamp"""
+  getAllUniversities: [UniversityModel!]!
+
+  """Получение всех доменов университетов"""
+  getAllUniversitiesDomains: [String!]!
+
+  """Получение количества университетов"""
+  countAllUniversities(universityInfoFilter: UniversityInfoFilterModel!): ID!
+
+  """Получение списка учеников Bootcamp и их вузовской почты"""
+  getStudentUniversityEmails(universityEmailFilter: UniversityEmailFilterInputModel!): [StudentUniversityEmailModelBTC!]!
+
+  """Получение количества записей списка вузовских почт"""
+  getStudentUniversityEmailsCount(universityEmailFilter: UniversityEmailFilterInputModel!): ID!
+
+  """S21. Поиск файлов проектов по параметрам"""
+  findPlatfProjectSolutions(goalId: Int, schoolId: UUID!, stageId: ID!, stageGroupId: ID!, studentState: StudentStateEnum, paging: PagingInput!): PlatfProjectSolutions!
+
+  """Выгрузка сертификата ученика"""
+  exportCertificateForStudent(
+    """ID ученика"""
+    studentId: UUID!
+
+    """ID выдачи сертификата"""
+    issuedId: ID!
+  ): IssuedCertificatePdf!
 
   """"""
   getBadges: [Badge!]!
@@ -8237,6 +8327,9 @@ type BusinessAdminQueries {
 
   """Отчет "Успеваемость" по Аттестационным периодам расширенный"""
   getStudentAcademicPerformanceByAttestationPeriodExpanded(startDate: DateTime!, endDate: DateTime!, closeModuleDate: Date!, stageId: Int!, subjectId: Int, currentRole: String): [StudentAcademicPerformanceExpandedV2!]!
+
+  """Отчет по выгрузке вузовской почты учеников в Bootcamp"""
+  exportStudentUniversityEmails(universityEmailFilter: UniversityEmailFilterInputModel!): ReportExcelFile!
 }
 
 """deprecated. use BusinessAdminRoleV2"""
@@ -9203,6 +9296,49 @@ type CategoryItemPage {
   pageSize: Int!
 }
 
+"""Свидетельство о прохождение траектории"""
+input CertificateInputModel {
+  """Титул свидетельства"""
+  courseTitle: String!
+
+  """
+  Название траектории для выдачи свидетельства (может не совпадать с trajectoryTemplateName)
+  """
+  trajectoryTitle: String!
+
+  """Необходимый уровень прохождения для получения сертификата"""
+  achieveLevel: Int!
+
+  """Шаблон сертификата"""
+  templateType: String!
+}
+
+"""Свидетельство к выдаче о прохождение траектории"""
+type CertificateOfParticipation {
+  """ID сертификата"""
+  certificateId: ID!
+
+  """ID траектории"""
+  trajectoryTemplateId: ID!
+
+  """Название траектории"""
+  trajectoryTemplateSlug: String!
+
+  """Титул свидетельства"""
+  courseTitle: String!
+
+  """
+  Название траектории для выдачи свидетельства (может не совпадать с trajectoryTemplateName)
+  """
+  trajectoryTitle: String!
+
+  """Необходимый уровень прохождения для получения сертификата"""
+  achieveLevel: Int!
+
+  """Шаблон сертификата"""
+  templateType: String!
+}
+
 """"""
 type ChallengeSubjectCategory {
   """идентификатор категории предмета"""
@@ -9621,9 +9757,6 @@ input ChecklistFilledInput {
 
   """Комментарий"""
   comment: String!
-
-  """Идентификатор видео онлайн проверки"""
-  vcRecordingId: ID
 }
 
 """Секция чек-листа"""
@@ -10991,6 +11124,12 @@ input ComplaintExportFilterInput {
 
   """Фильтр по идентификатору предмета"""
   subjectId: ID
+
+  """Строка поиска по почте и комментарию"""
+  textSearch: String
+
+  """Фильтр по идентификатору задания"""
+  taskId: ID
 }
 
 """"""
@@ -12923,10 +13062,10 @@ type CourseCoverInformation {
   finalPercentage: Int!
 
   """Дата начала регистрации на курс"""
-  signUpStartDate: DateTime!
+  signUpStartDate: DateTime
 
   """Дата окончания регистрации на курс"""
-  signUpEndDate: DateTime!
+  signUpEndDate: DateTime
 
   """Дата начала выполнения проекта"""
   workStartDate: DateTime
@@ -12972,6 +13111,12 @@ type CourseCoverInformation {
 
   """Отображение кнопки для ручного завершения курса"""
   isCourseCanBeFinished: Boolean
+
+  """
+  Timeline курса, список этапов прохождения проекта со статусами и опциональными датами начала/окончания
+  каждого этапа
+  """
+  timeline: [ProjectTimelineItem!]!
 }
 
 """"""
@@ -13158,6 +13303,27 @@ type CourseMutations {
   """Откат локального курса до последней успешной версии"""
   rollbackLocalCourseToLastSuccessVersion(localCourseId: ID!): Boolean!
 
+  """Повтороное сохранение локального курса в пакете"""
+  retryPublishingS21LocalCourseByPackageItemId(
+    """Id элемента в сохраняемом пакете локальных курсов"""
+    s21LocalCoursesSavingPackageItemId: ID!
+  ): Boolean!
+
+  """Откат публикации локального курса в пакете"""
+  rollbackS21LocalCoursesSaveProcessItem(
+    """Id элемента в сохраняемом пакете локальных курсов"""
+    s21LocalCoursesSavingPackageItemId: ID!
+  ): Boolean!
+
+  """Пропустить публикацию локального курса"""
+  skipS21LocalCoursesSaveProcessItem(
+    """Id элемента в сохраняемом пакете локальных курсов"""
+    s21LocalCoursesSavingPackageItemId: ID!
+  ): Boolean!
+
+  """Завершение публикации пачки локальных курсов"""
+  completionOfPublishS21LocalCourses: Boolean!
+
   """
   Сохранение настроек условий фильтрации для модуля (проекта, цели) в локальном курсе
   """
@@ -13165,6 +13331,30 @@ type CourseMutations {
 
   """Сохранение параметров команды в модуле локального курса"""
   saveTeamSettingsInLocalCourseGoal(localCourseGoalId: ID!, teamSettings: TeamSettingsInput!, isMulticampusEnabled: Boolean): Boolean!
+
+  """
+  Сохранение настроек выполнения для глобального курса (группы проектов) вне плана
+  """
+  saveCourseEvaluationRulesWithoutPlan(globalCourseId: ID!, conditionType: ConditionType!, evaluationRules: [EvaluationRuleGroupInput!]!): [EvaluationRuleGroup!]!
+
+  """
+  Сохранение настроек условий заданного типа для локального курса вне плана
+  """
+  saveLocalCourseEvaluationRulesWithoutPlan(localCourseId: ID!, conditionType: ConditionType!, evaluationRules: [EvaluationRuleGroupInput!]!): [EvaluationRuleGroup!]!
+
+  """
+  Изменение статуса локальных курсов по результату критериального поиска или по списку id локальных курсов
+  """
+  changePublicationStatusForLocalCourses(
+    """Критерии поиска"""
+    criteria: LocalCourseSearchCriteriaInput
+
+    """"""
+    localCourseIds: [ID!]
+
+    """"""
+    isPublished: Boolean!
+  ): Boolean!
 
   """
   -----------------------------Мутации студента-----------------------------
@@ -13226,7 +13416,7 @@ type CourseQueries {
     globalCourseId: ID!
 
     """Дата/время начала выполнения курса"""
-    courseStartDate: DateTime!
+    courseStartDate: DateTime
 
     """Дата/время начала регистрации на курс"""
     courseStartRegisterDate: DateTime
@@ -13283,6 +13473,11 @@ type CourseQueries {
   ): LocalCourseS21SavingProgress!
 
   """
+  Получение процесса сохранения локальных курсов. Nullable и не более одной is_active
+  """
+  getS21LocalCoursesSavingPackage: S21LocalCoursesSavingPackage
+
+  """
   Получение информации по локальному курсу в окне Projects для определённого студента
   """
   getLocalCourseGoalsByStudent(localCourseId: ID!, studentId: UUID!, sortingFields: [SortingField!]!): LocalCourseGoals!
@@ -13307,6 +13502,19 @@ type CourseQueries {
   getAttemptInfo(studentCourseAttemptId: ID!): StudentCourseAttempt!
 
   """
+  Запрос настроек условий заданного типа для курса (группы проектов) вне плана
+  """
+  loadCourseEvaluationRulesWithoutPlan(globalCourseId: ID!, conditionType: ConditionType!): [EvaluationRuleGroup!]!
+
+  """Запрос настроек условий заданного типа для локального курса вне плана"""
+  loadLocalCourseEvaluationRuleGroupsWithoutPlan(localCourseId: ID!, conditionType: ConditionType!): EvaluationRuleGroupsWithEquivalentFlag!
+
+  """
+  Запрос на получение всех попыток и всех гибких навыков за попытки по локальному курсу
+  """
+  loadLocalCourseAttemptsSoftSkills(studentCourseId: ID!): LocalCourseAttemptsSoftSkills
+
+  """
   -----------------------------Запросы студента-----------------------------
    Получение информации по локальному курсу в окне Projects
   """
@@ -13329,6 +13537,26 @@ type CourseQueries {
   Сортировка реализована только по полю localizedType - для идентичности с дашбордом по планам
   """
   getCourseModulesForDashboard(globalCourseId: ID!, paging: PagingInput, sorting: SortingField): DashboardCourseModules!
+
+  """
+  Получение возможных действий для курсов, попадающих под критерий поиска
+  """
+  getAvailablePublicationActionsForLocalCoursesByCriteria(
+    """Критерии поиска"""
+    criteria: LocalCourseSearchCriteriaInput!
+  ): AvailablePublicationActions!
+}
+
+"""Информация о результатах попытки в мета"""
+type CourseResultMeta {
+  """"""
+  studentCourseAttemptId: ID!
+
+  """"""
+  attemptCountingFormula: String!
+
+  """"""
+  courseSoftSkillForMeta: [CourseSoftSkillForMeta!]!
 }
 
 """Тип для работы с поиском курсов"""
@@ -13338,6 +13566,18 @@ type CourseSearchResult {
 
   """Найденные курсы"""
   courses: [CourseMeta!]
+}
+
+"""Информация о результатах гибких навыков попытки в мета"""
+type CourseSoftSkillForMeta {
+  """"""
+  softSkillId: ID!
+
+  """"""
+  softSkillPoint: Int!
+
+  """"""
+  maxAvailableSoftSkillPoint: Int
 }
 
 """Статус группы проектов (курса)"""
@@ -14390,6 +14630,20 @@ type DefaultResponse {
 type DeleteGitlabProjectsResponse {
   """"""
   success: Boolean!
+}
+
+"""
+S21. Ответ на удаление файлов из решений проектов с платформенным типом решения
+"""
+type DeletePlatfProjectSolutionsResponse {
+  """Общее кол-во файлов"""
+  totalCount: Int!
+
+  """Кол-во успешно удаленных файлов"""
+  deletedCount: Int!
+
+  """Идентификаторы ответов студентов, в которых остались неудаленные файлы"""
+  studentAnswerIds: [Int!]!
 }
 
 """"""
@@ -16109,6 +16363,9 @@ enum EntityType {
 
   """"""
   LESSON_PLAN_MATERIAL_BLOCK
+
+  """"""
+  STAGE
 }
 
 """"""
@@ -17131,7 +17388,7 @@ type ExamTaskWithStatuses {
   """Порядковый номер уровня"""
   levelOrder: Int!
 
-  """Комментарий (описание) к уровню экзмена"""
+  """Комментарий (описание) к уровню экзамена"""
   levelNote: String!
 
   """Идентификатор задания"""
@@ -17218,19 +17475,7 @@ type ExamTestResult {
   isFirstAttempt: Boolean!
 }
 
-"""
-Отправляемый ответ
-внутри result следующая структура (+ экранирование)
-{
-   "type":"result",
-   "data":{
-      "progress":"null",
-      "passingScore":"",
-      "status":"incomplete"
-   }
-}
-Информация о экзаменационном тесте
-"""
+"""Информация о экзаменационном тесте"""
 type ExamTestStatusInfo {
   """Идентификаор модуля с тестом"""
   goalId: Int!
@@ -18504,7 +18749,7 @@ type FilledChecklist {
   """Тип проверки, в рамках которой заполняется чеклист"""
   checkType: FilledChecklistCheckType
 
-  """Информация о видеозаписи проверки"""
+  """Информация о видеозаписях проверки"""
   onlineReview: OnlineReview
 
   """Этап заполненного чек-листа с отзывом"""
@@ -20315,6 +20560,9 @@ type GlobalCourseView {
   """Признак опубликованности курса"""
   isPublished: Boolean!
 
+  """Признак, является ли курс оцениваемым"""
+  isGradedCourse: Boolean
+
   """Название курса"""
   name: String!
 
@@ -20477,52 +20725,6 @@ input GlobalPlanGoalInput {
 
   """Флаг, указывающий на игнорирование любых дедлайнов для модуля"""
   deadlineFree: Boolean!
-}
-
-""""""
-type GlobalPlanMutations {
-  """
-  -----------------------------Мутации бизнес админа-----------------------------
-   Сохранение настроек условий фильтрации для модуля (проекта, цели) в плане на класс
-  """
-  saveEvaluationRulesForStageSubjectGroupPlan(stageSubjectGroupPlanGoalId: ID!, conditionType: ConditionType!, evaluationRules: [EvaluationRuleGroupInput!]!): [EvaluationRuleGroup!]!
-
-  """
-  Сохранение настроек условий фильтрации для курса (группы проектов) в плане на класс
-  """
-  saveCourseEvaluationRulesForStageSubjectGroupPlan(stageSubjectGroupPlanCourseId: ID!, conditionType: ConditionType!, evaluationRules: [EvaluationRuleGroupInput!]!): [EvaluationRuleGroup!]!
-
-  """Сохранение параметров команды в модуле плана на параллель"""
-  saveTeamSettingsInStageSubjectPlanGoal(stageSubjectPlanGoalId: ID!, teamSettings: TeamSettingsInput!, isMulticampusEnabled: Boolean): Boolean!
-
-  """Сохранение параметров команды в модуле плана на класс"""
-  saveTeamSettingsInStageSubjectGroupPlanGoal(stageSubjectGroupPlanGoalId: ID!, teamSettings: TeamSettingsInput!, isMulticampusEnabled: Boolean): Boolean!
-}
-
-""""""
-type GlobalPlanQueries {
-  """
-  -----------------------------Запросы бизнес админа-----------------------------
-   Запрос настроек условий заданного типа для модуля (проекта, цели) в плане на класс
-  """
-  loadTaskEvaluationRuleGroupsFromStageSubjectGroupPlan(stageSubjectGroupPlanGoalId: ID!, conditionType: ConditionType!): EvaluationRuleGroupsWithEquivalentFlag!
-
-  """
-  Запрос настроек условий заданного типа для курса (группы проектов) в плане на класс
-  """
-  loadCourseEvaluationRuleGroupsFromStageSubjectGroupPlan(stageSubjectGroupPlanCourseId: ID!, conditionType: ConditionType!): EvaluationRuleGroupsWithEquivalentFlag!
-
-  """Запрос параметров команды для модуля из плана на параллель"""
-  getTeamSettingsFromStageSubjectPlanGoal(stageSubjectPlanGoalId: ID!): TeamSettings
-
-  """Запрос группы параметров комманды для проекта из плана на параллель"""
-  getTeamSettingsGroupFromStageSubjectPlanGoal(stageSubjectPlanGoalId: ID!): TeamSettingsGroupWithEquivalentFlag!
-
-  """Запрос параметров команды для модуля из плана на класс"""
-  getTeamSettingsFromStageSubjectGroupPlanGoal(stageSubjectGroupPlanGoalId: ID!): TeamSettings
-
-  """Запрос группы параметров комманды для проекта из плана на класс"""
-  getTeamSettingsGroupFromStageSubjectGroupPlanGoal(stageSubjectGroupPlanGoalId: ID!): TeamSettingsGroupWithEquivalentFlag!
 }
 
 """"""
@@ -22398,19 +22600,19 @@ type InnopolisTeacher {
   lastName: String!
 }
 
-""""""
+"""S21. Информации о стажировке"""
 type InternshipStudentInfo {
-  """"""
+  """Ссылка на аппликант для загрузки документов"""
   link: String
 
-  """"""
+  """Дата/время начала стажировки"""
   internshipStartTime: DateTime
 
-  """"""
+  """Дата/время окончания стажировки"""
   internshipCompletionTime: DateTime
 }
 
-""""""
+"""S21. Обратная связь от ментора для студента"""
 type InternshipStudentReview {
   """Порядковый номер ревью"""
   reviewOrderNumber: Int
@@ -22431,15 +22633,15 @@ type InternshipStudentReview {
   threshold: Int
 }
 
-"""ответы ментора разбитие по попыткам"""
+"""S21. Обратная связь от ментора разбитую по попыткам"""
 type InternshipStudentReviewInfo {
-  """Список ответов"""
+  """Список обратных связей от наставника"""
   internshipStudentReviewList: [InternshipStudentReviewList]
 }
 
-""""""
+"""S21. Обратная связь от ментора по попытке"""
 type InternshipStudentReviewList {
-  """Список обратых связей наставника"""
+  """Список обратных связей наставника"""
   reviewModelList: [InternshipStudentReview]
 
   """количество проверок обратной связи"""
@@ -22513,6 +22715,36 @@ type IsSelfAssessmentTestComplete {
 
   """"""
   isComplete: Boolean!
+}
+
+""""""
+type IssuedCertificateModel {
+  """ID записи"""
+  issuedId: ID!
+
+  """Студент"""
+  student: Student!
+
+  """ID шаблона сертификата"""
+  certificateInfo: CertificateOfParticipation!
+
+  """Дата выдачи"""
+  issuedTs: Date
+
+  """Плановая дата окнчания траектории"""
+  dateStart: Date!
+
+  """Плановая дата начала траектории"""
+  dateEnd: Date!
+}
+
+"""Сертификат в формате pdf"""
+type IssuedCertificatePdf {
+  """Имя файла"""
+  fileName: String!
+
+  """Файл в base64"""
+  base64Data: String!
 }
 
 """Результат переключения статуса избранного для материала"""
@@ -25318,6 +25550,9 @@ type LocalCourse {
   """Флаг, показывающий, доступен ли курс студентам для прохождения"""
   isPublished: Boolean
 
+  """Признак, является ли курс оцениваемым"""
+  isGradedCourse: Boolean
+
   """Количество проектов"""
   projectCount: Int
 
@@ -25329,6 +25564,11 @@ type LocalCourse {
 
   """Проекты курса"""
   localCourseGoals: [LocalCourseGoal!]
+
+  """
+  Флаг, указывающий на эквивалентность правил для конструктора локального и глобального курса
+  """
+  equivalentConstructors: Boolean
 }
 
 """Типы сущностей, на которые можно назначить курс"""
@@ -25338,6 +25578,26 @@ enum LocalCourseAssignedEntityType {
 
   """Группа класса по предмету"""
   STAGE_SUBJECT_GROUP
+}
+
+"""
+Модель для получения данных по всем попыткам курса и всем гибким навыкам
+"""
+type LocalCourseAttemptsSoftSkills {
+  """"""
+  studentCourseId: ID!
+
+  """"""
+  attempts: [StudentCourseAttemptInfo!]!
+
+  """"""
+  courseResultMeta: CourseResultMeta
+
+  """"""
+  finalPoint: Int
+
+  """"""
+  finalPercentage: Int
 }
 
 """"""
@@ -25636,7 +25896,10 @@ input LocalCourseSearchCriteriaInput {
   sortingFields: [SortingField!]
 
   """Параметры пагинации"""
-  paging: PagingInput!
+  paging: PagingInput
+
+  """Идентификатор параллели"""
+  stageId: ID
 }
 
 """Результат поиска локальных курсов"""
@@ -25835,6 +26098,21 @@ type MassTransferTask {
 
   """Набор некритичных ошибок, возникших в процессе перевода"""
   result: [String!]
+}
+
+"""Курса для массового назначения на класс"""
+input MassiveLocalCourseAssignInput {
+  """Идентификатор глобального курса"""
+  globalCourseId: ID!
+
+  """Дата/время начала плана"""
+  startDate: DateTime
+
+  """Дата/время начала регистрации на курс"""
+  startRegisterDate: DateTime
+
+  """Дата/время окончания регистрации на курс"""
+  endRegisterDate: DateTime
 }
 
 """
@@ -26709,6 +26987,12 @@ input MisprintExportFilterInput {
 
   """Фильтр по идентификатору предмета"""
   subjectId: ID
+
+  """Строка поиска по почте и комментарию"""
+  textSearch: String
+
+  """Фильтр по идентификатору задания"""
+  taskId: ID
 }
 
 """"""
@@ -27897,9 +28181,6 @@ type Mutation {
   content: ContentMutations
 
   """"""
-  globalPlan: GlobalPlanMutations
-
-  """"""
   notificationConfiguration: NotificationConfigurationMutations
 
   """"""
@@ -27963,6 +28244,9 @@ type Mutation {
   tariffs: TariffsMutations
 
   """"""
+  s21StudyProgram: S21StudyProgramMutations
+
+  """"""
   selection: SelectionMutations!
 
   """"""
@@ -28014,6 +28298,9 @@ type Mutation {
   accelerator: AcceleratorMutations
 
   """"""
+  s21Plan: S21PlanMutations
+
+  """"""
   school21: School21Mutations
 
   """"""
@@ -28021,6 +28308,9 @@ type Mutation {
 
   """"""
   eventGenerator: EventGeneratorMutations
+
+  """"""
+  s21Exam: S21ExamMutations
 
   """"""
   attestationPeriods: AttestationPeriodMutations
@@ -28702,8 +28992,8 @@ type OnlineReview {
   """Флаг показывающий тип онлайн/офлайн"""
   isOnline: Boolean!
 
-  """Информация о видеозаписи проверки"""
-  video: OnlineReviewVideo
+  """Информация о видеозаписях проверки"""
+  videos: [OnlineReviewVideo!]
 }
 
 """"""
@@ -28722,6 +29012,9 @@ type OnlineReviewVideo {
 
   """Дата создания/обновления"""
   updateDateTime: DateTime!
+
+  """Размер файла"""
+  fileSize: Int!
 }
 
 """"""
@@ -29987,6 +30280,9 @@ type PenaltySlot {
 
   """Продолжительность в часах (2,4,8)"""
   duration: Int
+
+  """Список параллелей"""
+  stages: [Stage!]!
 }
 
 """"""
@@ -30005,6 +30301,9 @@ input PenaltySlotInput {
 
   """Максимальное число студентов"""
   maxStudentsCount: Int!
+
+  """Список идентификаторов параллелей"""
+  stageIds: [ID!]
 }
 
 """"""
@@ -31190,6 +31489,9 @@ enum PlanTypeForCondition {
 
   """Локальный курс вне плана"""
   LOCAL_COURSE
+
+  """Глобальный курс вне плана"""
+  GLOBAL_COURSE_OUT_OF_PLAN
 }
 
 """"""
@@ -31325,6 +31627,34 @@ type PlanningUserInfo {
 
   """Отчество автора/редактора плана"""
   middleName: String
+}
+
+"""
+S21. Информация по решению проекта с платформенным типом (исп. на странице удаления файлов решения)
+"""
+type PlatfProjectSolution {
+  """Логин студента (в групповом - тим лид)"""
+  login: String!
+
+  """Название проекта"""
+  projectName: String!
+
+  """Дата создания ответа студента"""
+  createdAt: Date!
+
+  """Идентификатор ответа студента"""
+  studentAnswerId: Int!
+}
+
+"""
+S21. Информация по решениям проектов с платформенным типом (исп. на странице удаления файлов решения)
+"""
+type PlatfProjectSolutions {
+  """Список решений"""
+  platfProjectSolutions: [PlatfProjectSolution!]!
+
+  """Общее кол-во"""
+  totalCount: Int!
 }
 
 """"""
@@ -32907,9 +33237,6 @@ type Query {
   content: ContentQueries
 
   """"""
-  globalPlan: GlobalPlanQueries
-
-  """"""
   notificationConfiguration: NotificationConfigurationQueries
 
   """"""
@@ -32947,6 +33274,9 @@ type Query {
 
   """"""
   schoolSelfConfiguration: SchoolSelfConfigurationQueries
+
+  """"""
+  s21Internship: s21InternshipQueries
 
   """"""
   sc21BaCalendar: SC21BaCalendarQueries
@@ -33009,6 +33339,9 @@ type Query {
   statisticsMarks: StatisticsMarksQueries
 
   """"""
+  s21StudyProgram: S21StudyProgramQueries
+
+  """"""
   selection: SelectionQueries!
 
   """"""
@@ -33066,6 +33399,9 @@ type Query {
   accelerator: AcceleratorQueries
 
   """"""
+  s21Plan: S21PlanQueries
+
+  """"""
   school21: School21Queries
 
   """"""
@@ -33073,6 +33409,9 @@ type Query {
 
   """"""
   attendanceAndAchievement: AttendanceAndAchievementQueries
+
+  """"""
+  s21Exam: S21ExamQueries
 
   """"""
   taskCheck: TaskCheckQueries
@@ -34521,6 +34860,210 @@ type S21ClassPlanSavingProgress {
   isRollback: Boolean!
 }
 
+""""""
+type S21ExamMutations {
+  """
+  -----------------------------Мутации студента-----------------------------
+   S21. Сохранения SSH ключа для экзаменационного пользователя
+  """
+  saveExamSSHKey(
+    """Временный идентификатор пользователя в внешней системе"""
+    fakeExternalSystemUserId: String!
+
+    """SSH ключ для внешней системы"""
+    key: String!
+  ): String!
+
+  """
+  S21. Старт экзамена студентом с последующей выдачей ему первого задания
+  """
+  startExam(
+    """
+    id события типа "Экзамен"
+    """
+    examId: ID!
+
+    """id экзамена (модуля/проекта)"""
+    goalId: ID!
+
+    """язык для выполнения экзамена"""
+    language: String
+  ): ExamTaskWithStatuses
+
+  """S21. Скип текущего задания во время прохождения экзамена"""
+  skipCurrentExamTask(
+    """
+    id события типа "Экзамен"
+    """
+    examId: ID!
+
+    """id экзамена (модуля/проекта)"""
+    goalId: ID!
+
+    """язык, на котором выдастся следующее задание"""
+    language: String
+  ): ExamTaskWithStatuses!
+
+  """S21. Получение следующего задания во время прохождения экзамена"""
+  pullNextExamTask(
+    """
+    id события типа "Экзамен"
+    """
+    examId: ID!
+
+    """id экзамена (модуля/проекта)"""
+    goalId: ID!
+
+    """язык для экзамена"""
+    language: String
+  ): ExamTaskWithStatuses!
+
+  """S21. Завершение экзамена"""
+  finishExam(
+    """
+    id события типа "Экзамен"
+    """
+    examId: ID!
+  ): ExamResult!
+
+  """S21. Завершение выполнения экзаменационного теста"""
+  finishExamTest(
+    """Идентификатор события экзаменационного теста"""
+    examId: ID!
+
+    """Идентификатор задания"""
+    taskId: ID!
+
+    """Список файлов"""
+    files: [FileInput!]!
+
+    """Идентификатор проверяющего"""
+    reviewUserId: ID
+
+    """Cписок ответов на вопросы (виджеты) экзаменационного теста"""
+    answersToWidgets: [AnswerToWidgetInput!]
+  ): ExamTestResult!
+
+  """
+  S21. Переключение учетной записи пользователя на временную во время прохождения экзамена
+  """
+  switchStudentToFakeAccount(
+    """
+    id события типа "Экзамен"
+    """
+    examId: ID!
+  ): Boolean!
+
+  """S21. Сохранение ответов на виджеты экзаменационного теста"""
+  saveExamTestAnswers(
+    """id эвента экзаменационного теста"""
+    examId: ID!
+
+    """Идентификатор задания в контексте ученика"""
+    taskId: ID!
+
+    """id следующей страницы"""
+    nextPageNumber: Int!
+
+    """Ответы на виджеты"""
+    answers: [AnswerToWidgetInput!]!
+
+    """Список файлов"""
+    files: [FileInput!]!
+
+    """Идентификатор проверяющего"""
+    reviewUserId: ID
+  ): Boolean
+}
+
+""""""
+type S21ExamQueries {
+  """
+  -----------------------------Запросы студента-----------------------------
+   S21. Получение текущего задания во время прохождения экзамена
+  """
+  getCurrentExamTask(
+    """
+    id события типа "Экзамен"
+    """
+    examId: ID!
+
+    """id экзамена (модуля/проекта)"""
+    goalId: ID!
+
+    """язык для выполнения экзамена"""
+    language: String
+  ): ExamTaskWithStatuses!
+
+  """
+  S21. Получение статуса текущего экзамена студента (если вернул null - текущий или следующий экзамен не найден)
+  """
+  getExamStatusInfo(
+    """
+    id события типа "Экзамен"
+    """
+    examId: Int
+  ): ExamStatusInfo
+
+  """
+  S21. Получение мета информации для подготовки студента к прохождению экзамена
+  """
+  getExamPassingUser(
+    """id экзамена (модуля/проекта)"""
+    goalId: ID!
+
+    """
+    id события типа "Экзамен"
+    """
+    examId: ID!
+  ): ExamPassingUser!
+
+  """
+  S21. Проверка наличия у пользователя наличия пропущенных экзаменов (true - он есть, надо показать модальное окно)
+  """
+  isExistSkippedExam: Boolean!
+
+  """
+  S21. Получение статуса проверки автотестов на отправленное экзаменационное задание
+  """
+  getExamAnswerStatus(
+    """
+    id события типа "Экзамен"
+    """
+    examId: ID!
+
+    """id экзамена (модуля/проекта)"""
+    goalId: ID!
+
+    """id текущего элемента цели (экзаменационного уровня)"""
+    currentLevelId: ID!
+
+    """id текущего задания"""
+    taskId: ID!
+  ): TaskStatusEnum
+
+  """
+  S21. Получить список предстоящих событий в экзаменационной среде Ш21 на текущую дату
+  """
+  getAvailableEventsForToday: [EventInfo!]!
+
+  """
+  S21. Получение статуса текущего экзамена студента (если вернул null - текущий или следующий экзамен не найден)
+  """
+  getExamTestStatusInfo(
+    """
+    id события типа "Экзамен"
+    """
+    examId: Int
+  ): ExamTestStatusInfo
+
+  """S21. Проверить доступ студента к экзамену"""
+  checkExamAccess(
+    """хеш-токен URL экзамена в школе студента"""
+    token: String!
+  ): Boolean!
+}
+
 """Цели"""
 type S21Goal {
   """Идентификатор цели"""
@@ -34563,6 +35106,83 @@ type S21Goal {
 
   """Просмотр контента"""
   isContentAvailable: Boolean!
+}
+
+"""Модель для отображения процесса сохранения пачки локальных курсов"""
+type S21LocalCoursesSavingPackage {
+  """Id процесса сохранения (пакета локальных курсов)"""
+  s21LocalCoursesSavingPackageId: ID!
+
+  """Список элементов в данном пакете сохранения"""
+  s21LocalCoursesSavingPackageItems: [S21LocalCoursesSavingPackageItem!]!
+}
+
+"""Модель для отображения одного элемента из пачки локальных курсов"""
+type S21LocalCoursesSavingPackageItem {
+  """Id элемента в пакете локальных курсов"""
+  s21LocalCoursesSavingPackageItemId: ID!
+
+  """Id локального курса"""
+  localCourseId: ID!
+
+  """Название локального курса"""
+  localCourseName: String!
+
+  """Название сущности, на которую назначен курс"""
+  assignedEntityName: String!
+
+  """Порядок локального курса в списке начиная с 0"""
+  order: ID!
+
+  """Статус сохранения данного итема (локального курса)"""
+  status: S21LocalCoursesSavingPackageItemStatus!
+
+  """Код ошибки для отображения на фронте"""
+  errorMessageCode: String
+
+  """Лог ошибки, список названий проектов, курсов"""
+  errorMessageLog: String
+
+  """
+  Прогресс сохранения по данному курсу (если его нет то дефолтаная модель)
+  """
+  localCourseS21SavingProgress: LocalCourseS21SavingProgress!
+}
+
+"""Статус сохранения одного итема в пачке локальных курсов"""
+enum S21LocalCoursesSavingPackageItemStatus {
+  """Данный элемент назначен для дальнейшего сохранения"""
+  ASSIGNED
+
+  """Данный элемент находится на этапе валидации"""
+  VALIDATION
+
+  """Данный элемент находится в процессе сохранения"""
+  IN_PROGRESS
+
+  """Данный элемент находится в процессе повторного сохранения"""
+  RETRY_PROGRESS
+
+  """Данный элемент находится в процессе отката сохранения"""
+  ROLLBACK_PROGRESS
+
+  """Данный элемент не прошел первичную валидацию"""
+  VALIDATION_ERROR
+
+  """Данный элемент получил ошибку в процессе публикации"""
+  PUBLICATION_ERROR
+
+  """Данный элемент получил ошибку в процессе отката"""
+  ROLLBACK_ERROR
+
+  """Данный элемент сохранен успешно"""
+  SUCCESS
+
+  """Данный элемент откатан (к прошлой версии)"""
+  ROLLBACKED
+
+  """Данный элемент зафейлен (не прошел первичнюу валидацию)"""
+  FAILED
 }
 
 """Массовая выдача награды ученикам"""
@@ -34734,6 +35354,12 @@ enum S21NotificationEnum {
 
   """"""
   S21_GITLAB_TASK_UPDATED
+
+  """"""
+  S21_GROUP_PROJECT_FAILED_TEAMLEAD
+
+  """"""
+  S21_CALC_COURSE_FINAL_POINT_UI
 }
 
 """"""
@@ -34761,6 +35387,85 @@ type S21NotificationReport {
 
   """"""
   groupNames: [String!]!
+}
+
+""""""
+type S21PlanMutations {
+  """
+  -----------------------------Мутации бизнес админа-----------------------------
+   Сохранение настроек условий фильтрации для модуля (проекта, цели) в плане на класс
+  """
+  saveEvaluationRulesForStageSubjectGroupPlan(stageSubjectGroupPlanGoalId: ID!, conditionType: ConditionType!, evaluationRules: [EvaluationRuleGroupInput!]!): [EvaluationRuleGroup!]!
+
+  """
+  Сохранение настроек условий фильтрации для курса (группы проектов) в плане на класс
+  """
+  saveCourseEvaluationRulesForStageSubjectGroupPlan(stageSubjectGroupPlanCourseId: ID!, conditionType: ConditionType!, evaluationRules: [EvaluationRuleGroupInput!]!): [EvaluationRuleGroup!]!
+
+  """Сохранение параметров команды в модуле плана на параллель"""
+  saveTeamSettingsInStageSubjectPlanGoal(stageSubjectPlanGoalId: ID!, teamSettings: TeamSettingsInput!, isMulticampusEnabled: Boolean): Boolean!
+
+  """Сохранение параметров команды в модуле плана на класс"""
+  saveTeamSettingsInStageSubjectGroupPlanGoal(stageSubjectGroupPlanGoalId: ID!, teamSettings: TeamSettingsInput!, isMulticampusEnabled: Boolean): Boolean!
+
+  """Сохранение плана на параллель"""
+  saveS21StagePlan(planGoalInputModels: [S21StagePlanGoalInput!]!, globalPlanId: ID, stagePlanId: ID): S21StagePlan!
+
+  """Публикация плана на параллель"""
+  publishS21StagePlanByGlobalPlanIds(globaPlanIds: [ID!]!): [S21StagePlan!]!
+
+  """Сброс плана на параллель до состояния глобального плана"""
+  resetS21StagePlan(stagePlanId: ID!): S21StagePlan!
+
+  """Сохранение плана на класс"""
+  saveS21ClassPlan(classPlan: S21ClassPlanInput!): S21ClassPlan!
+}
+
+""""""
+type S21PlanQueries {
+  """
+  -----------------------------Запросы бизнес админа-----------------------------
+   Запрос настроек условий заданного типа для модуля (проекта, цели) в плане на класс
+  """
+  loadTaskEvaluationRuleGroupsFromStageSubjectGroupPlan(stageSubjectGroupPlanGoalId: ID!, conditionType: ConditionType!): EvaluationRuleGroupsWithEquivalentFlag!
+
+  """
+  Запрос настроек условий заданного типа для курса (группы проектов) в плане на класс
+  """
+  loadCourseEvaluationRuleGroupsFromStageSubjectGroupPlan(stageSubjectGroupPlanCourseId: ID!, conditionType: ConditionType!): EvaluationRuleGroupsWithEquivalentFlag!
+
+  """Запрос параметров команды для модуля из плана на параллель"""
+  getTeamSettingsFromStageSubjectPlanGoal(stageSubjectPlanGoalId: ID!): TeamSettings
+
+  """Запрос группы параметров комманды для проекта из плана на параллель"""
+  getTeamSettingsGroupFromStageSubjectPlanGoal(stageSubjectPlanGoalId: ID!): TeamSettingsGroupWithEquivalentFlag!
+
+  """Запрос параметров команды для модуля из плана на класс"""
+  getTeamSettingsFromStageSubjectGroupPlanGoal(stageSubjectGroupPlanGoalId: ID!): TeamSettings
+
+  """Запрос группы параметров комманды для проекта из плана на класс"""
+  getTeamSettingsGroupFromStageSubjectGroupPlanGoal(stageSubjectGroupPlanGoalId: ID!): TeamSettingsGroupWithEquivalentFlag!
+
+  """Возвращает план на параллель по идентификатору"""
+  getS21StagePlan(stagePlanId: ID!): S21StagePlan!
+
+  """Возвращает план на параллель по идентификатору глобального плана"""
+  getS21StagePlanByGlobalPlanId(globalPlanId: ID!): S21StagePlan!
+
+  """Возвращает все существующие планы на параллель"""
+  getS21StagePlans(schoolId: UUID): [S21StagePlan!]!
+
+  """Возвращает план на класс по идентификатору"""
+  getS21ClassPlan(classPlanId: ID!): S21ClassPlan!
+
+  """Возвращает план на класс по идентификатору плана на параллель"""
+  getS21ClassPlanByStagePlanId(stagePlanId: ID!, classSubjectId: ID!): S21ClassPlan!
+
+  """Возвращает все существующие планы на класс"""
+  getS21ClassPlans: [S21ClassPlanByStagesSubjects!]!
+
+  """Получить текущий статус по процессу сохранения плана на класс"""
+  getS21ClassPlanSavingProgress(stageSubjectGroupPlanId: Int!): S21ClassPlanSavingProgress!
 }
 
 """S21. Тип выполнения модуля"""
@@ -34821,6 +35526,84 @@ enum S21RelatedObjectEnum {
 
   """"""
   DASHBOARD
+
+  """"""
+  COURSE
+}
+
+""""""
+input S21SchoolInput {
+  """Полное название кампуса"""
+  fullName: String!
+
+  """Краткое название кампуса"""
+  shortName: String!
+
+  """ИД таймзоны кампуса"""
+  timeZoneId: String!
+
+  """Урл экзаменационного приложения кампуса"""
+  examUrl: String
+
+  """Адрес электронной почты кампуса"""
+  email: String
+}
+
+"""S21. Тип праздничной темы"""
+enum S21SchoolViewSettingType {
+  """"""
+  NEW_YEAR
+
+  """"""
+  HALLOWEEN
+
+  """"""
+  S21_BIRTHDAY
+
+  """"""
+  DEFAULT
+}
+
+"""Праздничная тема"""
+type S21SchoolViewSettings {
+  """ИД настройки праздничной темы"""
+  s21SchoolViewSettingsId: ID
+
+  """Тип праздничной темы"""
+  schoolViewSettingType: S21SchoolViewSettingType!
+
+  """Включена/выключена"""
+  isEnabled: Boolean!
+
+  """Ежегодное повторение"""
+  isRepeatAnnually: Boolean
+
+  """Начало"""
+  startDate: Date
+
+  """Завершение"""
+  endDate: Date
+}
+
+""""""
+input S21SchoolViewSettingsInput {
+  """ИД настройки праздничной темы"""
+  s21SchoolViewSettingsId: ID
+
+  """Тип праздничной темы"""
+  schoolViewSettingType: S21SchoolViewSettingType!
+
+  """Включена/выключена"""
+  isEnabled: Boolean!
+
+  """Ежегодное повторение"""
+  isRepeatAnnually: Boolean
+
+  """Начало"""
+  startDate: Date
+
+  """Завершение"""
+  endDate: Date
 }
 
 """План на параллель"""
@@ -35003,6 +35786,198 @@ type S21StudentTaskFiles {
   S21. Получение файлов, прикрепленных к версии, которую на данный момент выполняет студент
   """
   getTaskContentFiles(studentAnswerId: ID!): [TaskFile!]!
+}
+
+"""Учебная программа"""
+type S21StudyProgram {
+  """Идентификатор учебной программы"""
+  studyProgramId: ID!
+
+  """Название учебной программы"""
+  studyProgramName: String!
+
+  """Статус публикации"""
+  isPublic: Boolean!
+
+  """Количество элементов учебной программы"""
+  itemsCount: Int!
+
+  """Список курсов учебной программы"""
+  studyProgramCourses: [S21StudyProgramCourse!]!
+}
+
+"""Курс в учебной программе"""
+type S21StudyProgramCourse {
+  """Идентификатор курса"""
+  globalCourseId: ID!
+
+  """Название курса"""
+  courseName: String!
+
+  """Тип курса"""
+  courseType: CourseType!
+
+  """Порядковый номер"""
+  order: Int!
+}
+
+"""Результат проверки назначения курсов учебной программы"""
+type S21StudyProgramCourseAssignment {
+  """Идентификатор курса"""
+  globalCourseId: ID!
+
+  """Название курса"""
+  courseName: String!
+
+  """Тип курса"""
+  courseType: CourseType!
+}
+
+"""Input курса в учебной программе"""
+input S21StudyProgramCourseInput {
+  """Идентификатор курса"""
+  globalCourseId: ID!
+
+  """Порядковый номер"""
+  order: Int!
+}
+
+"""Результат проверки назначения курсов учебной программы на класс"""
+type S21StudyProgramCoursesAssignment {
+  """Идентификатор учебной программы"""
+  studyProgramId: ID!
+
+  """Название учебной программы"""
+  studyProgramName: String!
+
+  """Список назначенных курсов"""
+  assignedCourses: [S21StudyProgramCourseAssignment!]!
+
+  """Список не назначенных курсов"""
+  nonAssignedCourses: [S21StudyProgramCourseAssignment!]!
+}
+
+"""Input учебной программы"""
+input S21StudyProgramInput {
+  """Идентификатор учебной программы"""
+  studyProgramId: ID!
+
+  """Название учебной программы"""
+  studyProgramName: String!
+
+  """Статус публикации"""
+  isPublic: Boolean!
+
+  """Список курсов учебной программы"""
+  studyProgramCourses: [S21StudyProgramCourseInput!]!
+}
+
+""""""
+type S21StudyProgramMutations {
+  """
+  -----------------------------Мутации админа-----------------------------
+   Создание учебной программы
+  """
+  createStudyProgram(studyProgramName: String!): S21StudyProgram!
+
+  """Переименование учебной программы с указанным идентификатором"""
+  renameStudyProgram(studyProgramId: ID!, studyProgramName: String!): Boolean!
+
+  """Публикация учебной программы с указанным идентификатором"""
+  publishStudyProgram(studyProgramId: ID!): Boolean!
+
+  """Сохранение учебной программы"""
+  saveStudyProgram(studyProgram: S21StudyProgramInput!): S21StudyProgram!
+
+  """Создание локальных курсов для учебной программы"""
+  saveLocalCourses(
+    """"""
+    studyProgramId: ID!
+
+    """Идентификатор сущности, на которую назначен курс"""
+    assignedEntityId: String!
+
+    """Тип сущности, на которую назначен курс"""
+    assignedEntityType: LocalCourseAssignedEntityType!
+
+    """список локальных курсов"""
+    localCourses: [MassiveLocalCourseAssignInput!]!
+  ): [LocalCourse!]!
+}
+
+"""Статус публикации учебной программы"""
+enum S21StudyProgramPublishedStatus {
+  """Опубликован"""
+  PUBLISHED
+
+  """НЕ опубликован"""
+  UNPUBLISHED
+
+  """Все"""
+  ALL
+}
+
+""""""
+type S21StudyProgramQueries {
+  """
+  -----------------------------Запросы админа-----------------------------
+   Получить список учебных программ с учетом указанных фильтров
+  """
+  getStudyPrograms(
+    """Искомое имя учебной программы"""
+    name: String
+
+    """Параметры пагинации"""
+    paging: PagingInput
+
+    """Список курсов которые надо исключить из выдачи"""
+    filterExceptStudyPrograms: [ID!]
+
+    """Статус публикации учебной программы"""
+    studyProgramPublishedStatus: S21StudyProgramPublishedStatus
+
+    """Список полей сортировки"""
+    sortingFields: [SortingField]
+  ): S21StudyProgramsSearchResult!
+
+  """Возвращает учебную программу по указанному идентификатору"""
+  getStudyProgram(studyProgramId: ID!): S21StudyProgram!
+
+  """Назначены ли курсы в УП на класс"""
+  getAssignedCourses(
+    """ID учебной программы"""
+    studyProgramId: ID!
+
+    """ID класса"""
+    stageSubjectGroupId: ID!
+  ): S21StudyProgramCoursesAssignment!
+
+  """Возвращает список всех проектов, входящих в курсы учебной программы"""
+  getStudyProgramCourseGoals(studyProgramId: ID!): [ModuleInfo!]!
+}
+
+"""Представление учебной программы в списке учебных программ"""
+type S21StudyProgramView {
+  """Идентификатор учебной программы"""
+  studyProgramId: ID!
+
+  """Название учебной программы"""
+  studyProgramName: String!
+
+  """Признак опубликованности учебной программы"""
+  isPublic: Boolean!
+
+  """Количество элементов, которые содержит учебная программа"""
+  itemsCount: Int!
+}
+
+"""Результат поиска учебных программ по заданным фильтрам"""
+type S21StudyProgramsSearchResult {
+  """Количество найденных учебных программ"""
+  count: Int!
+
+  """Список найденных учебных программ по переданным фильтрам"""
+  studyPrograms: [S21StudyProgramView!]
 }
 
 """"""
@@ -35206,13 +36181,13 @@ type SC21StudentTaskCheckMutations {
   markFileSolutionUploaded(taskId: ID!, fileUploadEvents: [StudyProcessFileUploadInput!]!): [StudyProcessFile!]! @deprecated
 
   """S21. Обновление статуса"""
-  markFileSolutionUploadedStatus(taskId: ID!, studyProcessFileIds: [ID!]!): [StudyProcessFile!]!
+  markFileSolutionUploadedStatus(taskId: ID!, studyProcessFileIds: ID!): StudyProcessFile!
 
   """S21. Пользователь отменил загрузку файла решения задания"""
   markFileSolutionUploadCancelled(taskId: ID!, studyProcessFileId: ID!): StudyProcessFile!
 
   """S21. Записать ошибку сохранения файла решения задания"""
-  markFileSolutionFailedToUpload(taskId: ID!, fileCancelEvent: [StudyProcessFileFailOrCancelInput!]!): [StudyProcessFile!]!
+  markFileSolutionFailedToUpload(taskId: ID!, studyProcessFileId: ID!, errorMessage: String!): StudyProcessFile!
 
   """
   S21. Сохранить комментарий к ответу студента, для задания с платформенным решением
@@ -35231,7 +36206,7 @@ type SC21StudentTaskCheckQueries {
   """
   S21. Получить видео в незавершенном статусе для переданного чеклиста, если есть
   """
-  getVideoInNotFinalStatus(filledChecklistId: ID!): OnlineReviewVideo
+  getUploadedAndNotConfirmedVideos(filledChecklistId: ID!): [OnlineReviewVideo!]!
 
   """
   S21. Получить информацию о текущем загруженном решении студента по заданию, для заданий с платформенной загрузкой решения
@@ -35678,6 +36653,12 @@ type School {
 
   """Конфигурация чтения / записи"""
   tenantConfiguration: TenantConfiguration!
+
+  """Адрес электронной почты школы"""
+  email: String
+
+  """Урл экзаменационного приложения школы"""
+  examUrl: String
 }
 
 """"""
@@ -35732,11 +36713,11 @@ type School21Mutations {
   """S21. Сохранить дату и время завершения обучения в классе"""
   saveStageGroupFinishDate(stageGroupId: ID!, finishDate: DateTime): StageGroupFinishDate!
 
-  """Видеозапись онлайн-проверки не подтверждена"""
-  markFilePending(filledChecklistId: ID!, fileName: String!, relativePath: String!): OnlineReviewVideo!
+  """Добавляет видеозапись онлайн-проверки в статусе NOT_CONFIRMED"""
+  markFilesPending(filledChecklistId: ID!, pendingFiles: [StudyProcessFileInitialInput!]!): [OnlineReviewVideo!]!
 
   """Видеозапись онлайн-проверки загружена"""
-  markP2pCheckVideoUploaded(filledChecklistId: ID!, onlineReviewId: ID!, videoSize: Int!): OnlineReviewVideo!
+  markP2pCheckVideoUploaded(filledChecklistId: ID!, onlineReviewId: ID!): OnlineReviewVideo!
 
   """Ошибка загрузки видеозаписи онлайн-проверки"""
   markP2pCheckVideoFailedToUpload(filledChecklistId: ID!, onlineReviewId: ID!, errorMessage: String!): OnlineReviewVideo!
@@ -35744,8 +36725,10 @@ type School21Mutations {
   """Пользователь отменил загрузку видео"""
   markP2pCheckVideoUploadCancelled(filledChecklistId: ID!, onlineReviewId: ID!): OnlineReviewVideo!
 
-  """Добавление ссылки с онлайн проверкой для уже заполненного чек-листа"""
-  updateFilledChecklistWithOnlineReview(filledChecklistId: ID!, onlineReviewId: ID!): FilledChecklist!
+  """
+  Добавление признака успешной загрузки видеозаписи проверки для уже заполненного чек-листа
+  """
+  submitFilledChecklistRecording(filledChecklistId: ID!): FilledChecklist!
 
   """
   Кидает ивенты о необходимости блокировки студентов определенной группы по предмету и отмену их штрафов
@@ -35793,6 +36776,12 @@ type School21Mutations {
 
   """S21 сохранение/изменение пользователя"""
   saveS21User(user: UserInput!): User!
+
+  """сохранение кампуса"""
+  saveSchool(schoolId: ID, school: S21SchoolInput!): ValidatedSchool!
+
+  """S21. Логирование ошибок Centrifugo, которые получает Front"""
+  logCentrifugoError(jsonMessage: String!): Boolean!
 }
 
 """"""
@@ -36271,14 +37260,17 @@ type School21Queries {
   """
   getAvailableFroleSetsWithRole(appicableRole: ROLES!): [FunctionalRoleSet!]!
 
-  """S21 получить информацию по стажировке студента администратором"""
-  getInternshipReviewDataInfoByStudent(goalId: ID!, studentId: UUID!): InternshipStudentReviewInfo!
-
   """Получение попыток прохождения курса"""
   getStudentCourseFinalScoreByLoginAndGoalId(login: String!, localCourseId: ID!): StudentCourseFinalScore!
 
   """Получение статистики по попыткам студента на модуле для студента"""
   getGoalAttemptStatisticByStudent(goalId: ID!, studentId: UUID!): [StudentGoalAttemptStatistic]
+
+  """Получение количества студентов в классе в статусах Active / Inactive"""
+  getParticipantsStatus(filterStageGroups: [ID]!, dismissTypeId: [ID]!): UsersStatusCount!
+
+  """S21. Генерация JWT токена для подключения к Centrifugo"""
+  generateJwtTokenForCentrifugo: String!
 
   """
   Получение всех языков, которые уже опубликованы для текущей активной контент версии
@@ -37110,6 +38102,12 @@ enum SelectionMeta {
 
   """"""
   EDUCATION_SUBJECT
+
+  """"""
+  EDUCATION_COURSE
+
+  """"""
+  S21_STUDY_PROGRAM
 }
 
 """"""
@@ -40327,6 +41325,16 @@ enum StudentCodeReviewStatus {
 }
 
 """
+Отправляемый ответ
+внутри result следующая структура (+ экранирование)
+{
+   "type":"result",
+   "data":{
+      "progress":"null",
+      "passingScore":"",
+      "status":"incomplete"
+   }
+}
 Процессы код-ревью студенческого проекта, с количеством завершенных Round1 и Round2
 """
 type StudentCodeReviewsWithCountRound {
@@ -40432,6 +41440,36 @@ type StudentCourseAttemptHeader {
 
   """Результат попытки"""
   resultCourseCompletion: CompletionResultStatus
+}
+
+"""Информация о попытке курса"""
+type StudentCourseAttemptInfo {
+  """"""
+  studentCourseAttemptId: ID!
+
+  """"""
+  finalPoint: Int
+
+  """"""
+  finalPercentage: Int
+
+  """"""
+  softSkills: [StudentCourseAttemptSoftSkill!]!
+}
+
+"""Информация о попытке курса"""
+type StudentCourseAttemptSoftSkill {
+  """"""
+  studentCourseAttemptId: ID!
+
+  """"""
+  softSkillId: ID!
+
+  """"""
+  score: Int!
+
+  """"""
+  maxAvailableScore: Int
 }
 
 """Информация о попытке прохождения курса"""
@@ -42918,15 +43956,6 @@ type StudentMutations {
   """
   completeP2pCheck(checklistFilledInput: ChecklistFilledInput!): Float!
 
-  """Видеозапись онлайн-проверки загружена"""
-  markP2pCheckVideoUploaded(filledChecklistId: ID!, link: String!): Boolean! @deprecated(reason: "use school21 mutation")
-
-  """Ошибка загрузки видеозаписи онлайн-проверки"""
-  markP2pCheckVideoFailedToUpload(filledChecklistId: ID!, errorMessage: String!): Boolean! @deprecated(reason: "use school21 mutation")
-
-  """Пользователь отменил загрузку видео"""
-  markP2pCheckVideoUploadCancelled(filledChecklistId: ID!): Boolean! @deprecated(reason: "use school21 mutation")
-
   """Создание фидбэка проверяемого по заданию, привязанного к чек-листу"""
   createReviewFeedback(reviewFeedbackInput: ReviewFeedbackInput!): ReviewFeedback!
 
@@ -43018,48 +44047,6 @@ type StudentMutations {
   """
   removeTrajectoryByIdAndRestartCreatingTrajectory(trajectoryId: ID!): StudentModule!
 
-  """Сохранения SSH ключа для экзаменационного пользователя"""
-  saveExamSSHKey(
-    """Временный идентификатор пользователя в внешней системе"""
-    fakeExternalSystemUserId: String!
-
-    """SSH ключ для внешней системы"""
-    key: String!
-  ): String!
-
-  """Старт экзамена студентом с последующей выдачей ему первого задания"""
-  startExam(examEventId: ID!, goalId: ID!, language: String): ExamTaskWithStatuses
-
-  """S21. Скип текущего задания во время прохождения экзамена"""
-  skipCurrentExamTask(examEventId: ID!, goalId: ID!, language: String): ExamTaskWithStatuses!
-
-  """S21. Получение следующего задания во время прохождения экзамена"""
-  pullNextExamTask(examEventId: ID!, goalId: ID!, language: String): ExamTaskWithStatuses!
-
-  """Завершение экзамена"""
-  finishExam(examEventId: ID!): ExamResult!
-
-  """Завершение выполнения экзаменационного теста"""
-  finishExamTest(
-    """Идентификатор события экзаменационного теста"""
-    examEventId: ID!
-
-    """Идентификатор задания"""
-    taskId: ID!
-
-    """Список файлов"""
-    files: [FileInput!]!
-
-    """Идентификатор проверяющего"""
-    reviewUserId: ID
-
-    """Cписок ответов на вопросы (виджеты) экзаменационного теста"""
-    answersToWidgets: [AnswerToWidgetInput!]
-  ): ExamTestResult!
-
-  """Переключение учетной записи пользователя на временную"""
-  switchStudentToFakeAccount(examEventId: ID!): Boolean!
-
   """Запрос на сдвиг дедлайна"""
   createDeadlineShiftRequest(deadlineRequest: DeadlineShiftRequestInput!): DeadlineShiftRequest
 
@@ -43148,27 +44135,6 @@ type StudentMutations {
     """Ответы на виджеты"""
     answers: [AnswerToWidgetInput!]!
   ): StudentTask!
-
-  """Сохранение ответов на виджеты экзаменационного теста"""
-  saveExamTestAnswers(
-    """id эвента экзаменационного теста"""
-    examEventId: ID!
-
-    """Идентификатор задания в контексте ученика"""
-    taskId: ID!
-
-    """id следующей страницы"""
-    nextPageNumber: Int!
-
-    """Ответы на виджеты"""
-    answers: [AnswerToWidgetInput!]!
-
-    """Список файлов"""
-    files: [FileInput!]!
-
-    """Идентификатор проверяющего"""
-    reviewUserId: ID
-  ): Boolean
 
   """Сохранить желаемый целевой уровень модуля"""
   saveTargetGoalLevel(
@@ -44235,15 +45201,6 @@ type StudentQueries {
   """"""
   getModuleById(goalId: ID!): StudentModule!
 
-  """"""
-  getInternshipDataById(goalId: ID!): InternshipStudentInfo!
-
-  """"""
-  getInternshipReviewData(goalId: ID!): InternshipStudentReviewList!
-
-  """"""
-  getInternshipReviewDataInfo(goalId: ID!): InternshipStudentReviewInfo!
-
   """Получение студенческого модуля в контексте студента по идентификатору"""
   getStudentModuleByStudentGoalId(studentGoalId: ID!, language: String): StudentModule!
 
@@ -44749,34 +45706,6 @@ type StudentQueries {
   getStudentTraffic(login: String!, schoolID: UUID!, date: Date!): StudentTraffic!
 
   """
-  Получение мета информации для подготовки студента к прохождению экзамена
-  """
-  getExamPassingUser(goalId: ID!, examEventId: ID!): ExamPassingUser!
-
-  """
-  Проверка наличия у пользователя наличия пропущенных экзаменов (true - он есть, надо показать модальное окно)
-  """
-  isExistSkippedExam: Boolean!
-
-  """
-  Получение статуса текущего экзамена студента (если вернул null - текущий или слудеющий экзамен не найден)
-  """
-  getExamStatusInfo(examEventId: Int): ExamStatusInfo
-
-  """
-  Получение статуса текущего экзамена студента (если вернул null - текущий или слудеющий экзамен не найден)
-  """
-  getExamTestStatusInfo(examEventId: Int): ExamTestStatusInfo
-
-  """
-  Получение статуса проверки автотестов на отправленное экзаменационное задание
-  """
-  getExamAnswerStatus(examEventId: ID!, goalId: ID!, currentLevelId: ID!, taskId: ID!): TaskStatusEnum
-
-  """S21. Получение текущего задания во время прохождения экзамена"""
-  getCurrentExamTask(examEventId: ID!, goalId: ID!, language: String): ExamTaskWithStatuses!
-
-  """
   Проверка существования заявки пользователя на расформирование указанной команды
   """
   isRequestBeenSentToTeamDisband(teamId: UUID!): Boolean!
@@ -45065,14 +45994,6 @@ type StudentQueries {
     attestationPeriodIds: [ID!]
   ): [StudentStudyPeriodsPerformanceResponse!]!
 
-  """
-  Получить список предстоящих событий в экзаменационной среде Ш21 на текущую дату
-  """
-  getAvailableEventsForToday: [EventInfo!]!
-
-  """Проверить доступ студента к экзамену"""
-  checkExamAccess(token: String!): Boolean!
-
   """Возвращает Задания в контексте студента по фильтрам"""
   getStudentTasksByTaskStatus(
     """
@@ -45334,7 +46255,21 @@ type StudentQueries {
   """
   Получение информации об университетской почте ученика по идентификатору ученика
   """
-  getStudentUniversityEmailInfo(studentId: UUID): StudentUniversityEmailModel
+  getStudentUniversityEmailInfo(studentId: UUID): StudentUniversityEmailModel! @deprecated(reason: "Unused. Will be deleted in a release")
+
+  """
+  Получение информации об университетской почте ученика по идентификатору ученика
+  """
+  getStudentUniversityEmailInfoV2(studentId: UUID): StudentUniversityEmailModel
+
+  """Получение сертификатов доступных студенту"""
+  getCertificatesForStudent: [IssuedCertificateModel]
+
+  """Выгрузка сертификата ученика"""
+  exportCertificate(
+    """ID выдачи сертификата"""
+    issuedId: ID!
+  ): IssuedCertificatePdf!
 
   """Все бейджи, с флагом, выданные или нет"""
   getBadges: [UserBadgeAward!]!
@@ -46803,7 +47738,7 @@ type StudentTasksToCheckResponse {
   checkedStudentTasks: [StudentTaskWithCriterias!]!
 
   """Назначенные задания студента"""
-  assignedStudentTasks: [StudentTask!]!
+  assignedStudentTasks: [StudentTaskWithCriterias!]!
 
   """количество заданий учеников"""
   studentTaskCount: Int!
@@ -47143,6 +48078,44 @@ type StudentUniversityEmailModel {
 
   """Время модификации записи"""
   modifyTs: DateTime
+}
+
+"""Запись о вузовской почте ученика Bootcamp"""
+type StudentUniversityEmailModelBTC {
+  """Иденитификатор записи"""
+  studentUniversityEmailId: ID!
+
+  """Почта ученика в системе Bootcamp"""
+  email: String
+
+  """Идентификатор пользователя"""
+  userId: UUID!
+
+  """Фамилия пользователя"""
+  lastName: String!
+
+  """Имя пользователя"""
+  firstName: String!
+
+  """Отчество пользователя"""
+  middleName: String
+
+  """Дата создания записи"""
+  createTs: DateTime!
+
+  """Флаг показа страницы верификации вузовской почты пользователю"""
+  isVisible: Boolean
+
+  """Наименование вуза"""
+  universityName: String
+
+  """Вузовская почта ученика"""
+  universityEmail: String
+
+  """
+  Комментарий, содержащий название вуза, которое не было найдено среди существующего списка вузов
+  """
+  comment: String
 }
 
 """"""
@@ -48093,15 +49066,6 @@ type StudyProcessFile {
 
   """Размер файла в байтах"""
   fileSize: Int
-}
-
-"""S21. Событие для файла с ошибкой или для отменяемого файла"""
-input StudyProcessFileFailOrCancelInput {
-  """Идентификатор файла"""
-  studyProcessFileId: ID!
-
-  """Причина отмены/фейла"""
-  detailsMessage: String!
 }
 
 """
@@ -49148,6 +50112,20 @@ type SystemAdminQueries {
     """Параметры пагинации"""
     paging: PagingInput
   ): [School!]!
+
+  """"""
+  getSchoolsOfSchool21Count(
+    """
+    фильтр активных школ: null - все, true - активные,  false - деактивированные
+    """
+    isActive: Boolean
+
+    """false - только капмусы Школы 21, true - кампусы + продукт"""
+    includingProduct: Boolean
+
+    """Строка поиска"""
+    textSearch: String
+  ): Int!
 
   """получение списка школ с входящими планами на ступень"""
   getSchoolsWithStudyStepSubjects(
@@ -57836,10 +58814,16 @@ type TrajectoryQueries {
   findPulseJobCodeByJobCodeType(pulseJobCodeType: [PulseJobCodeType!]!): [PulseJobCode]!
 
   """Получение списка шаблонов траекторий, у которых есть класс"""
-  getAllTrajectoryTemplatesWithStageGroup(trajectoryTemplateType: TrajectoryTemplateType): [TrajectoryTemplate]!
+  getAllTrajectoryTemplatesWithStageGroup(trajectoryTemplateType: TrajectoryTemplateType): [TrajectoryTemplate]! @deprecated(reason: "Использовать getAllTrajectoryTemplatesWithStageGroupV2")
+
+  """Получение списка шаблонов траекторий, у которых есть класс"""
+  getAllTrajectoryTemplatesWithStageGroupV2(trajectoryTemplateType: String!): [TrajectoryTemplate]!
 
   """Получение типов шаблонов траекторий Bootcamp"""
-  getTrajectoryTemplateTypes: [TrajectoryTemplateType]! @deprecated(reason: "Использовать getRecommendedTrajectoryTemplateV2")
+  getTrajectoryTemplateTypes: [TrajectoryTemplateType]! @deprecated(reason: "Использовать getTrajectoryTemplateTypesV2")
+
+  """Получение типов шаблонов траекторий Bootcamp"""
+  getTrajectoryTemplateTypesV2: [TrajectoryTemplateTypeModel!]! @deprecated(reason: "Использовать getRecommendedTrajectoryTemplateV2")
 
   """"""
   getRecommendedTrajectoryTemplate(trajectoryTemplateType: TrajectoryTemplateType!, userId: ID!, studentId: ID!): TrajectoryTemplate
@@ -57895,7 +58879,13 @@ type TrajectoryTemplate {
   trajectoryTemplateGoals: [TrajectoryTemplateGoal]
 
   """Тип шаблона траектории"""
-  trajectoryTemplateType: TrajectoryTemplateType
+  trajectoryTemplateType: TrajectoryTemplateType @deprecated(reason: "Переход на хранение типов шаблонов траекторий в БД, а не в коде")
+
+  """Тип шаблона траектории"""
+  trajectoryTemplateTypeV2: String
+
+  """Свидетельство о прохождение траектории"""
+  certificate: CertificateOfParticipation
 }
 
 """Модуль по предмету входящему в шаблон траектории Bootcamp"""
@@ -58006,6 +58996,12 @@ input TrajectoryTemplateInputModel {
 
   """Тип шаблона траектории"""
   trajectoryTemplateType: TrajectoryTemplateType
+
+  """Тип шаблона траектории"""
+  trajectoryTemplateTypeV2: String
+
+  """Сертификаты выдаваемые при прохождение траектории"""
+  certificate: CertificateInputModel
 }
 
 """
@@ -58061,6 +59057,18 @@ enum TrajectoryTemplateType {
   Тип "Стажировка"
   """
   INTERNSHIP
+}
+
+"""Тип шаблона траектории Bootcamp"""
+type TrajectoryTemplateTypeModel {
+  """Идентификатор типа шаблона траектории"""
+  trajectoryTypeId: ID
+
+  """Наименование типа шаблона траектории"""
+  trajectoryTypeName: String
+
+  """Человекочитаемое наименование типа шаблона траектории"""
+  title: String
 }
 
 """
@@ -58137,6 +59145,18 @@ type UniversityActiveStudentsCount {
   registeredStudentsCount: Int!
 }
 
+""""""
+input UniversityDomainInputModel {
+  """Идентификатор домена университета"""
+  universityDomainId: ID
+
+  """Имя домена университета"""
+  domain: String!
+
+  """Идентификатор университета, к которому относится домен"""
+  universityId: ID
+}
+
 """Домен университет, к которому относится пользователь Bootcamp"""
 type UniversityDomainModel {
   """Идентификатор домена университета"""
@@ -58147,6 +59167,77 @@ type UniversityDomainModel {
 
   """Идентификатор университета, к которому относится домен"""
   universityId: ID!
+}
+
+"""Фильтр по получению вузовской почты учеников Bootcamp"""
+input UniversityEmailFilterInputModel {
+  """Строка поиска по внутренней почте пользователя"""
+  textSearch: String
+
+  """Идентификаторы вузов, по которым запрашивается поиск"""
+  universityIds: [ID!]
+
+  """Флаг определения использования фильтра по статусу формы"""
+  isVisibleDefined: Boolean
+
+  """Флаг показа страницы верификации вузовской почты пользователю"""
+  isVisible: Boolean
+
+  """
+  Флаг, определяющий, заполнено ли поле комментария записью о вузе, который не был найден в списке существующих вузов
+  """
+  isCommentPresent: Boolean
+
+  """Флаг по запросу записей, где была заполнена почта"""
+  isEmailPresent: Boolean
+
+  """Дата начала поиска"""
+  dateFrom: DateTime
+
+  """Дата окончания поиска"""
+  dateTo: DateTime
+
+  """Пагинация"""
+  paging: PagingInput
+
+  """Сортировка по почте"""
+  isAscSortByEmail: Boolean
+}
+
+""""""
+input UniversityInfoFilterModel {
+  """"""
+  universityIds: [ID!]
+
+  """"""
+  domains: [String]
+
+  """"""
+  paging: PagingInput
+}
+
+""""""
+input UniversityInfoInputModel {
+  """Идентификатор университета"""
+  universityId: ID
+
+  """Имя университета"""
+  universityName: String!
+
+  """Список доменов университета"""
+  domains: [UniversityDomainInputModel]!
+}
+
+""""""
+type UniversityInfoModel {
+  """"""
+  universityId: ID!
+
+  """"""
+  universityName: String!
+
+  """"""
+  domains: [UniversityDomainModel]!
 }
 
 """Университет, к которому относится пользователь Bootcamp"""
@@ -59870,6 +60961,9 @@ type UserQueries {
     paging: PagingInput
   ): [MisprintReport!]!
 
+  """Получение фильтра"""
+  getMisprintFilterBtc: [Task!]!
+
   """"""
   getMisprintReportsBTC(
     """Фильтр по поиску опечаток в Bootcamp"""
@@ -59941,6 +61035,9 @@ type UserQueries {
     """Строка поиска"""
     textSearch: String
   ): Int!
+
+  """Получение фильтра"""
+  getComplaintsFilterBtc: [Task!]!
 
   """Запрос количества жалоб в Bootcamp"""
   countComplaintsBTC(
@@ -60558,6 +61655,9 @@ type UserTournamentWidget {
 type UserViewSettings {
   """Флаг включена ли темная тема (по умолчанию можно возвращать false)"""
   isDarkThemeEnabled: Boolean!
+
+  """Тип установленной праздничной темы для школы студента"""
+  schoolViewSettingType: S21SchoolViewSettingType!
 }
 
 """"""
@@ -60628,6 +61728,18 @@ type UserWithDeletedRole {
   Есть ли у роли Родитель активные дети. Используется для определения возможности восстановления роли.
   """
   hasParentActiveChildren: Boolean
+}
+
+"""Количество участников класса в статусе active / inactive"""
+type UsersStatusCount {
+  """"""
+  participants: Int
+
+  """"""
+  activeParticipants: Int
+
+  """"""
+  inactiveParticipants: Int
 }
 
 """Юзеры(ученики), для выдачи награды"""
@@ -62890,6 +64002,33 @@ type flywayMigrationVersion {
 
   """Версия последней миграции для данной БД"""
   migrationVersion: String
+}
+
+""""""
+type s21InternshipQueries {
+  """
+  -----------------------------Запросы студента-----------------------------
+   S21. Получение информации о стажировке
+  """
+  getInternshipDataById(
+    """id проекта"""
+    goalId: ID!
+  ): InternshipStudentInfo!
+
+  """S21. Получение обратной связи от ментора разбитую по попыткам"""
+  getInternshipReviewDataInfo(
+    """id проекта"""
+    goalId: ID!
+  ): InternshipStudentReviewInfo!
+
+  """S21. Получить информацию по стажировке студента администратором"""
+  getInternshipReviewDataInfoByStudent(
+    """id проекта"""
+    goalId: ID!
+
+    """id студента"""
+    studentId: UUID!
+  ): InternshipStudentReviewInfo!
 }
 
 """"""

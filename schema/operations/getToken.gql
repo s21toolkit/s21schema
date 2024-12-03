@@ -1,0 +1,5 @@
+query getToken {
+  school21 {
+    generateJwtTokenForCentrifugo
+  }
+}

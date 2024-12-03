@@ -17,10 +17,6 @@ fragment TimelineItem on ProjectTimelineItem {
   }
 }
 
-fragment CourseGoalsTypes on LocalCourseGoalInformation {
-  executionType
-}
-
 fragment CourseInfo on CourseCoverInformation {
   courseName
   courseType
@@ -59,19 +55,35 @@ fragment CourseInfo on CourseCoverInformation {
   }
 }
 
-query getCourseCoverInformation($localCourseId: ID!) {
+query getCourseInfoByStudent($localCourseId: ID!, $studentId: UUID!) {
   course {
-    getCourseCoverInformation(localCourseId: $localCourseId) {
+    getCourseCoverInformationByStudent(
+      localCourseId: $localCourseId
+      studentId: $studentId
+    ) {
       ...CourseInfo
     }
-    getCourseRetryInfo(localCourseId: $localCourseId) {
+    getCourseAttemptStatisticByStudent(
+      localCourseId: $localCourseId
+      studentId: $studentId
+    ) {
+      completionResultStatus
+    }
+    getCourseRetryInfoByStudent(
+      localCourseId: $localCourseId
+      studentId: $studentId
+    ) {
       totalRetryValue
       usedRetryCount
       unlimitedAttempts
     }
-    getLocalCourseGoals(localCourseId: $localCourseId) {
+    getLocalCourseGoalsByStudent(
+      localCourseId: $localCourseId
+      studentId: $studentId
+      sortingFields: {name: "goalName", asc: true}
+    ) {
       localCourseGoals {
-        ...CourseGoalsTypes
+        executionType
       }
     }
   }

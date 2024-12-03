@@ -1,0 +1,17 @@
+query MediatekaGetContentItem($itemIds: [ID!]!) {
+  mediateka {
+    getContentItemsByIds(isActive: true, itemIds: $itemIds) {
+      itemId
+      contentType
+      contentName
+      contentAuthor
+      contentUrl
+      subtitleLink
+      subtitleLinks {
+        languageCode
+        subtitleLink
+      }
+      description
+    }
+  }
+}

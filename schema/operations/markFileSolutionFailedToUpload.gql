@@ -9,11 +9,12 @@ fragment StudyProcessFile on StudyProcessFile {
   fileSize
 }
 
-mutation markFileSolutionFailedToUpload($taskId: ID!, $fileCancelEvent: [StudyProcessFileFailOrCancelInput!]!) {
+mutation markFileSolutionFailedToUpload($taskId: ID!, $errorMessage: String!, $studyProcessFileId: ID!) {
   sc21StudentTaskCheck {
     markFileSolutionFailedToUpload(
       taskId: $taskId
-      fileCancelEvent: $fileCancelEvent
+      errorMessage: $errorMessage
+      studyProcessFileId: $studyProcessFileId
     ) {
       ...StudyProcessFile
     }

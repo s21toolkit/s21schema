@@ -4,14 +4,14 @@ fragment OnlineReviewVideoInfo on OnlineReviewVideo {
   status
   statusDetails
   updateDateTime
+  fileSize
 }
 
-mutation markFilePending($filledChecklistId: ID!, $fileName: String!, $relativePath: String!) {
+mutation markFilesPending($filledChecklistId: ID!, $pendingFiles: [StudyProcessFileInitialInput!]!) {
   school21 {
-    markFilePending(
+    markFilesPending(
       filledChecklistId: $filledChecklistId
-      fileName: $fileName
-      relativePath: $relativePath
+      pendingFiles: $pendingFiles
     ) {
       ...OnlineReviewVideoInfo
     }

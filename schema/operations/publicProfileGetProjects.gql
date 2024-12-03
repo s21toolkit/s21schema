@@ -12,6 +12,10 @@ query publicProfileGetProjects($studentId: UUID!, $stageGroupId: ID!) {
       goalStatus
       amountAnswers
       amountReviewedAnswers
+      executionType
+      localCourseId
+      courseType
+      displayedCourseStatus
     }
   }
 }

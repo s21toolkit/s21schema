@@ -1,0 +1,10 @@
+query AttachedFilesWidgetGetSelection($selection: ID!) {
+  selection {
+    getItems(selectionId: $selection) {
+      itemId
+      contentType
+      contentName
+      contentUrl
+    }
+  }
+}

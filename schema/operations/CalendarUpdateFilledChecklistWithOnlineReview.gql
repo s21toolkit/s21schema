@@ -1,9 +1,6 @@
-mutation CalendarUpdateFilledChecklistWithOnlineReview($filledChecklistId: ID!, $onlineReviewId: ID!) {
+mutation CalendarUpdateFilledChecklistWithOnlineReview($filledChecklistId: ID!) {
   school21 {
-    updateFilledChecklistWithOnlineReview(
-      filledChecklistId: $filledChecklistId
-      onlineReviewId: $onlineReviewId
-    ) {
+    submitFilledChecklistRecording(filledChecklistId: $filledChecklistId) {
       checklistId
     }
   }

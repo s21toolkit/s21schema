@@ -4,6 +4,7 @@ fragment OnlineReviewVideoInfo on OnlineReviewVideo {
   status
   statusDetails
   updateDateTime
+  fileSize
 }
 
 mutation markOnlineReviewVideoUploadCancelled($filledChecklistId: ID!, $onlineReviewId: ID!) {

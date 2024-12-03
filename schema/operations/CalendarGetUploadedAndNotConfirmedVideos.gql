@@ -1,0 +1,12 @@
+query CalendarGetUploadedAndNotConfirmedVideos($filledChecklistId: ID!) {
+  sc21StudentTaskCheck {
+    getUploadedAndNotConfirmedVideos(filledChecklistId: $filledChecklistId) {
+      onlineVideoId
+      link
+      status
+      statusDetails
+      updateDateTime
+      fileSize
+    }
+  }
+}

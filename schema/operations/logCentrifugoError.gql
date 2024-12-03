@@ -1,0 +1,5 @@
+mutation logCentrifugoError($jsonMessage: String!) {
+  school21 {
+    logCentrifugoError(jsonMessage: $jsonMessage)
+  }
+}
