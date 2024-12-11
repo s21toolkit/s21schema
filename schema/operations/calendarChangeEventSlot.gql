@@ -124,6 +124,12 @@ fragment CalendarEvent on CalendarEvent {
     type
     start
     end
+    event {
+      eventUserRole
+    }
+    school {
+      shortName
+    }
   }
   bookings {
     ...CalendarReviewBooking

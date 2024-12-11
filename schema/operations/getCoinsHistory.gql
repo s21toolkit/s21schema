@@ -9,6 +9,7 @@ fragment CoinsTransactionInfo on UserCoinsHistoryItemModel {
   giverLogin
   comment
   amountAfter
+  tournamentName
 }
 
 query getCoinsHistory {

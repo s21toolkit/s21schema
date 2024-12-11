@@ -269,6 +269,9 @@ type AcademicYearSubjects {
 input AccGigaChatMessageInput {
   """текст сообщения"""
   content: String!
+
+  """"""
+  role: GigaChatRoleEnum
 }
 
 """Ответ GigaChat"""
@@ -1450,7 +1453,7 @@ type AcceleratorQueries {
   getAccModuleById(goalId: ID!): StudentModule
 
   """отправить запрос в GigaChat и получить ответ"""
-  getAccGigaChatResponse(messages: [AccGigaChatMessageInput!]!): [AccGigaChatResponse!]!
+  getAccGigaChatResponse(messages: [AccGigaChatMessageInput!]!, conversationId: UUID): [AccGigaChatResponse!]!
 }
 
 """"""
@@ -6637,6 +6640,24 @@ type BusinessAdminMutations {
     issuedId: ID!
   ): IssuedCertificateModel!
 
+  """Запись факта выдачи Welcome Pack"""
+  issuedWelcomePack(
+    """ID ученика"""
+    studentId: UUID!
+
+    """Табельный номер ученика"""
+    personnelNumber: ID!
+
+    """Организация ученика"""
+    organisationName: String!
+  ): WelcomePackModel!
+
+  """Сброс факта выдачи Welcome Pack"""
+  resetIssuedStatusForWelcomePack(comment: String!, welcomePackId: ID!): WelcomePackModel!
+
+  """"""
+  checkAutoAwards(inputs: [CheckAutoAwardsEventInput!]!): Boolean!
+
   """"""
   createBadgeAward(badgeInput: BadgeAwardInput!): Award!
 
@@ -8101,9 +8122,6 @@ type BusinessAdminQueries {
   """Получение количества записей списка вузовских почт"""
   getStudentUniversityEmailsCount(universityEmailFilter: UniversityEmailFilterInputModel!): ID!
 
-  """S21. Поиск файлов проектов по параметрам"""
-  findPlatfProjectSolutions(goalId: Int, schoolId: UUID!, stageId: ID!, stageGroupId: ID!, studentState: StudentStateEnum, paging: PagingInput!): PlatfProjectSolutions!
-
   """Выгрузка сертификата ученика"""
   exportCertificateForStudent(
     """ID ученика"""
@@ -8112,6 +8130,18 @@ type BusinessAdminQueries {
     """ID выдачи сертификата"""
     issuedId: ID!
   ): IssuedCertificatePdf!
+
+  """Получение фильтра для отчета о welcome pack"""
+  loadWelcomePackReportFilterParams: WelcomePackFilterParamsModel!
+
+  """Получение количества записей в отчете welcome pack"""
+  countWelcomePackReports(welcomePackFilter: WelcomePackFilterInputModel!): ID!
+
+  """Получение отчета о welcome pack"""
+  loadWelcomePackReports(welcomePackFilter: WelcomePackFilterInputModel!): [WelcomePackReportModel!]!
+
+  """S21. Поиск файлов проектов по параметрам"""
+  findPlatfProjectSolutions(goalId: Int, schoolId: UUID!, stageId: ID!, stageGroupId: ID!, studentState: StudentStateEnum, paging: PagingInput!): PlatfProjectSolutions!
 
   """"""
   getBadges: [Badge!]!
@@ -8191,6 +8221,12 @@ type BusinessAdminQueries {
   """Список турниров"""
   getSchoolGameTournaments(offset: Int!, limit: Int!, sortingFields: [SortingField!]): [GameTournament!]!
 
+  """"""
+  getSchoolGameTournamentsV2(timeStatus: TimeStatus!, search: String, stageId: ID, offset: Int!, limit: Int!, sortingFields: [SortingField!]): [GameTournament!]!
+
+  """"""
+  getSchoolGameTournamentsCountV2(timeStatus: TimeStatus!, search: String, stageId: ID): Int!
+
   """Общее кол-во турниров в школе"""
   getSchoolGameTournamentsCount: Int!
 
@@ -8240,6 +8276,9 @@ type BusinessAdminQueries {
 
   """провалидировать логины пользователей"""
   validateLoginsForAwardsV2(logins: [String!]!): LoginValidationResponseV2!
+
+  """"""
+  getTournamentResultReport(tournamentId: ID!): ReportExcelFile!
 
   """Обзор работы пользователей платформы."""
   getSchoolMonitoring(schoolMonitoringInput: SchoolMonitoringInput, currentRole: String): [SchoolMonitoring!]!
@@ -8330,6 +8369,9 @@ type BusinessAdminQueries {
 
   """Отчет по выгрузке вузовской почты учеников в Bootcamp"""
   exportStudentUniversityEmails(universityEmailFilter: UniversityEmailFilterInputModel!): ReportExcelFile!
+
+  """Отчет по Welcome Pack'ах в Bootcamp"""
+  exportWelcomePackReports(welcomePackFilter: WelcomePackFilterInputModel!): ReportExcelFile!
 }
 
 """deprecated. use BusinessAdminRoleV2"""
@@ -9337,6 +9379,26 @@ type CertificateOfParticipation {
 
   """Шаблон сертификата"""
   templateType: String!
+
+  """Плановая трудоемкость в часах"""
+  planLaboriousness: Int
+}
+
+""""""
+type CertificateOfParticipationInfoModel {
+  """Титул свидетельства"""
+  courseTitle: String!
+
+  """
+  Название траектории для выдачи свидетельства (может не совпадать с trajectoryTemplateName)
+  """
+  trajectoryTitle: String!
+
+  """Необходимый уровень прохождения для получения сертификата"""
+  achieveLevel: Int!
+
+  """Текущий уровень прохождения траектории учеником"""
+  trajectoryProgress: Int!
 }
 
 """"""
@@ -9658,6 +9720,21 @@ input ChannelInput {
 }
 
 """"""
+input CheckAutoAwardsEventInput {
+  """"""
+  userId: UUID!
+
+  """"""
+  studentId: UUID!
+
+  """"""
+  schoolId: UUID!
+
+  """"""
+  trigger: String!
+}
+
+""""""
 type CheckSequenceSettings {
   """"""
   taskId: ID!
@@ -9799,6 +9876,15 @@ type ChildUserInfo {
 
   """"""
   studentRoles: [StudentRole!]!
+}
+
+""""""
+type CityModel {
+  """ID города"""
+  cityId: ID!
+
+  """Название города"""
+  cityName: String!
 }
 
 """Информация о классе взята из stage_subject_groups"""
@@ -15372,6 +15458,9 @@ type EJournalDeleteOperationResponse {
 type EJournalError {
   """Код ошибки"""
   errorCode: EJournalErrorCode!
+
+  """Дополнительная информация по ошибке (опционально)"""
+  error: String
 }
 
 """Коды ошибок ЭЖ"""
@@ -18664,6 +18753,18 @@ enum FileExtensionEnum {
 
   """"""
   AI
+
+  """"""
+  YAML
+
+  """"""
+  YML
+
+  """"""
+  XML
+
+  """"""
+  JSON
 }
 
 """"""
@@ -19587,6 +19688,9 @@ type GameTournament {
 
   """"""
   daysToEnd: Int
+
+  """"""
+  tournamentAwardSettings: [TournamentAwardSetting!]
 }
 
 """"""
@@ -19611,6 +19715,9 @@ input GameTournamentInput {
 
   """"""
   tournamentAwardDescription: String
+
+  """"""
+  awardSettings: [TournamentAwardSettingInput!]
 }
 
 """"""
@@ -22726,6 +22833,9 @@ type IssuedCertificateModel {
   student: Student!
 
   """ID шаблона сертификата"""
+  certificateId: ID! @deprecated(reason: "Под удаление.")
+
+  """"""
   certificateInfo: CertificateOfParticipation!
 
   """Дата выдачи"""
@@ -34690,6 +34800,12 @@ type S21ClassPlan {
 
   """Цели плана"""
   planGoals: [S21ClassPlanGoal!]!
+
+  """Идентификатор паралели"""
+  stageId: ID
+
+  """Произошла ли миграция данного плана на курсы"""
+  isMigrated: Boolean
 }
 
 """Параллели и Планы на классы по предметам"""
@@ -35194,6 +35310,24 @@ type S21MassAddAwardToUsersResponse {
   createFile: Boolean!
 }
 
+"""S21. Тип сущности для миграции с плана на курс"""
+enum S21MigrationFromPlanToCourseEntityType {
+  """"""
+  CLASS
+
+  """"""
+  CAMPUS
+
+  """"""
+  ALL
+}
+
+"""Результат миграции с плана в курс"""
+type S21MigrationFromPlanToCourseResult {
+  """Время затраченное на миграцию"""
+  timeSpent: String!
+}
+
 """"""
 type S21Notification {
   """"""
@@ -35419,6 +35553,20 @@ type S21PlanMutations {
 
   """Сохранение плана на класс"""
   saveS21ClassPlan(classPlan: S21ClassPlanInput!): S21ClassPlan!
+
+  """Запуск миграции c плана на класс в курс"""
+  migrateFromClassPlanToCourse(
+    """Тип сущности для миграции"""
+    migrationEntityType: S21MigrationFromPlanToCourseEntityType!
+
+    """ID сущности для миграции (CLASS - Long, CAMPUS - UUID, ALL - null)"""
+    migrationEntityId: String
+
+    """
+    Тип миграции синхронно или нет (Для CAMPUS, ALL всегда isAsync == true)
+    """
+    isAsync: Boolean
+  ): S21MigrationFromPlanToCourseResult!
 }
 
 """"""
@@ -36708,6 +36856,12 @@ type School21Mutations {
 
     """Идентификатор попытки, по которой будет происходить пересчет"""
     studentGoalAttemptId: ID
+  ): Boolean!
+
+  """S21. Откат попытки выполнения экзамена/теста студентом"""
+  rollbackExamAttempt(
+    """Идентификатор экзаменационного проекта студента"""
+    studentGoalId: ID!
   ): Boolean!
 
   """S21. Сохранить дату и время завершения обучения в классе"""
@@ -38616,6 +38770,9 @@ type ShortStudentProgress {
 
   """Запланированная трудоемкость в днях"""
   planLaboriousnessDays: Int
+
+  """Возможность получения сертификата по траекториям студента"""
+  isHavePossibilityToGetCertificate: Boolean
 }
 
 """"""
@@ -38631,6 +38788,15 @@ type SimpleAnswerBody {
 input SimpleAnswerBodyInput {
   """Простой ответ"""
   answer: String!
+}
+
+"""Упрощенное представление пользователя"""
+type SimpleUserInfoModel {
+  """ID пользователя"""
+  userId: UUID!
+
+  """Полное ФИО пользователя"""
+  fullName: String!
 }
 
 """"""
@@ -46265,6 +46431,9 @@ type StudentQueries {
   """Получение сертификатов доступных студенту"""
   getCertificatesForStudent: [IssuedCertificateModel]
 
+  """Получение сертификатов не доступных к скачиванию ученику"""
+  getNotReceivedCertificatesForStudent: [CertificateOfParticipationInfoModel]
+
   """Выгрузка сертификата ученика"""
   exportCertificate(
     """ID выдачи сертификата"""
@@ -46517,6 +46686,81 @@ type StudentRatingBySubjectModel {
 
   """"""
   finalMarks: [JournalFinalStudentMark]!
+}
+
+""""""
+input StudentReducedProgressFilterBTCInputModel {
+  """Идентификаторы классов"""
+  stageGroupIds: [ID!]
+
+  """Идентификаторы модулей"""
+  goalIds: [ID!]
+
+  """Идентификаторы пользоваталей"""
+  userIds: [ID!]
+
+  """Идентификаторы предметов"""
+  subjectIds: [ID!]
+
+  """Фильтр по траекториям"""
+  trajectories: [String!]
+
+  """Начало диапазона плановой даты начала обучения"""
+  planStartDateFrom: Date
+
+  """Конец диапазона плановой даты начала обучения"""
+  planStartDateTo: Date
+
+  """Пагинация"""
+  paging: PagingInput
+}
+
+""""""
+type StudentReducedProgressForBtcModel {
+  """Идентификатор студента (students.student_id)"""
+  studentId: ID!
+
+  """Идентификатор пользователя (users.user_id)"""
+  userId: ID!
+
+  """Фамилия ученика"""
+  lastName: String!
+
+  """Имя ученика"""
+  firstName: String!
+
+  """Отчество ученика"""
+  middleName: String
+
+  """Полное ФИО"""
+  fullName: String!
+
+  """Логин ученика"""
+  login: String!
+
+  """Email ученика"""
+  email: String
+
+  """Дата создания УЗ"""
+  accountCreationDate: DateTime!
+
+  """Дата последнего входа"""
+  lastAuthorizationDate: DateTime
+
+  """Фактическая дата начала"""
+  factStartDate: DateTime
+
+  """Фактическая дата окончания"""
+  factEndDate: DateTime
+
+  """Траектория"""
+  trajectory: String
+
+  """Прогресс по траектории (в процентах)"""
+  progressPercentByTrajectory: Int!
+
+  """Прогресс по модулям"""
+  studyModuleProgress: [StudentStudyModuleProgress!]
 }
 
 """"""
@@ -58459,6 +58703,21 @@ enum TimeSlotTypeEnum {
   EVENT
 }
 
+""""""
+enum TimeStatus {
+  """"""
+  ANY
+
+  """"""
+  UPCOMING
+
+  """"""
+  ONGOING
+
+  """"""
+  COMPLETED
+}
+
 """Тип элемента таймлайна"""
 enum TimelineElementEnum {
   """оценка ментора"""
@@ -58686,6 +58945,51 @@ type Top5AndMeCoalitionTournamentMembers {
 }
 
 """"""
+type TournamentAwardSetting {
+  """"""
+  tournamentAwardSettingId: ID!
+
+  """"""
+  tournamentId: ID!
+
+  """"""
+  coalitionPlace: Int!
+
+  """"""
+  memberPlace: Int
+
+  """"""
+  coins: Int
+
+  """"""
+  awardId: ID
+
+  """"""
+  award: Award
+
+  """"""
+  memberAwards: [TournamentAwardSetting!]
+}
+
+""""""
+input TournamentAwardSettingInput {
+  """"""
+  coalitionPlace: Int!
+
+  """"""
+  memberPlace: Int
+
+  """"""
+  coins: Int
+
+  """"""
+  awardId: Int
+
+  """"""
+  memberAwards: [TournamentAwardSettingInput!]
+}
+
+""""""
 type Trajectory {
   """"""
   trajectoryId: ID
@@ -58832,6 +59136,9 @@ type TrajectoryQueries {
   Получение рекомендованого шаблона траектории на основании данных из АС Пульс
   """
   getRecommendedTrajectoryTemplateV2(userId: ID!, studentId: ID!): TrajectoryTemplate
+
+  """Получение траекторий по идентификаторам классов"""
+  getTrajectoriesByStageGroupIds(stageGroupIds: [ID!]!): [Trajectory!]!
 }
 
 """Шаблон траектории Bootcamp"""
@@ -59814,6 +60121,9 @@ type UserCoinsHistoryItemModel {
 
   """Коммент из БД(тут может быть что угодно в разном формате, даже null)"""
   comment: String
+
+  """Название турнира, если коины получены за турнир, иначе null"""
+  tournamentName: String
 }
 
 """Тип операции с монетами"""
@@ -59826,6 +60136,9 @@ enum UserCoinsHistoryItemType {
 
   """Монеты выданы админом в ручном режиме"""
   HAND_REWARD
+
+  """монеты получены прямым начислением за турнир"""
+  TOURNAMENT_REWARD
 }
 
 """Инфа по пользователю и история изменения его монет"""
@@ -61348,6 +61661,14 @@ type UserQueries {
   """Подсчет результатов удовлетворяющих фильтру"""
   countFeedbacksBTC(filter: FeedbackFilterInputModel): Int!
 
+  """Получение упрощенной версии отчета БМ для Внешнего учителя"""
+  getStudentsReducedProgressForBTC(filter: StudentReducedProgressFilterBTCInputModel!): [StudentReducedProgressForBtcModel!]!
+
+  """
+  Получение количества записей по упрощенной версии отчета БМ для Внешнего учителя
+  """
+  countStudentsReducedProgressForBTC(filter: StudentReducedProgressFilterBTCInputModel!): Int!
+
   """Отчет по жалобам пользователей в Bootcamp"""
   exportComplaintsBTC(
     """Фильтр по выгрузке жалоб в excel"""
@@ -61362,6 +61683,11 @@ type UserQueries {
 
   """"""
   exportFeedbackReport(filter: FeedbackFilterInputModel): ReportExcelFile!
+
+  """
+  Получение excel-выгрузки упрощенной версии отчета БМ для Внешнего учителя
+  """
+  exportStudentReducedProgressBTC(filter: StudentReducedProgressFilterBTCInputModel!): ReportExcelFile!
 }
 
 """Место и ряд пользователя в лидерборде"""
@@ -62281,6 +62607,132 @@ type WeekSubjectPlan {
 
   """Есть ли мотивационный блок у модуля с Id = nearestGoalId"""
   isMotivationBlockPresent: Boolean
+}
+
+""""""
+input WelcomePackFilterInputModel {
+  """Поиск по вхождению"""
+  textSearch: String
+
+  """Поиск по городам"""
+  cities: [ID!]
+
+  """Поиск по Botcamp мастерам"""
+  masters: [UUID!]
+
+  """Поиск по организациям"""
+  organisationsNames: [String!]
+
+  """Филь по дате начало"""
+  dateFrom: DateTime
+
+  """Филь по дате конец"""
+  dateTo: DateTime
+
+  """Пагинация"""
+  paging: PagingInput
+
+  """Сортирорвка по дате"""
+  isSortByDate: Boolean
+
+  """Сортировка по ФИО"""
+  isSortByName: Boolean
+
+  """Фильтр по факту выдачи"""
+  isIssued: Boolean
+
+  """Фильтр по факту окончания Bootcamp"""
+  isCompleteTrajectory: Boolean
+
+  """Поиск среди всех учеников"""
+  isFullSearch: Boolean
+}
+
+""""""
+type WelcomePackFilterParamsModel {
+  """Города учеников из отчета о welcome pack"""
+  allCities: [CityModel]!
+
+  """БМ мастера из отчета о welcome pack"""
+  masters: [SimpleUserInfoModel]!
+}
+
+""""""
+type WelcomePackModel {
+  """ID записи"""
+  welcomePackId: ID!
+
+  """ID ученика"""
+  studentId: UUID!
+
+  """Факт выдачи Welcome Pack"""
+  isIssued: Boolean!
+
+  """Дата выдачи Welcome Pack"""
+  issuedTs: DateTime
+
+  """Факт сброса выдачи welcome pack"""
+  isReset: Boolean!
+
+  """Комментарий к сбросу"""
+  commentForReset: String
+
+  """Полное ФИО буткемп мастера который выдал welcome pack"""
+  issuedUserFullName: String
+
+  """Табельный номер ученика"""
+  personnelNumber: ID
+
+  """Организация ученика"""
+  organisationName: String
+}
+
+""""""
+type WelcomePackReportModel {
+  """ID записи"""
+  welcomePackId: ID!
+
+  """ID ученика"""
+  studentId: UUID!
+
+  """Полное ФИО ученика"""
+  studentFullName: String!
+
+  """Табельный номер ученика"""
+  personnelNumber: ID
+
+  """Организация ученика"""
+  organisationName: String
+
+  """Название траектории ученика"""
+  trajectoryName: String
+
+  """Факт выдачи Welcome Pack"""
+  isIssued: Boolean!
+
+  """Дата выдачи Welcome Pack"""
+  issuedTs: DateTime
+
+  """Плановая дата окончания траектории"""
+  trajectoryEndDate: DateTime
+
+  """Город ученика"""
+  city: String
+
+  """Полное ФИО Botcamp мастера"""
+  BmFullName: String
+
+  """Полное ФИО буткемп мастера который выдал welcome pack"""
+  issuedUserFullName: String
+
+  """Факт сброса выдачи welcome pack"""
+  isReset: Boolean!
+
+  """Прогресс ученика по траектории"""
+  studentProgress: Int!
+
+  """Коментарий к сбросу факта выдачи"""
+  commentForReset: String
 }
 
 """"""
