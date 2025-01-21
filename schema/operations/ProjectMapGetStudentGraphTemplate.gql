@@ -7,10 +7,19 @@ query ProjectMapGetStudentGraphTemplate($studentId: UUID, $stageGroupId: Int) {
         target
         sourceHandle
         targetHandle
+        data {
+          sourceGap
+          targetGap
+          points {
+            x
+            y
+          }
+        }
       }
       nodes {
         id
         label
+        handles
         position {
           x
           y

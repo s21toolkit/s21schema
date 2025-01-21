@@ -21530,6 +21530,36 @@ type GoalReviewInfo {
   checkDurationMinutes: Int!
 }
 
+"""Краткая информация о проекте"""
+type GoalShortInfo {
+  """Идентификатор проекта"""
+  goalId: ID
+
+  """Название проекта"""
+  goalName: String
+}
+
+"""Краткая информация об источнике проекте"""
+type GoalSourceShortInfo {
+  """Идентификатор источника проекта"""
+  goalSourceId: ID
+
+  """Название источника проекта"""
+  goalSourceName: String
+}
+
+"""Типы источников проектов"""
+enum GoalSourceTypeEnum {
+  """"""
+  STUDY_PROGRAM
+
+  """"""
+  COURSE
+
+  """"""
+  STAGE_PLAN
+}
+
 """Статус модуля"""
 enum GoalStatus {
   """Зарегистрирован"""
@@ -21963,6 +21993,60 @@ type HolyGraph {
   graph: HolyGraphJSON
 }
 
+"""Контекст графа по заданным источникам"""
+type HolyGraphContentBunch {
+  """Тип источников проектов"""
+  contentBunchType: HolyGraphContentBunchTypeEnum!
+
+  """Перечень Id источников проектов"""
+  contentBunchIds: [Int!]!
+
+  """Id параллели"""
+  stageId: Int
+
+  """Учебные модули заданных источников"""
+  items: [HolyGraphContentBunchItem!]!
+}
+
+"""Источник проектов"""
+type HolyGraphContentBunchEntity {
+  """Id источника проектов"""
+  id: Int!
+
+  """Наименование источника проектов"""
+  name: String
+}
+
+"""Учебные модули глобального плана"""
+type HolyGraphContentBunchItem {
+  """Тип связанной сущности"""
+  entityType: HolyGraphItemEntityType
+
+  """Ид связанной сущности"""
+  entityId: Int
+
+  """Направления обучения (навыки)"""
+  skills: [HolyGraphItemSkill!]!
+
+  """Детальная информация о проекте"""
+  goal: HolyGraphItemGoalInfo
+
+  """Детальная информация о курсе"""
+  course: HolyGraphItemCourseInfo
+}
+
+""""""
+enum HolyGraphContentBunchTypeEnum {
+  """Учебная программа"""
+  STUDY_PROGRAM
+
+  """Курс"""
+  COURSE
+
+  """Глобальный план"""
+  GLOBAL_PLAN
+}
+
 """Связи между элементами графа"""
 type HolyGraphEdge {
   """Ид связи"""
@@ -21979,42 +22063,24 @@ type HolyGraphEdge {
 
   """id точки входа"""
   targetHandle: String!
+
+  """Тип связи"""
+  type: String!
+
+  """Траектория связи"""
+  data: HolyGraphEdgeData!
 }
 
-"""Контекст графа глобального плана"""
-type HolyGraphGlobalPlan {
-  """Id глобального плана"""
-  globalPlanId: Int
+"""Траектория связи графа"""
+type HolyGraphEdgeData {
+  """Расстояние до источника"""
+  sourceGap: Int!
 
-  """Id параллели"""
-  stageId: Int
+  """Расстояние до назначения"""
+  targetGap: Int!
 
-  """Id предмета"""
-  subjectId: Int
-
-  """Статус плана"""
-  planStatus: PlanStatusEnum
-
-  """Учебные модули глобального плана"""
-  items: [HolyGraphGlobalPlanItem!]!
-}
-
-"""Учебные модули глобального плана"""
-type HolyGraphGlobalPlanItem {
-  """Тип связанной сущности"""
-  entityType: HolyGraphItemEntityType
-
-  """Ид связанной сущности"""
-  entityId: Int
-
-  """Направления обучения (навыки)"""
-  skills: [HolyGraphItemSkill!]!
-
-  """Детальная информация о проекте"""
-  goal: HolyGraphItemGoalInfo
-
-  """Детальная информация о курсе"""
-  course: HolyGraphItemCourseInfo
+  """Координаты точек траектории связи"""
+  points: [HolyGraphPointPosition!]!
 }
 
 """Детальная информация о курсе"""
@@ -22128,6 +22194,12 @@ type HolyGraphMutations {
 
     """Комментарий"""
     comment: String
+
+    """Тип источников проектов"""
+    contentBunchType: HolyGraphContentBunchTypeEnum!
+
+    """Перечень Id источников проектов"""
+    contentBunchIds: [Int!]!
   ): HolyGraph
 
   """
@@ -22161,6 +22233,12 @@ type HolyGraphMutations {
 
     """Граф"""
     graph: JsonNode!
+
+    """Тип источников проектов"""
+    contentBunchType: HolyGraphContentBunchTypeEnum
+
+    """Перечень Id источников проектов"""
+    contentBunchIds: [Int]
   ): Int
 
   """Удалить черновик графа для указанной параллели"""
@@ -22183,6 +22261,9 @@ type HolyGraphNode {
 
   """Координаты группы"""
   position: HolyGraphNodePosition!
+
+  """Точки входа/выхода"""
+  handles: [String!]!
 }
 
 """Элементы групп графа"""
@@ -22227,6 +22308,15 @@ type HolyGraphNodePosition {
   y: Int!
 }
 
+"""Координаты точек траектории связи"""
+type HolyGraphPointPosition {
+  """"""
+  x: Int!
+
+  """"""
+  y: Int!
+}
+
 """"""
 type HolyGraphQueries {
   """Получить список параллелей, имеющих опубликованный граф"""
@@ -22247,11 +22337,26 @@ type HolyGraphQueries {
     emptyIfNotExist: Boolean
   ): HolyGraphJSON
 
-  """Получить контекст графа глобального плана"""
-  getGlobalPlanGraph(
-    """Id глобального плана"""
-    globalPlanId: Int
-  ): HolyGraphGlobalPlan
+  """Получить источники проектов по типу"""
+  getContentBunchesByType(
+    """Тип источников проектов"""
+    contentBunchType: HolyGraphContentBunchTypeEnum!
+
+    """Id параллели"""
+    stageId: Int!
+  ): [HolyGraphContentBunchEntity!]!
+
+  """Получить контекст графа по заданным источникам"""
+  getContentBunchGraph(
+    """Тип источников проектов"""
+    contentBunchType: HolyGraphContentBunchTypeEnum!
+
+    """Перечень Id источников проектов"""
+    contentBunchIds: [Int!]!
+
+    """Id параллели"""
+    stageId: Int!
+  ): HolyGraphContentBunch
 
   """Получить граф прогресса студента"""
   getStudentStateGraph(
@@ -22324,8 +22429,11 @@ type HolyGraphStage {
   """Наименование параллели"""
   stageName: String!
 
-  """Id глобального плана"""
-  globalPlanId: Int
+  """Тип источников проектов"""
+  contentBunchType: HolyGraphContentBunchTypeEnum!
+
+  """Перечень Id источников проектов"""
+  contentBunchIds: [Int!]!
 
   """Дата последнего изменения"""
   updateTs: DateTime
@@ -37027,6 +37135,12 @@ type School21Queries {
   """S21. Возвращает план на параллель по идентификатору"""
   getS21StagePlan(stagePlanId: ID!): S21StagePlan!
 
+  """S21. Возвращает список источников проектов по типу источника"""
+  getGoalSources(schoolId: UUID!, stageSubjectGroupId: ID, goalSourceType: GoalSourceTypeEnum!): [GoalSourceShortInfo!]!
+
+  """S21. Возвращает список проектов по типу и Id источника"""
+  getGoalsByGoalSourceId(schoolId: UUID!, stageSubjectGroupId: ID, goalSourceType: GoalSourceTypeEnum!, goalSourceId: ID!): [GoalShortInfo!]!
+
   """
   S21. Возвращает план на параллель по идентификатору c групповыми проектами
   """
@@ -37073,6 +37187,9 @@ type School21Queries {
 
   """S21. Запрос отчета по командам"""
   loadStudentsTeamS21Report(stageId: ID!, stageSubjectGroupId: ID, goalId: ID, timeZone: String, schoolId: UUID): ReportExcelFile!
+
+  """S21. Запрос отчета по командам"""
+  loadStudentsTeamS21ReportV2(schoolId: UUID!, stageSubjectGroupId: ID, goalSourceType: GoalSourceTypeEnum!, goalSourceId: ID!, goalId: ID, timeZone: String): ReportExcelFile!
 
   """S21. Получение отчета по проведенным мероприятиям"""
   getEventsReport(from: DateTime!, to: DateTime!, eventCodes: [String!]!, timeZone: String, schoolId: UUID): ReportExcelFile!
