@@ -226,6 +226,18 @@ enum ASAPWidgetTypeEnum {
   LINK
 }
 
+""""""
+type Ability {
+  """"""
+  abilityId: ID!
+
+  """"""
+  abilityName: String!
+
+  """"""
+  imageUrl: String
+}
+
 """Значение характеристик: Урон, Здоровье и т.д."""
 type AbilityPower {
   """user_ability_id || equipment_ability__id"""
@@ -238,6 +250,15 @@ type AbilityPower {
   imageUrl: String!
 
   """Значение"""
+  power: Int!
+}
+
+""""""
+input AbilityPowerInputModel {
+  """ID характеристики"""
+  abilityId: ID!
+
+  """Количество начисляемых значений характеристики"""
   power: Int!
 }
 
@@ -378,6 +399,12 @@ type AccUserInfoModel {
 
   """"""
   isOldStageGroup: Boolean!
+
+  """"""
+  readyProject: Boolean
+
+  """"""
+  utm: String
 }
 
 """"""
@@ -1341,6 +1368,9 @@ type AcceleratorQueries {
 
   """Отчет об успеваемости по модулям"""
   exportModulesReportToXLS(filter: ModulesReportFilter!): ReportExcelFile!
+
+  """Отчет по сообщениям GigaChat"""
+  exportGigaChatReportToXLS(filter: GigaChatHistoryRequest): ReportExcelFile!
 
   """Получение спиcка всех ТБ и регионов по ТБ"""
   getTerbanksWithRegions: [TerbanksModel]!
@@ -4870,6 +4900,33 @@ type AwardCondition {
   description: String!
 }
 
+""""""
+input AwardInputModel {
+  """
+  ID награды
+  {null} если создается новая
+  """
+  awardId: Int
+
+  """Условия получения"""
+  awardConditionId: Int!
+
+  """"""
+  assignmentIds: [ID!]!
+
+  """"""
+  systemAssignmentEnabled: Boolean!
+
+  """Количество очков опыта"""
+  pointsToAdd: Int
+
+  """Статус активности награды"""
+  isActive: Boolean!
+
+  """"""
+  equipment: EquipmentInputModel
+}
+
 """Справочник уровней наград"""
 type AwardLevel {
   """Число уровня"""
@@ -4910,6 +4967,22 @@ type AwardMutations {
 
   """Редактировать бэйдж"""
   editBadgeAward(awardId: ID!, badgeAwardInputModel: BadgeAwardInput!, schoolId: UUID!): Award!
+
+  """
+  Создание награды типа "экипировка"
+  """
+  createEquipmentAward(createAward: AwardInputModel): Award!
+
+  """
+  Редактирование награды типа "экипировка"
+  Так же можно через эту ручку архивировать награду
+  """
+  editEquipmentAward(editAward: AwardInputModel): Award!
+
+  """
+  Удаление награды типа "экипировка"
+  """
+  deleteEquipmentAward(awardId: ID): Boolean!
 }
 
 """"""
@@ -4936,6 +5009,22 @@ type AwardQueries {
 
   """Механики назначения наград"""
   getS21AwardAssignmentTypes: [AssignmentType!]!
+
+  """Возвращает все награды типа "экипировка" для конкретной школы"""
+  getAllEquipmentAward: [Award!]!
+
+  """
+  Получаем информацию по использованию наград виде экипировки закрепленных за определенным модулем
+  """
+  getAwardInfoForModule(moduleId: ID!): [InfoWhereAwardIsUsed!]!
+
+  """
+  Получаем информацию по использованию награды в виде экипировки в различных модулях
+  """
+  getAwardInfoWithModuleInfo(awardId: ID!): InfoWhereAwardIsUsed
+
+  """"""
+  getAllInfoForCreateAward: InfoForCreateAward!
 }
 
 """Тип награды"""
@@ -9291,6 +9380,24 @@ type CalendarTimeSlot {
   null, если не наступило время деанонимизации
   """
   school: School
+}
+
+""""""
+input CaptureFileInput {
+  """
+  Картинка закодирована в base64
+  {null} в том случае если не создается новая
+  """
+  fileBase64: String
+
+  """
+  Путь к картинке
+  {null} в том случае если создается новая
+  """
+  filePath: String
+
+  """Расширение картинки"""
+  extension: FileExtensionEnum!
 }
 
 """"""
@@ -16489,6 +16596,36 @@ type Equipment {
   abilities: [AbilityPower!]!
 }
 
+""""""
+input EquipmentInputModel {
+  """Название экипировки"""
+  name: String!
+
+  """Аватарка экипировки"""
+  avatarImg: CaptureFileInput!
+
+  """Картинка надетой экипировки"""
+  dressedImg: CaptureFileInput!
+
+  """Слот надевания экипировки"""
+  equipmentSlotId: ID!
+
+  """Уровень экипировки"""
+  equipmentLevelId: ID!
+
+  """Дополнительные характеристики экипировки"""
+  abilities: [AbilityPowerInputModel!]
+}
+
+""""""
+type EquipmentLevelInfo {
+  """"""
+  id: ID!
+
+  """"""
+  name: String!
+}
+
 """Слот для экипировки"""
 enum EquipmentSlotEnum {
   """Ботинки"""
@@ -16523,6 +16660,15 @@ enum EquipmentSlotEnum {
 
   """Украшение на шею"""
   NECKLACE
+}
+
+""""""
+type EquipmentSlotInfo {
+  """"""
+  id: ID!
+
+  """"""
+  name: String!
 }
 
 """"""
@@ -18765,6 +18911,9 @@ enum FileExtensionEnum {
 
   """"""
   JSON
+
+  """"""
+  ZIP
 }
 
 """"""
@@ -19738,7 +19887,7 @@ type GamificationMutations {
   setHistoryShowed(historyId: ID!): Boolean!
 
   """Назначить награды за выполнения модулей"""
-  setModuleAwards(moduleId: ID!, moduleAwards: [ModuleAwardInput!]!): Boolean!
+  setModuleAwards(moduleId: ID!, moduleAwards: [ModuleAwardInput!]!, isBootcamp: Boolean): Boolean!
 
   """Создание нового уровня с константами"""
   createNextDeadlineGameLevel(level: DeadlineGameLevelInput!): DeadlineGameLevel!
@@ -20010,6 +20159,15 @@ type GetVisitJournalRulesResponse {
 
   """"""
   visitJournalRules: [VisitJournalRule!]!
+}
+
+""""""
+input GigaChatHistoryRequest {
+  """"""
+  createdDateFrom: Date!
+
+  """"""
+  createdDateTo: Date!
 }
 
 """Сообщение GigaChat, отправленное пользователем или полученное в ответ"""
@@ -22708,6 +22866,9 @@ interface IProject {
 
   """"""
   files: [ProjectFile]
+
+  """"""
+  legalName: String
 }
 
 """Контекст входящего ответа по Заданию, с дополнительной информацией"""
@@ -22729,6 +22890,39 @@ type IndicatorsSettingExamTestPageModel {
 
   """Вес страницы"""
   pageWeight: Float!
+}
+
+""""""
+type InfoForCreateAward {
+  """Типы назначения"""
+  assignmentTypes: [AssignmentType!]!
+
+  """Типы назначения"""
+  awardConditions: [AwardCondition!]!
+
+  """"""
+  equipmentAward: InfoForCreateEquipment
+}
+
+""""""
+type InfoForCreateEquipment {
+  """"""
+  equipmentSlots: [EquipmentSlotInfo!]!
+
+  """"""
+  equipmentLevels: [EquipmentLevelInfo!]!
+
+  """"""
+  abilityTypes: [Ability!]!
+}
+
+""""""
+type InfoWhereAwardIsUsed {
+  """"""
+  award: Award!
+
+  """"""
+  usedInTrajectory: [TrajectoryWithUsedModels!]
 }
 
 """"""
@@ -27139,6 +27333,15 @@ type MilestoneReport {
 
   """Этап"""
   milestone: String
+
+  """Регистрация с проектом"""
+  readyProject: Boolean
+
+  """Метка канала привлечения"""
+  UTM: String
+
+  """Наименование ЮЛ"""
+  legalName: String
 }
 
 """"""
@@ -27187,6 +27390,9 @@ input MilestoneReportFilter {
 
   """Массив id проектов"""
   projectId: [UUID]
+
+  """Регистрация с проектом"""
+  readyProject: Boolean
 }
 
 """"""
@@ -32619,6 +32825,9 @@ type Project implements IProject {
 
   """"""
   files: [ProjectFile]
+
+  """"""
+  legalName: String
 }
 
 """"""
@@ -32763,6 +32972,9 @@ type ProjectCard implements IProject {
 
   """"""
   files: [ProjectFile]
+
+  """"""
+  legalName: String
 }
 
 """Статус проверки проекта"""
@@ -32983,6 +33195,15 @@ input ProjectInput {
 
   """"""
   logotypeUrl: String
+
+  """"""
+  legalName: String
+
+  """"""
+  fileName: String
+
+  """"""
+  fileURL: String
 }
 
 """"""
@@ -59258,6 +59479,15 @@ type TrajectoryQueries {
   getTrajectoriesByStageGroupIds(stageGroupIds: [ID!]!): [Trajectory!]!
 }
 
+""""""
+type TrajectorySimpleInfo {
+  """Идентификатор (trajectory_templates.trajectory_template_id)"""
+  trajectoryTemplateId: ID!
+
+  """Название шаблона траектории"""
+  trajectoryTemplateName: String!
+}
+
 """Шаблон траектории Bootcamp"""
 type TrajectoryTemplate {
   """Идентификатор (trajectory_templates.trajectory_template_id)"""
@@ -59493,6 +59723,15 @@ type TrajectoryTemplateTypeModel {
 
   """Человекочитаемое наименование типа шаблона траектории"""
   title: String
+}
+
+""""""
+type TrajectoryWithUsedModels {
+  """"""
+  trajectory: TrajectorySimpleInfo
+
+  """"""
+  usedModules: [ModuleInfo]
 }
 
 """
@@ -63317,6 +63556,12 @@ type WidgetFillingGap {
 
   """Карточки для раскладывания в пропуски"""
   cards: [WidgetFillingGapCard!]
+
+  """Комментарий к правильному ответу"""
+  correctHint: String
+
+  """Комментарий к неверному ответу"""
+  incorrectHint: String
 }
 
 """"""
@@ -63431,6 +63676,12 @@ input WidgetFillingGapInput {
 
   """Карточки для раскладывания в пропуски"""
   cards: [WidgetFillingGapCardInput!]
+
+  """Комментарий к правильному ответу"""
+  correctHint: String
+
+  """Комментарий к неверному ответу"""
+  incorrectHint: String
 }
 
 """"""
@@ -63630,6 +63881,12 @@ type WidgetLineConnector {
 
   """правые карты"""
   rightCards: [WidgetLineConnectorCard!]!
+
+  """Комментарий к правильному ответу"""
+  correctHint: String
+
+  """Комментарий к неверному ответу"""
+  incorrectHint: String
 }
 
 """"""
@@ -63678,6 +63935,12 @@ input WidgetLineConnectorInput {
 
   """правые карты"""
   rightCards: [WidgetLineConnectorCardInput!]!
+
+  """Комментарий к правильному ответу"""
+  correctHint: String
+
+  """Комментарий к неверному ответу"""
+  incorrectHint: String
 }
 
 """"""
@@ -63844,6 +64107,12 @@ type WidgetSimpleAnswer {
 
   """Правильные ответы"""
   correctAnswers: [String!]!
+
+  """Комментарий к правильному ответу"""
+  correctHint: String
+
+  """Комментарий к неверному ответу"""
+  incorrectHint: String
 }
 
 """"""
@@ -63868,6 +64137,12 @@ input WidgetSimpleAnswerInput {
 
   """Правильные ответы"""
   correctAnswers: [String!]!
+
+  """Комментарий к правильному ответу"""
+  correctHint: String
+
+  """Комментарий к неверному ответу"""
+  incorrectHint: String
 }
 
 """"""
@@ -63889,6 +64164,12 @@ type WidgetSortable {
 
   """Карточки для раскладывания в группы"""
   cards: [WidgetSortableCard!]!
+
+  """Комментарий к правильному ответу"""
+  correctHint: String
+
+  """Комментарий к неверному ответу"""
+  incorrectHint: String
 }
 
 """"""
@@ -63974,6 +64255,12 @@ input WidgetSortableInput {
 
   """Карточки для раскладывания в группы"""
   cards: [WidgetSortableCardInput!]!
+
+  """Комментарий к правильному ответу"""
+  correctHint: String
+
+  """Комментарий к неверному ответу"""
+  incorrectHint: String
 }
 
 """"""
@@ -64022,6 +64309,9 @@ type WidgetTestChoice {
 
   """правильный/неправильный"""
   correct: Boolean!
+
+  """Комментарий к варианту ответа"""
+  hint: String
 }
 
 """"""
@@ -64043,6 +64333,9 @@ input WidgetTestChoiceInput {
 
   """правильный/неправильный"""
   correct: Boolean!
+
+  """Комментарий к варианту ответа"""
+  hint: String
 }
 
 """"""
