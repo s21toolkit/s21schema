@@ -5943,6 +5943,42 @@ type BreadCrumbsPlanItem {
   executionType: ModuleExecutionType
 }
 
+"""Фильтр для запроса внешних учителей"""
+input BtcExternalTeacherInputModel {
+  """Поиск по ФИО"""
+  textSearch: String
+
+  """Сортировка"""
+  sortingFields: [SortingField]
+
+  """Пагинация"""
+  paging: PagingInput
+}
+
+"""Информация о внешнем учителе"""
+type BtcExternalTeacherModel {
+  """Идентификатор пользователя"""
+  userId: UUID!
+
+  """Фамилия пользователя"""
+  lastName: String!
+
+  """Имя пользователя"""
+  firstName: String!
+
+  """Отчество пользователя"""
+  middleName: String
+
+  """Email пользователя"""
+  email: String
+
+  """Логин пользователя"""
+  login: String!
+
+  """Список классов внешнего учителя"""
+  stageGroupIds: [ID!]
+}
+
 """"""
 type BtcStudentCityModel {
   """Идентификатор города"""
@@ -5953,6 +5989,95 @@ type BtcStudentCityModel {
 
   """Формат обучения учеников в Bootcamp в этом городе (очно/дистанционно)"""
   isStudyOnline: Boolean
+}
+
+"""Информация о теге контента для сохранения"""
+input BtcTagInputModel {
+  """Идентификатор тега"""
+  tagId: ID
+
+  """Имя тега"""
+  tagName: String!
+
+  """Флаг, обозначающий, включен или выключен данный тег"""
+  isActive: Boolean!
+}
+
+"""Информация о теге контента"""
+type BtcTagModel {
+  """Идентификатор тега"""
+  tagId: ID!
+
+  """Имя тега"""
+  tagName: String!
+
+  """Флаг, обозначающий, включен или выключен данный тег"""
+  isActive: Boolean!
+
+  """Дата и время создания тега"""
+  createTs: DateTime
+
+  """Дата и время модификации тега"""
+  modifyTs: DateTime
+
+  """Идентификатор пользователя, который создал тег"""
+  createdBy: UUID!
+
+  """Идентификатор пользователя, который модифицировал тег"""
+  modifiedBy: UUID
+}
+
+"""Информация о теге контента, назначенном на сущность"""
+type BtcTagToEntityModel {
+  """Tег сущности"""
+  btcTag: BtcTagModel!
+
+  """Идентификатор сущности"""
+  entityId: ID!
+
+  """Тип сущности"""
+  entityType: BtcTagsEntityTypeModel!
+
+  """Идентификатор пользователя, который назначил тег на сущность"""
+  assignedBy: UUID
+}
+
+"""Информация о теге контента, назначенном на пользователя"""
+type BtcTagToUserModel {
+  """Tег сущности"""
+  btcTag: BtcTagModel!
+
+  """Идентификатор пользователя"""
+  userId: UUID!
+
+  """
+  Время, до которого данный тег активен и дает пользователю доступ к контенту
+  """
+  expiresAt: Date
+
+  """Является ли тег временным для пользователя"""
+  isTemporary: Boolean!
+
+  """Идентификатор пользователя, который назначил тег на пользователя"""
+  assignedBy: UUID
+}
+
+""""""
+enum BtcTagsEntityTypeModel {
+  """"""
+  TASK
+
+  """"""
+  GOAL
+
+  """"""
+  SUBJECT
+
+  """"""
+  TRAJECTORY_TEMPLATE
+
+  """"""
+  COURSE
 }
 
 """"""
@@ -6744,6 +6869,15 @@ type BusinessAdminMutations {
   """Сброс факта выдачи Welcome Pack"""
   resetIssuedStatusForWelcomePack(comment: String!, welcomePackId: ID!): WelcomePackModel!
 
+  """Сохранение внешнего учителя"""
+  saveExternalTeacher(userId: UUID!, isEnabled: Boolean!, stageGroupIdsToSave: [ID!]!): ID!
+
+  """Добавление внешних учителей к классу"""
+  addExternalTeachersToStageGroup(userIds: [UUID!]!, stageGroupId: ID!): Boolean!
+
+  """Удаление внешних учителей из класса"""
+  deleteExternalTeachersFromStageGroup(userIds: [UUID!]!, stageGroupId: ID!): Boolean!
+
   """"""
   checkAutoAwards(inputs: [CheckAutoAwardsEventInput!]!): Boolean!
 
@@ -7376,6 +7510,15 @@ type BusinessAdminQueries {
 
   """список функциоальных ролей по ролям и школам"""
   getFunctionalRoles(request: [SchoolFunctionalRoleInput!]!): [FunctionalRole!]!
+
+  """список функциоальных ролей по ролям и школам для Bootcamp"""
+  getFunctionalRolesBtc(
+    """информация о роли запрашиваемых фролей"""
+    request: [SchoolFunctionalRoleInput!]!
+
+    """признак внешнего учителя"""
+    isExternalTeacher: Boolean
+  ): [FunctionalRole!]!
 
   """"""
   getSchools(
@@ -8193,6 +8336,21 @@ type BusinessAdminQueries {
     paging: PagingInput
   ): [StudentWhiteListModel!]!
 
+  """Получение списка всех записей в вайт-листах по фильтру"""
+  getStudentWhitelistByFilter(
+    """Фильтр по записям в таблице вайт-листов"""
+    filter: StudentWhitelistFilterInputModel!
+  ): [StudentWhiteListModel!]!
+
+  """Получение количества всех записей в вайт-листах по фильтру"""
+  getStudentWhitelistCountByFilter(
+    """Фильтр по записям в таблице вайт-листов"""
+    filter: StudentWhitelistFilterInputModel!
+  ): Int!
+
+  """Получение списка классов пользователей из вайт-листов"""
+  getAllStageGroupsFromStudentWhitelists: [StageGroup!]!
+
   """Получение списка университетов и их почтовых доменов"""
   getAllUniversitiesInfo(universityInfoFilter: UniversityInfoFilterModel!): [UniversityInfoModel!]!
 
@@ -8231,6 +8389,24 @@ type BusinessAdminQueries {
 
   """S21. Поиск файлов проектов по параметрам"""
   findPlatfProjectSolutions(goalId: Int, schoolId: UUID!, stageId: ID!, stageGroupId: ID!, studentState: StudentStateEnum, paging: PagingInput!): PlatfProjectSolutions!
+
+  """Получение списка всех внешних учителей"""
+  getAllExternalTeachers(btcExternalTeacherInputModel: BtcExternalTeacherInputModel!): [BtcExternalTeacherModel!]!
+
+  """Получение количества всех внешних учителей"""
+  countAllExternalTeachers(btcExternalTeacherInputModel: BtcExternalTeacherInputModel!): Int!
+
+  """Получение классов внешнего учителя"""
+  getStageGroupsByUserId(userId: UUID!): [ID!]!
+
+  """Получение внешних учителей по классу"""
+  getExternalTeachersByStageGroupId(btcExternalTeacherInputModel: BtcExternalTeacherInputModel!, stageGroupId: ID!): [BtcExternalTeacherModel!]!
+
+  """Получение количества внешних учителей по классу"""
+  countExternalTeachersByStageGroupId(btcExternalTeacherInputModel: BtcExternalTeacherInputModel!, stageGroupId: ID!): Int!
+
+  """Получение флага, является ли пользователь внешним учителем"""
+  getIsExternalTeacherFlag(userId: UUID!): Boolean!
 
   """"""
   getBadges: [Badge!]!
@@ -11809,6 +11985,18 @@ enum ContentEntityProductionStatus {
 
   """Опубликован, переход из VERIFIED"""
   PUBLISHED
+}
+
+""""""
+input ContentEntityTagFilterInputModel {
+  """Строка поиска по имени тега"""
+  textSearch: String!
+
+  """Пагинация"""
+  paging: PagingInput!
+
+  """Параметры сортировки"""
+  sortingFields: [SortingField]
 }
 
 """Тип сущности, которая находится в определенном статусе"""
@@ -48759,6 +48947,15 @@ type StudentWhiteListModel {
   """Идентификатор шаблона траектории"""
   trajectoryTemplateId: ID
 
+  """Имя траектории"""
+  trajectoryName: String
+
+  """Идентификатор класса ученика"""
+  stageGroupId: ID
+
+  """Имя класса"""
+  stageGroupName: String
+
   """Идентификатор пользователя"""
   userId: UUID
 
@@ -48776,6 +48973,30 @@ type StudentWhiteListModel {
 
   """Дата и время последнего изменения"""
   lastModifyTs: DateTime
+}
+
+""""""
+input StudentWhitelistFilterInputModel {
+  """Метка траектории из справочника траекторий"""
+  trajectorySlug: String
+
+  """Идентификатор класса ученика"""
+  stageGroupId: ID
+
+  """Строка поиска по e-mail студента, номеру телефона, utm-метке и заметке"""
+  textSearch: String
+
+  """Есть ли связь с пользователем"""
+  isUserAssigned: Boolean
+
+  """Дата начала диапазона поиска по дате создания записи"""
+  createDateFrom: DateTime
+
+  """Дата окончания диапазона поиска по дате создания записи"""
+  createDateTo: DateTime
+
+  """Пагинация"""
+  paging: PagingInput
 }
 
 """"""
@@ -57062,6 +57283,9 @@ type TeacherQueries {
   """список предметов по организации"""
   getSubjects: [Subject!]!
 
+  """список предметов по организации для определенных классов"""
+  getSubjectsByStageGroups(stageGroupIds: [ID!]!): [Subject!]!
+
   """учебные периоды"""
   getStudyPeriodsByStudyPeriodSet(studyPeriodSetId: ID!): [StudyPeriod!]!
 
@@ -57609,6 +57833,9 @@ type TeacherQueries {
     """дата и время окончания выборки Уроков (в зоне школы) для дневника"""
     toDateTime: DateTime!
   ): TeacherDiary!
+
+  """Получение классов внешнего учителя"""
+  getStageGroupsForExternalTeacher: [StageGroup]!
 
   """выбирает только с BadgeAssignmentType == TEACHER_STUDENT"""
   getBadgesByKindId(kindId: Int!): [Badge!]!
@@ -59392,6 +59619,9 @@ type TrajectoryQueries {
   """Получение списка всех траекторий Bootcamp"""
   getAllTrajectories: [Trajectory!]!
 
+  """Получение списка всех траекторий из Student Whitelists"""
+  getAllTrajectoriesFromStudentWhitelists: [Trajectory!]!
+
   """"""
   getTrajectoriesByIds(ids: [ID!]!): [Trajectory!]!
 
@@ -59535,11 +59765,17 @@ type TrajectoryTemplate {
   """Тип шаблона траектории"""
   trajectoryTemplateType: TrajectoryTemplateType @deprecated(reason: "Переход на хранение типов шаблонов траекторий в БД, а не в коде")
 
-  """Тип шаблона траектории"""
+  """
+  Тип шаблона траектории
+  Тип шаблона траектории
+  """
   trajectoryTemplateTypeV2: String
 
   """Свидетельство о прохождение траектории"""
   certificate: CertificateOfParticipation
+
+  """Список тегов, назначенных на шаблон траектории"""
+  tags: [BtcTagModel!]
 }
 
 """Модуль по предмету входящему в шаблон траектории Bootcamp"""
@@ -59656,6 +59892,9 @@ input TrajectoryTemplateInputModel {
 
   """Сертификаты выдаваемые при прохождение траектории"""
   certificate: CertificateInputModel
+
+  """Список тегов, назначаемых на шаблон траектории"""
+  tags: [BtcTagInputModel!]
 }
 
 """
@@ -61244,6 +61483,15 @@ type UserMutations {
 
   """Изменение пользовательских настроек отображения темы пользователя"""
   switchUserTheme(userId: UUID!, isDarkThemeEnabled: Boolean!): Boolean!
+
+  """Сохранение, редактирование и архивирование тегов"""
+  saveBtcTag(btcTagsToSave: [BtcTagInputModel!]!, btcTagsToUpdate: [BtcTagInputModel!]!): [BtcTagModel!]!
+
+  """Назначение тегов на пользователя"""
+  saveBtcTagForUser(tagIds: [ID!]!, userId: UUID!): Boolean!
+
+  """Создание и назначение тегов на сущность"""
+  saveBtcTagsForEntity(btcTagInputModels: [BtcTagInputModel!]!, entityId: ID!, entityType: BtcTagsEntityTypeModel!): [BtcTagModel!]!
 }
 
 """"""
@@ -62024,6 +62272,50 @@ type UserQueries {
   Получение количества записей по упрощенной версии отчета БМ для Внешнего учителя
   """
   countStudentsReducedProgressForBTC(filter: StudentReducedProgressFilterBTCInputModel!): Int!
+
+  """Получение списка всех тегов"""
+  getAllTagsBtc(filter: ContentEntityTagFilterInputModel!): [BtcTagModel!]!
+
+  """Получение тегов по идентификатору сущности"""
+  getAllEntityTags(
+    """Идентификатор сущности (шаблона траектории, модуля, предмета, задачи)"""
+    entityId: ID!
+
+    """Тип сущности"""
+    entityType: BtcTagsEntityTypeModel!
+  ): [BtcTagToEntityModel!]!
+
+  """Получение тегов пользователя"""
+  getTagsByUserId(userId: UUID!): [BtcTagToUserModel!]!
+
+  """Получение своих тегов пользователем"""
+  getOwnTagsByUserId: [BtcTagToUserModel!]!
+
+  """
+  Список сущностей, к которым пользователь с указанным userId имеет доступ
+  """
+  getAllEntitiesSpecifiedUserHasAccessTo(
+    """Идентификатор пользователя"""
+    userId: UUID!
+
+    """Тип запрашиваемой сущности"""
+    entityType: BtcTagsEntityTypeModel!
+  ): [ID!]!
+
+  """Список сущностей, к которым пользователь имеет доступ"""
+  getAllEntitiesUserHasAccessTo(
+    """Тип запрашиваемой сущности"""
+    entityType: BtcTagsEntityTypeModel!
+  ): [ID!]!
+
+  """Список сущностей, на которых назначен тег с указанным tag_id"""
+  getEntitiesByTagId(
+    """Идентификатор тега"""
+    tagId: ID!
+
+    """Тип запрашиваемой сущности"""
+    entityType: BtcTagsEntityTypeModel!
+  ): [ID!]!
 
   """Отчет по жалобам пользователей в Bootcamp"""
   exportComplaintsBTC(
