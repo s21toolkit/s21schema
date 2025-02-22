@@ -45370,6 +45370,9 @@ input StudentProgressFilterBTCInputModelV2 {
   """Идентификаторы классов"""
   stageGroupIds: [ID!]!
 
+  """Идентификаторы предметов"""
+  subjectIds: [ID!]!
+
   """Идентификаторы модулей"""
   goalIds: [ID!]!
 
