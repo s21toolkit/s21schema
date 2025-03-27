@@ -293,6 +293,9 @@ input AccGigaChatMessageInput {
 
   """"""
   role: GigaChatRoleEnum
+
+  """"""
+  fileId: String
 }
 
 """Ответ GigaChat"""
@@ -1484,6 +1487,12 @@ type AcceleratorQueries {
 
   """отправить запрос в GigaChat и получить ответ"""
   getAccGigaChatResponse(messages: [AccGigaChatMessageInput!]!, conversationId: UUID): [AccGigaChatResponse!]!
+
+  """получить access token для взаимодействия с GigaChat"""
+  getAccGigaChatToken: String!
+
+  """отправить запрос в GigaChat и получить ответ с использованием файла"""
+  getAccGigaChatPresentation(fileName: String!, filePath: String!): [AccGigaChatResponse!]!
 }
 
 """"""
@@ -3164,6 +3173,30 @@ input AssignVariantToStudentRequest {
   classSubjectControlWorkVariantId: ID!
 }
 
+"""Назначенная на студента траектория"""
+type AssignedTrajectoryModel {
+  """идентификатор траектории"""
+  trajectoryId: ID!
+
+  """краткое название траектории"""
+  trajectorySlug: String!
+
+  """название траектории"""
+  trajectoryName: String!
+
+  """признак основной траектории"""
+  isPrimary: Boolean!
+
+  """Плановая дата начала обучения по траектории"""
+  planStartDate: Date
+
+  """Плановая дата окончания обучения по траектории"""
+  planEndDate: Date
+
+  """Фактическая дата окончания"""
+  factEndDate: Date
+}
+
 """Механика назначения (учитель/ученик, система/ученик, etc.)"""
 type AssignmentType {
   """"""
@@ -4636,6 +4669,22 @@ type AvailablePublicationActions {
   isUnPublishAvailable: Boolean!
 }
 
+"""
+Результат проверки доступных для публикации/снятия с публикации локальных курсов
+"""
+type AvailablePublicationCourses {
+  """
+  Признак доступности всех указанных курсов для публикации/снятия с публикации
+  """
+  allCoursesAvailable: Boolean!
+
+  """Список идентификаторов уже опубликованных курсов"""
+  publishedCourseIds: [ID!]!
+
+  """Список идентификаторов неопубликованных курсов"""
+  unpublishedCourseIds: [ID!]!
+}
+
 """Доступные области видимости и пресеты"""
 type AvailableScopes {
   """"""
@@ -6015,7 +6064,7 @@ type BtcTagModel {
   isActive: Boolean!
 
   """Дата и время создания тега"""
-  createTs: DateTime
+  createTs: DateTime!
 
   """Дата и время модификации тега"""
   modifyTs: DateTime
@@ -9184,6 +9233,11 @@ type CalendarEventS21Queries {
     """Параметры пагинации"""
     page: PagingInput
   ): [CalendarEvent]!
+
+  """
+  S21. Запрос даты начала события для перехода на нужную неделю календаря из нотификации
+  """
+  getEventSlotDateTime(bookingId: ID!): DateTime!
 }
 
 """Информация о школе, к которой привязано событие"""
@@ -10073,20 +10127,11 @@ type Checklist {
   """Идентификатор задания"""
   taskId: ID!
 
-  """Название чеклиста"""
-  name: String
-
-  """Описание чек-листа"""
-  comment: String
-
   """Вступление чек-листа"""
   introduction: String
 
   """Инструкция чек-листа"""
   guidelines: String!
-
-  """Язык"""
-  language: String!
 
   """Язык"""
   languageCode: LanguageCodeType!
@@ -13476,7 +13521,7 @@ type CourseCoverInformation {
   retriesOfCurrentStudents: Int!
 
   """Кол-во команд ожидающих проверки по групповым проектам"""
-  teamsWaitingEvaluationCount: Int!
+  teamsWaitingEvaluationCount: Int! @deprecated(reason: "убрано с фронта. Для курсов не имеет смысла")
 
   """Кол-во успешных завершений курса"""
   finishedCount: Int!
@@ -13737,6 +13782,17 @@ type CourseMutations {
     isPublished: Boolean!
   ): Boolean!
 
+  """Изменение дат локальных курсов"""
+  saveDatesLocalCoursesAndGoals(
+    """Даты локальных курсов"""
+    localCoursesDates: [LocalCourseDatesInput!]!
+
+    """
+    Признак изменения дат проектов внутри курсов (а так же студенческих проектов и обработки задач для шедулера)
+    """
+    updateCourseGoals: Boolean!
+  ): Boolean!
+
   """
   -----------------------------Мутации студента-----------------------------
    регистрация на курс студентом
@@ -13926,6 +13982,20 @@ type CourseQueries {
     """Критерии поиска"""
     criteria: LocalCourseSearchCriteriaInput!
   ): AvailablePublicationActions!
+
+  """
+  Проверка доступности действия публикации/снятия с публикации для всех указанных локальных курсов
+  """
+  checkPublicationStatusForLocalCourses(
+    """Критерии поиска"""
+    criteria: LocalCourseSearchCriteriaInput
+
+    """Cписок идентификаторов локальных курсов"""
+    localCourseIds: [ID!]
+
+    """Признак публикации для изменения"""
+    isPublished: Boolean!
+  ): AvailablePublicationCourses!
 }
 
 """Информация о результатах попытки в мета"""
@@ -17191,6 +17261,9 @@ type EventMutations {
 
   """Участник - отозвать предложенное мероприятие"""
   cancelParticipantEvent(activityEvent: ID!): ActivityEvent!
+
+  """Участник - отказаться от фидбека на мероприятие"""
+  rejectCalendarEventFeedback(eventId: ID!): Boolean!
 }
 
 """"""
@@ -17338,6 +17411,15 @@ type Exam {
 
   """Факт включения прокторинга"""
   isProctoring: Boolean
+}
+
+"""Информация по курсу, в котором находится экзамен, проходимый студентом"""
+type ExamCourseInfo {
+  """Выполняется ли данный экзамен в рамках курса"""
+  isExamInCourse: Boolean
+
+  """Находится ли экзамен в оцениваемом курсе"""
+  isExamInGradedCourse: Boolean
 }
 
 """Причина недопуска студента в экзамен"""
@@ -17854,6 +17936,9 @@ type ExamTaskWithStatuses {
 
   """Контент задания с правильными подставленными ссылками на изображения"""
   taskContent: Task
+
+  """Идентификатор ответа студента"""
+  studentAnswerId: ID
 }
 
 """"""
@@ -17927,7 +18012,7 @@ type ExamTestStatusInfo {
   """Причина по которой не пускаем судента в экз. тест"""
   denialReason: ExamDenialReason
 
-  """Выолняется ли данный тест в рамках курса"""
+  """Выполняется ли данный тест в рамках курса"""
   isExamInCourse: Boolean
 }
 
@@ -26211,6 +26296,21 @@ type LocalCourseCompareGlobalCourseResult {
   moduleConstructorEquals: Boolean!
 }
 
+""""""
+input LocalCourseDatesInput {
+  """Идентификатор локального курса"""
+  localCourseId: ID
+
+  """Дата/время начала плана"""
+  startDate: DateTime
+
+  """Дата/время начала регистрации на курс"""
+  startRegisterDate: DateTime
+
+  """Дата/время окончания регистрации на курс"""
+  endRegisterDate: DateTime
+}
+
 """Цели локального курса"""
 type LocalCourseGoal {
   """Идентификатор цели локального курса"""
@@ -28563,10 +28663,10 @@ type ModulesProgressStudentDetails {
 """"""
 input ModulesReportFilter {
   """"""
-  beginDate: Date!
+  beginDate: Date
 
   """"""
-  endDate: Date!
+  endDate: Date
 
   """"""
   stageGroupIds: [Int]!
@@ -29871,6 +29971,42 @@ type P2pInstance {
 
   """Набранный при проверке процент"""
   receivedPercentage: Int
+}
+
+"""Заявка на п2п проверку"""
+type P2pRequest {
+  """ID заявки"""
+  p2pRequestId: ID!
+
+  """Дата начала"""
+  startTime: DateTime!
+
+  """Дата окончания"""
+  endTime: DateTime!
+
+  """Признак онлайн формата"""
+  isOnline: Boolean!
+
+  """ID проекта"""
+  goalId: ID!
+
+  """ID ответа студента"""
+  studentAnswerId: ID!
+
+  """Наименование проекта"""
+  goalName: String!
+}
+
+"""S21. Статус о проверке проекта"""
+enum P2pRequirementStatus {
+  """"""
+  NEED_STUDENT_CHECK
+
+  """"""
+  NEED_STAFF_CHECK
+
+  """"""
+  NO_NEED_CHECK
 }
 
 """"""
@@ -33180,15 +33316,6 @@ enum ProjectEvaluationStatus {
   NOT_SCHEDULED
 }
 
-"""Информация о проверках по проекту"""
-type ProjectEvaluationsInfo {
-  """Информация о p2p проверках"""
-  p2p: [P2PEvaluationInfo!]!
-
-  """Информация об auto проверках"""
-  auto: AutoEvaluationInfo!
-}
-
 """"""
 type ProjectFile {
   """"""
@@ -33416,6 +33543,9 @@ type ProjectReviewsInfo {
 
   """Количество запланированных проверок к БА"""
   relevantReviewByInspectionStaffCount: Int!
+
+  """Статус необходимости p2p проверки"""
+  p2pRequirementStatus: P2pRequirementStatus!
 }
 
 """Модель вакансии проекта Акселератора"""
@@ -35087,6 +35217,12 @@ type ResumeModel {
 
   """"""
   isFavoriteByCurrentTeam: Boolean!
+
+  """"""
+  projectId: UUID
+
+  """"""
+  projectName: String
 }
 
 """"""
@@ -35639,6 +35775,14 @@ type S21ExamQueries {
   ): ExamStatusInfo
 
   """
+  S21. Получить информацию по курсу, в котором находится экзамен, проходимый студентом
+  """
+  getExamCourseInfo(
+    """Идетификатор экзамена"""
+    examId: ID!
+  ): ExamCourseInfo!
+
+  """
   S21. Получение мета информации для подготовки студента к прохождению экзамена
   """
   getExamPassingUser(
@@ -36011,6 +36155,21 @@ enum S21NotificationEnum {
 
   """"""
   S21_CALC_COURSE_FINAL_POINT_UI
+
+  """"""
+  S21_CALC_INTERNSHIP_FINAL_POINT_UI
+
+  """"""
+  S21_P2P_REQUEST_COMPLETED
+
+  """"""
+  S21_P2P_REQUEST_EXPIRED
+
+  """"""
+  S21_P2P_REQUEST_ALL_SLOT_CANCELED
+
+  """"""
+  S21_P2P_REQUEST_PASSED_CANCELED
 }
 
 """"""
@@ -36194,6 +36353,9 @@ enum S21RelatedObjectEnum {
 
   """"""
   COURSE
+
+  """"""
+  INTERNSHIP
 }
 
 """"""
@@ -37568,6 +37730,9 @@ type School21Queries {
   """
   getSoftSkillLimitByStudentId(studentId: UUID!): SoftSkillLimit!
 
+  """S21. Получение данных о пользователе для конфигуратора системы"""
+  getUser(userId: ID!): User!
+
   """S21. Получение профилей студента по идентификаторам пользователя"""
   getUsers(userIds: [UUID!]!): [S21StudentPublicProfileBasicInfo!]
 
@@ -37680,6 +37845,16 @@ type School21Queries {
   S21. Публичный профиль студента. Получение всех проектов для публичного профиля по userId и stageGroupId
   """
   getStudentProjectsForPublicProfileByStageGroup(studentId: UUID!, stageGroupId: ID!): [StudentItem]!
+
+  """
+  S21. Публичный профиль студента. Получение всех проектов для публичного профиля по studentId и stageGroupId
+  """
+  getStudentProjectsForPublicProfileV2(studentId: UUID!, stageGroupId: ID!): [StudentItem]!
+
+  """
+  S21. Публичный профиль студента. Получение статусов проектов для публичного профиля
+  """
+  getStudentProjectStatusesForPublicProfileV2(studentId: UUID!, projects: [StudentItemEntityInput!]!): [StudentItem]!
 
   """получение информации по средней посещаемости за неделю/месяц"""
   loadAverageLogtime(login: String!, schoolID: UUID!, date: Date!): AverageLogtime!
@@ -41819,6 +41994,18 @@ enum StudentAnswerType {
   EOR_RESULT
 }
 
+"""Траектории назначенные на студента"""
+type StudentAssignedTrajectoryModel {
+  """идентификатор студента"""
+  studentId: UUID!
+
+  """строка с перечнем траекторий разделенных запятой"""
+  trajectorySlugs: String!
+
+  """список назначенных на студента траекторий"""
+  trajectories: [AssignedTrajectoryModel!]!
+}
+
 """Посещаемость по предметам"""
 type StudentAttendanceBySubject {
   """Предмет"""
@@ -41873,6 +42060,29 @@ type StudentAttributes {
 
   """"""
   studentDismissInfo: StudentDismissInfo @deprecated(reason: "Use getDismissInfoByStudentId()")
+}
+
+"""
+Информация о доступных модулях/задачах для пользователя (студента ВУЗа) IT Bootcamp
+"""
+type StudentBtcInfoAccess {
+  """Идентификатор пользователя"""
+  userId: UUID!
+
+  """Идентификатор студента"""
+  studentId: UUID
+
+  """Признак необходимости использования ограничения доступа к контенту"""
+  useAccessRestriction: Boolean!
+
+  """Список разрешенных идентификаторов модулей"""
+  allowedModuleIds: [ID]!
+
+  """Список разрешенных идентификаторов задач"""
+  allowedTaskIds: [ID]!
+
+  """Описание"""
+  info: String
 }
 
 """Жалоба на буллинг"""
@@ -42679,6 +42889,9 @@ type StudentEventFeedback {
 
   """"""
   comment: String
+
+  """"""
+  isEmpty: Boolean!
 }
 
 """"""
@@ -43646,6 +43859,15 @@ type StudentItem {
   amountCurrentCodeReviewMembers: Int
 }
 
+"""Источник проектов"""
+input StudentItemEntityInput {
+  """Идентификатор цели (если модуль, иначе null)"""
+  goalId: Int
+
+  """Идентификатор курса (если не модуль, иначе null)"""
+  localCourseId: Int
+}
+
 """"""
 type StudentJournalMark {
   """"""
@@ -44562,6 +44784,12 @@ type StudentMutations {
   """Сохранение реальной трудоемкости задания"""
   saveStudentEffortEstimation(studentEffortEstimationInput: StudentEffortEstimationInput!): ID!
 
+  """S21. Создание заявки на п2п проверку"""
+  createP2pRequest(startTime: DateTime!, isOnline: Boolean!, goalId: ID!): P2pRequest!
+
+  """S21. Отмена заявки на п2п проверку"""
+  cancelP2pRequest(p2pRequestId: ID!): Boolean!
+
   """S21. Добавление свободного времени для проверки"""
   addEventToTimetable(start: DateTime!, end: DateTime!): [CalendarEvent!]!
 
@@ -45371,7 +45599,7 @@ input StudentProgressFilterBTCInputModelV2 {
   stageGroupIds: [ID!]!
 
   """Идентификаторы предметов"""
-  subjectIds: [ID!]!
+  subjectIds: [ID!]
 
   """Идентификаторы модулей"""
   goalIds: [ID!]!
@@ -46121,6 +46349,9 @@ type StudentQueries {
   """
   getNameLessStudentTimeslotsForReview(from: DateTime!, to: DateTime!, taskId: ID!): CalendarNamelessTimeSlotResponse!
 
+  """. S21. Запрос на получения списка открытых п2п заявок"""
+  getMyActualP2pRequests(from: DateTime!, to: DateTime!): [P2pRequest!]!
+
   """
   S21. Запрос на получение информации о требуемых и запланированных записях на проверку
   """
@@ -46447,10 +46678,7 @@ type StudentQueries {
   """
   Получение статистики по проекту (для индивидуальных и групповых проектов)
   """
-  getProjectStatistics(goalId: ID!): ProjectStatistics @deprecated(reason: "Актуальная версия квери getProjectAttemptEvaluationsInfo_V1")
-
-  """"""
-  getProjectEvaluationsInfo(studentAnswerId: ID!): ProjectEvaluationsInfo!
+  getProjectStatistics(goalId: ID!): ProjectStatistics
 
   """Получение информации о проверках по проекту"""
   getProjectAttemptEvaluationsInfo(goalId: ID!): [ProjectAttemptEvaluationsInfo!]!
@@ -46968,6 +47196,11 @@ type StudentQueries {
     """ID выдачи сертификата"""
     issuedId: ID!
   ): IssuedCertificatePdf!
+
+  """
+  Получение информации о доступных модулях/задачах для пользователя (студента ВУЗа) IT Bootcamp
+  """
+  getCurrentStudentBtcInfoAccess: StudentBtcInfoAccess!
 
   """Все бейджи, с флагом, выданные или нет"""
   getBadges: [UserBadgeAward!]!
@@ -47612,6 +47845,9 @@ enum StudentStateEnum {
 
   """"""
   FROZEN
+
+  """"""
+  STUDY_COMPLETED
 }
 
 """"""
@@ -48787,6 +49023,9 @@ input StudentTrajectoryTemplateAssignmentInputModel {
 
   """Плановая дата начала обучения по траектории"""
   planStartDate: Date!
+
+  """Плановая дата окончания обучения по траектории"""
+  planEndDate: Date
 
   """Способ применения шаблона траектории"""
   assignmentMode: TrajectoryAssignmentMode!
@@ -51286,10 +51525,10 @@ type SystemAdminQueries {
   getUsersV2Count(filterNonConfiguredUsers: Boolean, filterSchools: [UUID], filterFroleSets: [UUID], textSearch: String): Int!
 
   """Получить список пользователей-студентов"""
-  getStudents(filterSchools: [ID], filterStages: [ID], filterStageGroups: [ID], creationDateTimeStart: DateTime, creationDateTimeEnd: DateTime, filterNoFroleSet: Boolean, filterFreezingStudents: Boolean, filterExpellingStudents: Boolean, filterInactiveStudents: Boolean, filterBlockedStudents: Boolean, restrictDateStart: DateTime, restrictDateEnd: DateTime, textSearch: String, sortingFields: [SortingField], paging: PagingInput): [User]!
+  getStudents(filterSchools: [ID], filterStages: [ID], filterStageGroups: [ID], creationDateTimeStart: DateTime, creationDateTimeEnd: DateTime, filterNoFroleSet: Boolean, filterFreezingStudents: Boolean, filterExpellingStudents: Boolean, filterInactiveStudents: Boolean, filterBlockedStudents: Boolean, filterStudyCompletedStudents: Boolean, restrictDateStart: DateTime, restrictDateEnd: DateTime, textSearch: String, sortingFields: [SortingField], paging: PagingInput): [User]!
 
   """Количество записей для запроса getStudents"""
-  getStudentsCount(filterSchools: [ID], filterStages: [ID], filterStageGroups: [ID], creationDateTimeStart: DateTime, creationDateTimeEnd: DateTime, filterNoFroleSet: Boolean, filterFreezingStudents: Boolean, filterExpellingStudents: Boolean, filterInactiveStudents: Boolean, filterBlockedStudents: Boolean, restrictDateStart: DateTime, restrictDateEnd: DateTime, textSearch: String): Int!
+  getStudentsCount(filterSchools: [ID], filterStages: [ID], filterStageGroups: [ID], creationDateTimeStart: DateTime, creationDateTimeEnd: DateTime, filterNoFroleSet: Boolean, filterFreezingStudents: Boolean, filterExpellingStudents: Boolean, filterInactiveStudents: Boolean, filterBlockedStudents: Boolean, filterStudyCompletedStudents: Boolean, restrictDateStart: DateTime, restrictDateEnd: DateTime, textSearch: String): Int!
 
   """
   получить пользователя с ролями (только СА, БА), статусами и ролеспецифичными данными.
@@ -59611,6 +59850,9 @@ type TrajectoryMutations {
   """
   changePlanDatesTrajectoryStudent(studentId: UUID!, trajectory: String!, newPlanEndDate: Date!): Boolean
 
+  """Изменить плановые даты начала и окончания траектории студентов"""
+  changeTrajectoryPlanDatesForStudents(studentIds: [UUID!]!, trajectory: String!, beginPlanDate: Date!, endPlanDate: Date!): Boolean
+
   """
   Сохранение маппинга между шаблонами траекторий и внешними идентификаторами профессий/ролей/подразделений
   """
@@ -59644,6 +59886,9 @@ type TrajectoryQueries {
 
     """список идентификаторов модулей"""
     goalIds: [ID]
+
+    """список типов траекторий"""
+    types: [String]
   ): [TrajectoryTemplate]!
 
   """Получение шаблона траектории Bootcamp по его идентификатору"""
@@ -59659,6 +59904,11 @@ type TrajectoryQueries {
   Получение списка идентификаторов студентов с информацией по назначенным траекториям в виде строки разделенной запятой
   """
   getAssignedTrajectories(studentIds: [ID!]!): [StudentTrajectorySlug]!
+
+  """
+  Получение списка идентификаторов студентов с информацией по назначенным траекториям
+  """
+  getStudentAssignedTrajectories(studentIds: [UUID!]!): [StudentAssignedTrajectoryModel!]!
 
   """
   Получить данные для фильтров для страницы списка задач по назначению шаблонов траектории на студентов
@@ -59776,6 +60026,12 @@ type TrajectoryTemplate {
 
   """Свидетельство о прохождение траектории"""
   certificate: CertificateOfParticipation
+
+  """плановая дата начала обучения по шаблону"""
+  planBeginDate: Date
+
+  """плановая дата окончания обучения по шаблону"""
+  planEndDate: Date
 
   """Список тегов, назначенных на шаблон траектории"""
   tags: [BtcTagModel!]
@@ -59895,6 +60151,12 @@ input TrajectoryTemplateInputModel {
 
   """Сертификаты выдаваемые при прохождение траектории"""
   certificate: CertificateInputModel
+
+  """плановая дата начала обучения по шаблону"""
+  planBeginDate: Date
+
+  """плановая дата окончания обучения по шаблону"""
+  planEndDate: Date
 
   """Список тегов, назначаемых на шаблон траектории"""
   tags: [BtcTagInputModel!]
@@ -60157,10 +60419,10 @@ type UniversityModel {
 """"""
 input UniversityModulesReportFilter {
   """"""
-  beginDate: Date!
+  beginDate: Date
 
   """"""
-  endDate: Date!
+  endDate: Date
 
   """"""
   stageGroupIds: [Int]!

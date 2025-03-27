@@ -2,7 +2,6 @@ fragment StudyProcessFile on StudyProcessFile {
   studyProcessFileId
   link
   status
-  statusDetails
   updateDateTime
   creatorLogin
   fileExtension

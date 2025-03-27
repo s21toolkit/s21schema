@@ -35,6 +35,7 @@ fragment CalendarReviewBooking on CalendarBooking {
     end
     event {
       eventUserRole
+      eventCode
     }
     school {
       shortName

@@ -2,7 +2,6 @@ fragment OnlineReviewVideoInfo on OnlineReviewVideo {
   onlineVideoId
   link
   status
-  statusDetails
   updateDateTime
   fileSize
 }

@@ -10,6 +10,7 @@ fragment ProjectReviewsInfo on ProjectReviewsInfo {
   relevantReviewByStudentsCount
   reviewByInspectionStaffCount
   relevantReviewByInspectionStaffCount
+  p2pRequirementStatus
 }
 
 query calendarGetNameLessStudentTimeslotsForReview($from: DateTime!, $taskId: ID!, $to: DateTime!) {

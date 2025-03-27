@@ -29,7 +29,6 @@ fragment OnlineReviewInfo on OnlineReview {
     onlineVideoId
     link
     status
-    statusDetails
     updateDateTime
     fileSize
   }
@@ -91,6 +90,8 @@ fragment ChecklistSolutionInfo on SolutionInfo {
     files {
       studyProcessFileId
       link
+      status
+      updateDateTime
       creatorLogin
       fileExtension
       fileSize

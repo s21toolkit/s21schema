@@ -12,6 +12,7 @@ fragment ProjectReviewsInfo on ProjectReviewsInfo {
   relevantReviewByStudentsCount
   reviewByInspectionStaffCount
   relevantReviewByInspectionStaffCount
+  p2pRequirementStatus
 }
 
 fragment TimelineItem on ProjectTimelineItem {

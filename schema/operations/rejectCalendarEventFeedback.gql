@@ -1,0 +1,5 @@
+mutation rejectCalendarEventFeedback($eventId: ID!) {
+  event {
+    rejectCalendarEventFeedback(eventId: $eventId)
+  }
+}

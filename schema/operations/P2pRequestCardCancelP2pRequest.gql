@@ -1,0 +1,5 @@
+mutation P2pRequestCardCancelP2pRequest($p2pRequestId: ID!) {
+  student {
+    cancelP2pRequest(p2pRequestId: $p2pRequestId)
+  }
+}

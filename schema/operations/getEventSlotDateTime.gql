@@ -1,0 +1,5 @@
+query getEventSlotDateTime($bookingId: ID!) {
+  calendarEventS21 {
+    getEventSlotDateTime(bookingId: $bookingId)
+  }
+}

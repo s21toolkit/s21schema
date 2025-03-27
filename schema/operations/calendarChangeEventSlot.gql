@@ -87,6 +87,7 @@ fragment CalendarReviewBooking on CalendarBooking {
     end
     event {
       eventUserRole
+      eventCode
     }
     school {
       shortName
@@ -146,6 +147,7 @@ fragment CalendarEvent on CalendarEvent {
       id
       rating
       comment
+      isEmpty
     }
     status
     activityType

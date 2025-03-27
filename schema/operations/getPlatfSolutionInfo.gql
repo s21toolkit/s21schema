@@ -4,7 +4,6 @@ fragment PlatfSolutionInfo on PlatfSolutionInfo {
     studyProcessFileId
     link
     status
-    statusDetails
     updateDateTime
     creatorLogin
     fileExtension

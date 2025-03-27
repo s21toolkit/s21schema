@@ -1,7 +1,70 @@
+fragment VerifiableStudentItem on VerifiableStudent {
+  userId
+  login
+  avatarUrl
+  levelCode
+  isTeamLead
+  cookiesCount
+  codeReviewPoints
+  school {
+    shortName
+  }
+}
+
+fragment CalendarReviewUser on User {
+  id
+  login
+}
+
+fragment CalendarReviewBooking on CalendarBooking {
+  id
+  answerId
+  eventSlotId
+  task {
+    id
+    goalId
+    goalName
+    studentTaskAdditionalAttributes {
+      cookiesCount
+    }
+    assignmentType
+  }
+  eventSlot {
+    id
+    start
+    end
+    event {
+      eventUserRole
+      eventCode
+    }
+    school {
+      shortName
+    }
+  }
+  verifierUser {
+    ...CalendarReviewUser
+  }
+  verifiableInfo {
+    verifiableStudents {
+      ...VerifiableStudentItem
+    }
+    team {
+      name
+    }
+  }
+  bookingStatus
+  isOnline
+  vcLinkUrl
+  additionalChecklist {
+    filledChecklistId
+    filledChecklistStatusRecordingEnum
+  }
+}
+
 mutation updateP2POnlineType($bookingId: ID!) {
   sc21StudentTaskCheck {
     enableOnlineP2pCheck(bookingId: $bookingId) {
-      id
+      ...CalendarReviewBooking
     }
   }
 }

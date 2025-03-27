@@ -1,8 +1,8 @@
-query publicProfileGetProjects($studentId: UUID!, $stageGroupId: ID!) {
+query publicProfileGetProjectsStatuses($studentId: UUID!, $projects: [StudentItemEntityInput!]!) {
   school21 {
-    getStudentProjectsForPublicProfileV2(
+    getStudentProjectStatusesForPublicProfileV2(
       studentId: $studentId
-      stageGroupId: $stageGroupId
+      projects: $projects
     ) {
       groupName
       name

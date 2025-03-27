@@ -1,0 +1,17 @@
+fragment CalendarP2pRequest on P2pRequest {
+  p2pRequestId
+  startTime
+  endTime
+  isOnline
+  goalId
+  goalName
+  studentAnswerId
+}
+
+query calendarGetMyActualP2pRequests($from: DateTime!, $to: DateTime!) {
+  student {
+    getMyActualP2pRequests(from: $from, to: $to) {
+      ...CalendarP2pRequest
+    }
+  }
+}

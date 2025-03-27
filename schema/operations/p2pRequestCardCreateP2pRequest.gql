@@ -1,0 +1,7 @@
+mutation p2pRequestCardCreateP2pRequest($startTime: DateTime!, $isOnline: Boolean!, $goalId: ID!) {
+  student {
+    createP2pRequest(startTime: $startTime, isOnline: $isOnline, goalId: $goalId) {
+      p2pRequestId
+    }
+  }
+}
