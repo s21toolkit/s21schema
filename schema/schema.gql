@@ -6883,7 +6883,7 @@ type BusinessAdminMutations {
   insertNewStudent(studentWhiteListInputModel: StudentWhiteListInputModel!): Boolean
 
   """Изменение признака разрешения для студента в student_whiteList"""
-  updateAllowedStatusByMobilePhoneOrEmailOrUtmSource(email: String, mobilePhone: String, utmSource: String, allowed: Boolean!): Boolean
+  updateAllowedStatusByMobilePhoneOrEmailOrUtmSource(email: String, mobilePhone: String, utmSource: String, isTwoFactor: Boolean, allowed: Boolean!): Boolean
 
   """Удаление записи в student_whiteList"""
   deleteStudentByMobilePhoneOrEmailOrUtmSource(mobilePhone: String, email: String, utmSource: String): Boolean
@@ -6926,6 +6926,17 @@ type BusinessAdminMutations {
 
   """Удаление внешних учителей из класса"""
   deleteExternalTeachersFromStageGroup(userIds: [UUID!]!, stageGroupId: ID!): Boolean!
+
+  """Генерация invite-кодов"""
+  generateInviteCodes(numberOfCodes: ID!, utmId: ID!, comment: String): [InviteCodeModel!]!
+
+  """
+  Обновление статусов invite-кодов или удаление invite-кодов в случае, если статус равен BLOCKED, а текущий статус invite-кода - NEW
+  """
+  updateInviteCodeStatus(codeIds: [ID!]!, status: InviteCodeStatus!): [InviteCodeModel!]!
+
+  """Обновление приватности UTM-метки"""
+  updateIsTwoFactorForUtmSource(utmId: ID!, isTwoFactor: Boolean!): UtmSourceModel!
 
   """"""
   checkAutoAwards(inputs: [CheckAutoAwardsEventInput!]!): Boolean!
@@ -8457,6 +8468,39 @@ type BusinessAdminQueries {
   """Получение флага, является ли пользователь внешним учителем"""
   getIsExternalTeacherFlag(userId: UUID!): Boolean!
 
+  """Получение класс по типу шаблонов траекторий учеников внутри них"""
+  getStageGroupsByTrajectoryType(trajectoryTypeIds: [ID!]!): [StageGroup!]!
+
+  """Получение сводного отчета по внутренним пользователям BootCamp"""
+  getInternalSummaryStatisticsReportBtc(filter: SummaryStatisticsFilterInput!): SummaryStatisticsReport!
+
+  """Получение сводного отчета по внешним пользователям BootCamp"""
+  getExternalSummaryStatisticsReportBtc(filter: SummaryStatisticsFilterInput!): [SummaryStatistics!]!
+
+  """Получение список всех авторов invite-кодов для определенной utm метки"""
+  getInviteCodesAuthorByUtmId(utmId: ID!): [SimpleUserInfoModel!]!
+
+  """Получение списка всех invite-кодов"""
+  getAllInviteCodes(filter: InviteCodeFilterInputModel!): [InviteCodeModel!]!
+
+  """Получение количества всех invite-кодов"""
+  countAllInviteCodes(filter: InviteCodeFilterInputModel!): ID!
+
+  """Получение списка всех статусов invite-кодов"""
+  getInviteCodeStatuses: [InviteCodeStatusModel!]!
+
+  """Получение списка всех utm-меток"""
+  getAllUtmSources(filter: UtmSourceFilterInputModel!): [UtmSourceModel!]!
+
+  """Отчет с invite-кодами"""
+  getInviteCodesReportBtc(filter: InviteCodeFilterInputModel!): [InviteCodeReportModel!]!
+
+  """Подсчет количества записей с invite-кодами"""
+  countInviteCodesReportBtc(filter: InviteCodeFilterInputModel!): ID!
+
+  """Получение рейтинга по P2P проверке"""
+  getP2PLeaderBoard(filter: P2PLeaderBoardInput!): [P2PLeaderBoardStudentModel!]!
+
   """"""
   getBadges: [Badge!]!
 
@@ -8684,8 +8728,20 @@ type BusinessAdminQueries {
   """Отчет по выгрузке вузовской почты учеников в Bootcamp"""
   exportStudentUniversityEmails(universityEmailFilter: UniversityEmailFilterInputModel!): ReportExcelFile!
 
-  """Отчет по Welcome Pack'ах в Bootcamp"""
+  """Отчет о выдаче Welcome Pack'ов в Bootcamp"""
   exportWelcomePackReports(welcomePackFilter: WelcomePackFilterInputModel!): ReportExcelFile!
+
+  """Отчет "Сводный по городам, BootCamp-мастерам и траекториям" в Bootcamp"""
+  exportInternalSummaryStatisticsReportBtc(filter: SummaryStatisticsFilterInput!): ReportExcelFile!
+
+  """Отчет "Сводный траекториям" в Bootcamp"""
+  exportExternalSummaryStatisticsReportBtc(filter: SummaryStatisticsFilterInput!): ReportExcelFile!
+
+  """Генерация excel-файла с invite-кодами для передачи кураторам"""
+  exportInviteCodesToTransfer(filter: InviteCodeFilterInputModel!): ReportExcelFile!
+
+  """Генерация excel-отчета с invite-кодами"""
+  exportInviteCodesReportBtc(filter: InviteCodeFilterInputModel!): ReportExcelFile!
 }
 
 """deprecated. use BusinessAdminRoleV2"""
@@ -23346,6 +23402,125 @@ enum InvitationStatusEnum {
 }
 
 """"""
+input InviteCodeFilterInputModel {
+  """Идентификаторы выбранных invite-кодов"""
+  codeIds: [ID!]
+
+  """Идентификатор utm-метки"""
+  utmId: ID
+
+  """Идентификатор БМ-мастера"""
+  bmUserId: UUID
+
+  """Статус invite-кода"""
+  status: String
+
+  """Дата начала диапазона поиска по дате создания записи"""
+  createDateFrom: DateTime
+
+  """Дата окончания диапазона поиска по дате создания записи"""
+  createDateTo: DateTime
+
+  """Пагинация"""
+  paging: PagingInput
+}
+
+""""""
+type InviteCodeModel {
+  """Идентификатор invite-кода"""
+  codeId: ID!
+
+  """Invite-код"""
+  codeString: String!
+
+  """Статус invite-кода"""
+  status: String!
+
+  """Комментарий к invite-коду"""
+  comment: String
+
+  """UTM-метка, к которой относится invite-код"""
+  utmSource: UtmSourceModel!
+
+  """Идентификатор пользователя, который зашел по данному invite-коду"""
+  userId: UUID
+
+  """
+  Идентификатор пользователя, захватившего блокировку invite-кода во время попытки войти в систему
+  """
+  lockUserId: UUID
+
+  """Время начала временной блокировки invite-кода пользователем"""
+  lockTs: DateTime
+
+  """Время создания invite-кода"""
+  createTs: DateTime!
+
+  """Время изменения записи по invite-коду"""
+  modifyTs: DateTime
+
+  """Идентификатор пользователя, создавшего invite-код"""
+  createdBy: UUID
+
+  """ФИО пользователя, создавшего invite-код"""
+  creatorFullName: String
+}
+
+""""""
+type InviteCodeReportModel {
+  """Invite-код"""
+  codeString: String!
+
+  """Статус invite-кода"""
+  status: String!
+
+  """Комментарий к invite-коду"""
+  comment: String
+
+  """UTM-метка, к которой относится invite-код"""
+  utmSource: String!
+
+  """Идентификатор пользователя, который зашел по данному invite-коду"""
+  userId: UUID
+
+  """Название траектории"""
+  trajectoryName: String
+
+  """Время создания invite-кода"""
+  createTs: DateTime!
+
+  """Время изменения записи по invite-коду"""
+  modifyTs: DateTime
+
+  """ФИО пользователя, создавшего invite-код"""
+  createdBy: String
+}
+
+"""Статус invite-кода в Bootcamp"""
+enum InviteCodeStatus {
+  """Новый"""
+  NEW
+
+  """Зарезервирован"""
+  RESERVED
+
+  """Применен"""
+  ASSIGNED
+
+  """Заблокирован"""
+  BLOCKED
+}
+
+"""Статус invite-кода в Bootcamp"""
+type InviteCodeStatusModel {
+  """Название статуса"""
+  name: String!
+
+  """Текстовый заголовок статуса"""
+  title: String!
+}
+
+""""""
 input InviteRequestInput {
   """"""
   inviteUserId: UUID!
@@ -23416,7 +23591,7 @@ type IssuedCertificateModel {
   """Дата выдачи"""
   issuedTs: Date
 
-  """Плановая дата окнчания траектории"""
+  """Плановая дата окончания траектории"""
   dateStart: Date!
 
   """Плановая дата начала траектории"""
@@ -29846,6 +30021,51 @@ type P2PEvaluationInfo {
 
   """Заполненный чеклист, если проверка была проведена"""
   checklist: FilledChecklist
+}
+
+"""Фильтр для построение таблицы рейтинга"""
+input P2PLeaderBoardInput {
+  """Поиск по вхождению"""
+  textSearch: String
+
+  """Расчет рейтинга по количеству принятых заданий"""
+  isFilterByCheckDone: Boolean
+
+  """Расчет рейтинга по количеству возвращенных заданий"""
+  isFilterByCheckTryAgain: Boolean
+
+  """Фильтр по дате, начало"""
+  dateFrom: DateTime
+
+  """Фильтр по дате, конец"""
+  dateTo: DateTime
+}
+
+"""Рейтинг ученика по проверке P2P"""
+type P2PLeaderBoardModel {
+  """Таблица со всеми участниками"""
+  allRatings: [P2PLeaderBoardStudentModel!]!
+
+  """Личная позиция относительно таблицы"""
+  myPosition: P2PLeaderBoardStudentModel
+}
+
+"""Рейтинг ученика по проверке P2P"""
+type P2PLeaderBoardStudentModel {
+  """Полное ФИО ученика"""
+  studentFullName: String!
+
+  """Позиция ученика в рейтинге"""
+  studentPosition: Int!
+
+  """Подсчет проверенных заданий, где указал статус (Зачтенных)"""
+  countCheckDone: Int!
+
+  """Подсчет проверенных заданий, где указал статус (На доработку)"""
+  countCheckTryAgain: Int!
+
+  """Подсчет проверенных заданий общий"""
+  countAllReview: Int!
 }
 
 """"""
@@ -45748,6 +45968,9 @@ type StudentProgressForBTCModel {
 
   """Город ученика"""
   studentCity: String
+
+  """Связанный с учеником invite-код"""
+  inviteCode: String
 }
 
 """Фильтр для запроса доступных модулей для прогресса учащихся"""
@@ -47202,6 +47425,9 @@ type StudentQueries {
   """
   getCurrentStudentBtcInfoAccess: StudentBtcInfoAccess!
 
+  """Получение рейтинга по P2P проверке"""
+  getP2PLeaderBoard(filter: P2PLeaderBoardInput!): P2PLeaderBoardModel!
+
   """Все бейджи, с флагом, выданные или нет"""
   getBadges: [UserBadgeAward!]!
 
@@ -47523,6 +47749,9 @@ type StudentReducedProgressForBtcModel {
 
   """Прогресс по модулям"""
   studyModuleProgress: [StudentStudyModuleProgress!]
+
+  """Связанный с учеником invite-код"""
+  inviteCode: String
 }
 
 """"""
@@ -49176,6 +49405,9 @@ input StudentWhiteListInputModel {
 
   """Значение метки utm_source"""
   utmSource: String
+
+  """Является ли метка приватной"""
+  isTwoFactor: Boolean
 }
 
 """"""
@@ -49207,8 +49439,11 @@ type StudentWhiteListModel {
   """E-mail"""
   email: String
 
-  """Значение метки utm_source"""
-  utmSource: String
+  """Наименование utm метки"""
+  utmSource: String @deprecated(reason: "Использовать utmEntity")
+
+  """Метка utm_source"""
+  utmEntity: UtmSourceModel
 
   """Дата и время создания"""
   createTs: DateTime!
@@ -50806,6 +51041,47 @@ input SubtitleLinkForLanguageInput {
 
   """Cсылка на субтитры для видео"""
   subtitleLink: String!
+}
+
+"""Модель представления"""
+type SummaryStatistics {
+  """Наименование параметра"""
+  name: String!
+
+  """Значение параметра"""
+  value: Int!
+}
+
+""""""
+input SummaryStatisticsFilterInput {
+  """Список id типов траектории"""
+  trajectoryTypeIds: [ID!]!
+
+  """Список id классов"""
+  stageGroupIds: [ID!]!
+
+  """
+  Флаг отображающий надобность/не надобность возвращать записи с нулевым значение
+  """
+  isGetWithZero: Boolean!
+
+  """Начальная дата периода"""
+  dateFrom: DateTime!
+
+  """Конечная дата периода"""
+  dateTo: DateTime!
+}
+
+"""Сводный отчет"""
+type SummaryStatisticsReport {
+  """По траекториям"""
+  byTrajectories: [SummaryStatistics!]!
+
+  """По городам"""
+  byCities: [SummaryStatistics!]!
+
+  """По BootCamp мастерам"""
+  byBootCampMasters: [SummaryStatistics!]!
 }
 
 """Модель опроса"""
@@ -59939,27 +60215,21 @@ type TrajectoryQueries {
   findPulseJobCodeByJobCodeType(pulseJobCodeType: [PulseJobCodeType!]!): [PulseJobCode]!
 
   """Получение списка шаблонов траекторий, у которых есть класс"""
-  getAllTrajectoryTemplatesWithStageGroup(trajectoryTemplateType: TrajectoryTemplateType): [TrajectoryTemplate]! @deprecated(reason: "Использовать getAllTrajectoryTemplatesWithStageGroupV2")
-
-  """Получение списка шаблонов траекторий, у которых есть класс"""
   getAllTrajectoryTemplatesWithStageGroupV2(trajectoryTemplateType: String!): [TrajectoryTemplate]!
 
   """Получение типов шаблонов траекторий Bootcamp"""
-  getTrajectoryTemplateTypes: [TrajectoryTemplateType]! @deprecated(reason: "Использовать getTrajectoryTemplateTypesV2")
-
-  """Получение типов шаблонов траекторий Bootcamp"""
-  getTrajectoryTemplateTypesV2: [TrajectoryTemplateTypeModel!]! @deprecated(reason: "Использовать getRecommendedTrajectoryTemplateV2")
-
-  """"""
-  getRecommendedTrajectoryTemplate(trajectoryTemplateType: TrajectoryTemplateType!, userId: ID!, studentId: ID!): TrajectoryTemplate
+  getTrajectoryTemplateTypesV2: [TrajectoryTemplateTypeModel!]!
 
   """
-  Получение рекомендованого шаблона траектории на основании данных из АС Пульс
+  Получение рекомендованного шаблона траектории на основании данных из АС Пульс
   """
   getRecommendedTrajectoryTemplateV2(userId: ID!, studentId: ID!): TrajectoryTemplate
 
   """Получение траекторий по идентификаторам классов"""
   getTrajectoriesByStageGroupIds(stageGroupIds: [ID!]!): [Trajectory!]!
+
+  """Получение всех авторов шаблонов траекторий"""
+  getTrajectoryTemplateAuthors: [User!]!
 }
 
 """"""
@@ -60016,12 +60286,6 @@ type TrajectoryTemplate {
   trajectoryTemplateGoals: [TrajectoryTemplateGoal]
 
   """Тип шаблона траектории"""
-  trajectoryTemplateType: TrajectoryTemplateType @deprecated(reason: "Переход на хранение типов шаблонов траекторий в БД, а не в коде")
-
-  """
-  Тип шаблона траектории
-  Тип шаблона траектории
-  """
   trajectoryTemplateTypeV2: String
 
   """Свидетельство о прохождение траектории"""
@@ -60144,9 +60408,6 @@ input TrajectoryTemplateInputModel {
   trajectoryTemplateGoals: [TrajectoryTemplateGoalInputModel]
 
   """Тип шаблона траектории"""
-  trajectoryTemplateType: TrajectoryTemplateType
-
-  """Тип шаблона траектории"""
   trajectoryTemplateTypeV2: String
 
   """Сертификаты выдаваемые при прохождение траектории"""
@@ -60192,29 +60453,6 @@ enum TrajectoryTemplateStatus {
 
   """Шаблон полностью заполнен и может использоваться"""
   PUBLISHED
-}
-
-"""Тип шаблона траектории Bootcamp"""
-enum TrajectoryTemplateType {
-  """
-  Тип "Адаптация"
-  """
-  ADAPTATION
-
-  """
-  Тип "Квалификация"
-  """
-  QUALIFICATION
-
-  """
-  Тип "Внешний"
-  """
-  EXTERNAL
-
-  """
-  Тип "Стажировка"
-  """
-  INTERNSHIP
 }
 
 """Тип шаблона траектории Bootcamp"""
@@ -61750,13 +61988,22 @@ type UserMutations {
   switchUserTheme(userId: UUID!, isDarkThemeEnabled: Boolean!): Boolean!
 
   """Сохранение, редактирование и архивирование тегов"""
-  saveBtcTag(btcTagsToSave: [BtcTagInputModel!]!, btcTagsToUpdate: [BtcTagInputModel!]!): [BtcTagModel!]!
+  saveBtcTag(btcTagsToSave: [BtcTagInputModel!]!, btcTagsToUpdate: [BtcTagInputModel!]!): [BtcTagModel!]! @deprecated(reason: "A new implementation was created. Use the saveAndUpdateBtcTags mutation")
+
+  """Сохранение, редактирование и архивирование тегов"""
+  saveAndUpdateBtcTags(btcTags: [BtcTagInputModel!]!): [BtcTagModel!]!
+
+  """Сохранение новых тегов"""
+  saveBtcTags(btcTags: [BtcTagInputModel!]!): [BtcTagModel!]!
 
   """Назначение тегов на пользователя"""
   saveBtcTagForUser(tagIds: [ID!]!, userId: UUID!): Boolean!
 
   """Создание и назначение тегов на сущность"""
-  saveBtcTagsForEntity(btcTagInputModels: [BtcTagInputModel!]!, entityId: ID!, entityType: BtcTagsEntityTypeModel!): [BtcTagModel!]!
+  saveBtcTagsForEntity(btcTagInputModels: [BtcTagInputModel!]!, entityId: ID!, entityType: BtcTagsEntityTypeModel!): [BtcTagModel!]! @deprecated(reason: "A new implementation was created. Use the assignBtcTagsToEntity mutation")
+
+  """Создание и назначение тегов на сущность"""
+  assignBtcTagsToEntity(allTagIdsToAssign: [ID!], entityId: ID!, entityType: BtcTagsEntityTypeModel!): [BtcTagModel!]!
 }
 
 """"""
@@ -62997,6 +63244,27 @@ type UsersToBadgeAward {
 }
 
 """"""
+input UtmSourceFilterInputModel {
+  """Фильтр по названию utm-метки"""
+  textSearch: String
+
+  """Пагинация"""
+  paging: PagingInput!
+}
+
+""""""
+type UtmSourceModel {
+  """Идентификатор UTM-метки"""
+  utmId: ID!
+
+  """Имя UTM-метки"""
+  utmName: String
+
+  """Флаг необходимости ввода invite-кода при входе"""
+  isTwoFactor: Boolean
+}
+
+""""""
 type VCLink {
   """Комната для проведения видеоконференции"""
   room: String!
@@ -63530,7 +63798,7 @@ input WelcomePackFilterInputModel {
   """Поиск по городам"""
   cities: [ID!]
 
-  """Поиск по Botcamp мастерам"""
+  """Поиск по Bootcamp мастерам"""
   masters: [UUID!]
 
   """Поиск по организациям"""
@@ -63545,7 +63813,7 @@ input WelcomePackFilterInputModel {
   """Пагинация"""
   paging: PagingInput
 
-  """Сортирорвка по дате"""
+  """Сортировка по дате"""
   isSortByDate: Boolean
 
   """Сортировка по ФИО"""
@@ -63644,7 +63912,7 @@ type WelcomePackReportModel {
   """Прогресс ученика по траектории"""
   studentProgress: Int!
 
-  """Коментарий к сбросу факта выдачи"""
+  """Комментарий к сбросу факта выдачи"""
   commentForReset: String
 }
 
