@@ -22446,8 +22446,11 @@ type HolyGraph {
   """Id Графа"""
   graphId: Int
 
-  """Идентификатор параллели, для которой действует граф"""
-  stageId: Int
+  """Тип связи с орг. структурой"""
+  linkEntityType: HolyGraphLinkEntityTypeEnum
+
+  """Id связанного элемента орг. структуры"""
+  linkEntityId: Int
 
   """Идентификатор продукта, в котором действует граф"""
   tenantId: UUID
@@ -22488,20 +22491,14 @@ type HolyGraphContentBunch {
   """Перечень Id источников проектов"""
   contentBunchIds: [Int!]!
 
-  """Id параллели"""
-  stageId: Int
+  """Тип связи с орг. структурой"""
+  linkEntityType: HolyGraphLinkEntityTypeEnum
+
+  """Id связанного элемента орг. структуры"""
+  linkEntityId: Int
 
   """Учебные модули заданных источников"""
   items: [HolyGraphContentBunchItem!]!
-}
-
-"""Источник проектов"""
-type HolyGraphContentBunchEntity {
-  """Id источника проектов"""
-  id: Int!
-
-  """Наименование источника проектов"""
-  name: String
 }
 
 """Учебные модули глобального плана"""
@@ -22522,6 +22519,15 @@ type HolyGraphContentBunchItem {
   course: HolyGraphItemCourseInfo
 }
 
+"""Источник проектов"""
+type HolyGraphContentBunchSource {
+  """Id источника проектов"""
+  id: Int!
+
+  """Наименование источника проектов"""
+  name: String
+}
+
 """"""
 enum HolyGraphContentBunchTypeEnum {
   """Учебная программа"""
@@ -22532,6 +22538,9 @@ enum HolyGraphContentBunchTypeEnum {
 
   """Глобальный план"""
   GLOBAL_PLAN
+
+  """Назначенный курс"""
+  ASSIGNED_COURSE
 }
 
 """Связи между элементами графа"""
@@ -22669,12 +22678,63 @@ type HolyGraphJSON {
   edges: [HolyGraphEdge!]!
 }
 
+"""Связь графа и орг. структуры"""
+type HolyGraphLinkEntity {
+  """Id графа"""
+  graphId: Int
+
+  """Тип связи с орг. структурой"""
+  linkEntityType: HolyGraphLinkEntityTypeEnum!
+
+  """Id связанного элемента орг. структуры"""
+  linkEntityId: Int!
+
+  """Наименование связанного элемента орг. структуры"""
+  linkEntityName: String!
+
+  """Id параллели"""
+  stageId: Int!
+
+  """Id кампуса"""
+  schoolId: UUID
+
+  """Наименование кампуса"""
+  schoolName: String
+
+  """Тип источников проектов"""
+  contentBunchType: HolyGraphContentBunchTypeEnum
+
+  """Перечень Id источников проектов"""
+  contentBunchIds: [Int]
+
+  """Дата последнего изменения"""
+  updateTs: DateTime
+
+  """Автор последнего изменения"""
+  updatedBy: String
+
+  """Комментарий к версии графа"""
+  comment: String
+}
+
+""""""
+enum HolyGraphLinkEntityTypeEnum {
+  """"""
+  STAGE
+
+  """"""
+  STAGE_GROUP
+}
+
 """"""
 type HolyGraphMutations {
   """Опубликовать граф для указанной параллели"""
   publishGraph(
-    """Идентификатор параллели"""
-    stageId: Int!
+    """Тип связи с орг. структурой"""
+    linkEntityType: HolyGraphLinkEntityTypeEnum!
+
+    """Id связанного элемента орг. структуры"""
+    linkEntityId: Int!
 
     """Граф"""
     graph: JsonNode!
@@ -22694,8 +22754,11 @@ type HolyGraphMutations {
   Граф переносится в архив и ему присваивается номер архивной версии. Равносильно операции удаления графа
   """
   archiveGraph(
-    """Идентификатор параллели"""
-    stageId: Int!
+    """Тип связи с орг. структурой"""
+    linkEntityType: HolyGraphLinkEntityTypeEnum!
+
+    """Id связанного элемента орг. структуры"""
+    linkEntityId: Int!
 
     """Комментарий"""
     comment: String
@@ -22706,8 +22769,11 @@ type HolyGraphMutations {
   Архивная версия публикуется, а текущая опубликованная помещается в архив
   """
   restoreArchivedGraph(
-    """Идентификатор параллели"""
-    stageId: Int!
+    """Тип связи с орг. структурой"""
+    linkEntityType: HolyGraphLinkEntityTypeEnum!
+
+    """Id связанного элемента орг. структуры"""
+    linkEntityId: Int!
 
     """Версия графа"""
     version: Int!
@@ -22715,8 +22781,11 @@ type HolyGraphMutations {
 
   """Сохранить черновик графа для указанной параллели"""
   saveDraft(
-    """Идентификатор параллели"""
-    stageId: Int!
+    """Тип связи с орг. структурой"""
+    linkEntityType: HolyGraphLinkEntityTypeEnum!
+
+    """Id связанного элемента орг. структуры"""
+    linkEntityId: Int!
 
     """Граф"""
     graph: JsonNode!
@@ -22730,8 +22799,11 @@ type HolyGraphMutations {
 
   """Удалить черновик графа для указанной параллели"""
   deleteDraft(
-    """Идентификатор параллели"""
-    stageId: Int!
+    """Тип связи с орг. структурой"""
+    linkEntityType: HolyGraphLinkEntityTypeEnum!
+
+    """Id связанного элемента орг. структуры"""
+    linkEntityId: Int!
   ): Boolean
 }
 
@@ -22806,8 +22878,8 @@ type HolyGraphPointPosition {
 
 """"""
 type HolyGraphQueries {
-  """Получить список параллелей, имеющих опубликованный граф"""
-  getPublishedGraphStages: [HolyGraphStage!]!
+  """Получить список орг. единиц, имеющих опубликованный граф"""
+  getPublishedGraphsWithLinkEntity: [HolyGraphLinkEntity!]!
 
   """Получить граф по указанному Id"""
   getGraph(
@@ -22817,8 +22889,11 @@ type HolyGraphQueries {
 
   """Получить опубликованный граф для указанной параллели"""
   getPublishedGraph(
-    """Идентификатор параллели"""
-    stageId: Int!
+    """Тип связи с орг. структурой"""
+    linkEntityType: HolyGraphLinkEntityTypeEnum!
+
+    """Id связанного элемента орг. структуры"""
+    linkEntityId: Int!
 
     """Возвращать пустой граф если он не существует"""
     emptyIfNotExist: Boolean
@@ -22829,9 +22904,12 @@ type HolyGraphQueries {
     """Тип источников проектов"""
     contentBunchType: HolyGraphContentBunchTypeEnum!
 
-    """Id параллели"""
-    stageId: Int!
-  ): [HolyGraphContentBunchEntity!]!
+    """Тип связи с орг. структурой"""
+    linkEntityType: HolyGraphLinkEntityTypeEnum!
+
+    """Id связанного элемента орг. структуры"""
+    linkEntityId: Int!
+  ): [HolyGraphContentBunchSource!]!
 
   """Получить контекст графа по заданным источникам"""
   getContentBunchGraph(
@@ -22841,8 +22919,11 @@ type HolyGraphQueries {
     """Перечень Id источников проектов"""
     contentBunchIds: [Int!]!
 
-    """Id параллели"""
-    stageId: Int!
+    """Тип связи с орг. структурой"""
+    linkEntityType: HolyGraphLinkEntityTypeEnum!
+
+    """Id связанного элемента орг. структуры"""
+    linkEntityId: Int!
   ): HolyGraphContentBunch
 
   """Получить граф прогресса студента"""
@@ -22879,14 +22960,20 @@ type HolyGraphQueries {
 
   """Получить список архивных версий графа для указанной параллели"""
   getArchivedGraphVersions(
-    """Идентификатор параллели"""
-    stageId: Int!
+    """Тип связи с орг. структурой"""
+    linkEntityType: HolyGraphLinkEntityTypeEnum!
+
+    """Id связанного элемента орг. структуры"""
+    linkEntityId: Int!
   ): [HolyGraphVersion!]!
 
   """Получить архивную версию графа для указанной параллели"""
   getArchivedGraph(
-    """Идентификатор параллели"""
-    stageId: Int!
+    """Тип связи с орг. структурой"""
+    linkEntityType: HolyGraphLinkEntityTypeEnum!
+
+    """Id связанного элемента орг. структуры"""
+    linkEntityId: Int!
 
     """Версия графа"""
     version: Int!
@@ -22894,42 +22981,21 @@ type HolyGraphQueries {
 
   """Проверить наличие у пользователя черновика графа для параллели"""
   isDraftGraphExists(
-    """Идентификатор параллели"""
-    stageId: Int!
+    """Тип связи с орг. структурой"""
+    linkEntityType: HolyGraphLinkEntityTypeEnum!
+
+    """Id связанного элемента орг. структуры"""
+    linkEntityId: Int!
   ): Boolean
 
   """Получить черновик графа пользователя"""
   getDraftGraph(
-    """Идентификатор параллели"""
-    stageId: Int!
+    """Тип связи с орг. структурой"""
+    linkEntityType: HolyGraphLinkEntityTypeEnum!
+
+    """Id связанного элемента орг. структуры"""
+    linkEntityId: Int!
   ): HolyGraphJSON
-}
-
-"""Связь графа и параллели"""
-type HolyGraphStage {
-  """Id графа"""
-  graphId: Int!
-
-  """Id параллели"""
-  stageId: Int!
-
-  """Наименование параллели"""
-  stageName: String!
-
-  """Тип источников проектов"""
-  contentBunchType: HolyGraphContentBunchTypeEnum!
-
-  """Перечень Id источников проектов"""
-  contentBunchIds: [Int!]!
-
-  """Дата последнего изменения"""
-  updateTs: DateTime
-
-  """Автор последнего изменения"""
-  updatedBy: String
-
-  """Комментарий к версии графа"""
-  comment: String
 }
 
 """Версия графа"""
@@ -22937,8 +23003,11 @@ type HolyGraphVersion {
   """Id графа"""
   graphId: Int!
 
-  """Id параллели"""
-  stageId: Int!
+  """Тип связи с орг. структурой"""
+  linkEntityType: HolyGraphLinkEntityTypeEnum!
+
+  """Id связанного элемента орг. структуры"""
+  linkEntityId: Int!
 
   """Версия графа"""
   version: Int!
@@ -38223,7 +38292,7 @@ type School21Queries {
   checkIfLegalTaskNameToCreateGitlabProject(taskName: String!): Boolean!
 
   """S21. Получить список классов школы 21 по фильтрам Кампус/Параллель"""
-  getStageGroups(schoolIds: [UUID], stageIds: [ID], textSearch: String): [StageGroup]
+  getStageGroups(schoolIds: [UUID], stageIds: [ID], textSearch: String, ignoreStageGroupsWithoutSubject: Boolean): [StageGroup]
 
   """
   S21. Получить список классов школы 21 по фильтрам Кампус/Параллель с дополнительными ограничениями по полномочиям текущего пользователя
