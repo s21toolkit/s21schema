@@ -438,6 +438,9 @@ enum AcceleratorMetric {
 
   """"""
   NPS
+
+  """"""
+  CSATSC
 }
 
 """Этапы Акселератора"""
@@ -6417,6 +6420,9 @@ type BusinessAdminMutations {
   """Создание конфигурации оценивания"""
   createRatingConfiguration(ratingConfiguration: RatingConfigurationInput!): RatingConfiguration!
 
+  """Метод сохранения предметов для продукта Bootcamp"""
+  saveSubjectsForBTC(subjects: [SubjectInput!]!): [Subject!]!
+
   """
   Новый метод сохранения предмета(-ов) для данного образовательного учреждения с 2-мя параметрами "subjects" и "orgUnitId"
   """
@@ -7660,6 +7666,9 @@ type BusinessAdminQueries {
   список классов (для завуча все классы, для учителя его классы, возможны фильтры по параллели и учебному году)
   """
   getStageGroupsBySchoolAndTeacher(stageId: ID, academicYearId: ID): [StageGroupInfo!]!
+
+  """список предметов по тенанту для бизнес-администратора bootcamp"""
+  getSubjects(textSearch: String): [Subject!]!
 
   """
   список предметов для класса (для учителя только его предметы, для классного руководителя его предмет и предметы его класса)
@@ -45292,6 +45301,9 @@ type StudentMutations {
     Идентификатор плана урока, в рамках которого был отправлен ответ на задание.
     """
     lessonPlanId: ID
+
+    """Путь до задания на проверку"""
+    pathToCheck: String
   ): SaveStudentAnswerResponse!
 
   """"""
