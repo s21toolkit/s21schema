@@ -1,0 +1,11 @@
+query GetP2pReviewModeSettingsByStudentId($studentId: UUID!) {
+  school21 {
+    getP2pReviewModeSettingsByStudentId(studentId: $studentId) {
+      stage {
+        id
+        name
+      }
+      mode
+    }
+  }
+}

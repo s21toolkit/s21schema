@@ -1,0 +1,27 @@
+query getReviewPointTransactions($userId: UUID!, $rpType: RpType!, $from: DateTime!, $to: DateTime!) {
+  school21 {
+    getReviewPointTransactions(
+      userId: $userId
+      rpType: $rpType
+      from: $from
+      to: $to
+    ) {
+      lastBalanceBeforePeriod
+      reviewPointTransactions {
+        id
+        rpType
+        date
+        isLastTransactionOfDay
+        transactionSource
+        amount
+        amountAfter
+        actionTypeDescription
+        badgeName
+        badgeAvatar
+        projectName
+        projectId
+        verifiableLogin
+      }
+    }
+  }
+}

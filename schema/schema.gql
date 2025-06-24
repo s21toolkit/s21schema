@@ -4540,6 +4540,15 @@ type AuditRecordsResponse {
   records: [AuditMessage!]!
 }
 
+"""Критерии для поиска типов аудита (Ш21)"""
+input AuditTypeSearchCriteriaInput {
+  """тип аудируемой сущности"""
+  entityTypeCode: String
+
+  """Тип действия пользователя"""
+  action: AuditOperationAction
+}
+
 """"""
 type AuditableEntityType {
   """Уникальный код сущности"""
@@ -5995,6 +6004,496 @@ type BreadCrumbsPlanItem {
   executionType: ModuleExecutionType
 }
 
+""""""
+input BtcAccessTagFilterInputModel {
+  """Строка поиска по имени тега доступа"""
+  textSearch: String!
+
+  """Список типов тегов доступа"""
+  btcAccessTagTypes: [BtcAccessTagsTypeModel!]!
+
+  """Пагинация"""
+  paging: PagingInput!
+
+  """Параметры сортировки"""
+  sortingFields: [SortingField]
+}
+
+"""Информация о теге доступа для сохранения"""
+input BtcAccessTagInputModel {
+  """Идентификатор тега доступа"""
+  tagId: ID
+
+  """Имя тега"""
+  tagName: String!
+
+  """Флаг, обозначающий, включен или выключен данный тег"""
+  isActive: Boolean!
+
+  """Тип тега доступа"""
+  tagType: BtcAccessTagsTypeModel!
+}
+
+""""""
+enum BtcAccessTagLevelModel {
+  """"""
+  GROUP_LEVEL
+
+  """"""
+  TAG_LEVEL
+}
+
+"""Информация о теге доступа"""
+type BtcAccessTagModel {
+  """Идентификатор тега"""
+  tagId: ID!
+
+  """Имя тега"""
+  tagName: String!
+
+  """Флаг, обозначающий, включен или выключен данный тег"""
+  isActive: Boolean!
+
+  """Тип тега доступа"""
+  tagType: BtcAccessTagsTypeModel!
+
+  """Уровень тега доступа"""
+  tagLevel: BtcAccessTagLevelModel!
+
+  """Дата и время создания тега"""
+  createTs: DateTime!
+
+  """Дата и время модификации тега"""
+  modifyTs: DateTime
+
+  """Идентификатор пользователя, который создал тег"""
+  createdBy: UUID!
+
+  """Идентификатор пользователя, который модифицировал тег"""
+  modifiedBy: UUID
+}
+
+"""Информация о теге доступа, назначенном на пользователя"""
+type BtcAccessTagToUserModel {
+  """Tег доступа"""
+  btcTag: BtcAccessTagModel!
+
+  """Идентификатор пользователя"""
+  userId: UUID!
+
+  """
+  Время, до которого данный тег активен и дает пользователю доступ к контенту
+  """
+  expiresAt: Date
+
+  """Является ли тег временным для пользователя"""
+  isTemporary: Boolean!
+
+  """Идентификатор пользователя, который назначил тег на пользователя"""
+  assignedBy: UUID
+}
+
+""""""
+enum BtcAccessTagsEntityTypeModel {
+  """"""
+  COURSE
+
+  """"""
+  TRAJECTORY
+}
+
+""""""
+enum BtcAccessTagsTypeModel {
+  """"""
+  INTERNAL
+
+  """"""
+  DZO
+
+  """"""
+  EXTERNAL
+}
+
+"""Фильтр для поиска курсов"""
+input BtcCourseFilterInputModel {
+  """Идентификаторы курсов"""
+  courseIds: [ID!]
+
+  """Название курса"""
+  courseName: String
+
+  """Статус"""
+  statuses: [BtcStudyStatus!]
+
+  """Описание курса"""
+  courseInfo: String
+
+  """Список идентификаторов тегов доступа"""
+  accessTagIds: [ID!]
+
+  """Теги"""
+  tags: [String!]
+
+  """Предметы"""
+  subjectIds: [ID!]
+
+  """Модули"""
+  goalIds: [ID!]
+
+  """Задача"""
+  taskIds: [ID!]
+
+  """Идентификаторы курсов из АС Пульс"""
+  catalogItemIds: [String!]
+
+  """Автор"""
+  authorUserIds: [UUID!]
+
+  """С ограничением по времени (да / нет)"""
+  accessLimit: Boolean
+
+  """С сертификатом (да / нет)"""
+  certificateAvailable: Boolean
+}
+
+"""Входные данные для модуля в курсе"""
+input BtcCourseGoalInputModel {
+  """Идентификатор модуля по предмету в модуле курса"""
+  courseGoalId: ID
+
+  """Идентификатор курса"""
+  courseId: ID
+
+  """Идентификатор модуля"""
+  goalId: ID!
+
+  """Уровень"""
+  goalLevel: Float!
+
+  """Длительность в часах"""
+  laboriousness: Int!
+
+  """Признак обязательности"""
+  isMandatory: Boolean!
+
+  """Сквозной порядок следования модуля внутри курса"""
+  orderNumber: Int!
+
+  """Список задач в модуле курса"""
+  tasks: [BtcCourseGoalTaskInputModel!]
+}
+
+"""Модуль в курсе"""
+type BtcCourseGoalModel {
+  """Идентификатор модуля по предмету в курсе"""
+  courseGoalId: ID!
+
+  """Идентификатор курса"""
+  courseId: ID!
+
+  """Идентификатор предмета"""
+  subjectId: ID!
+
+  """Название предмета"""
+  subjectName: String!
+
+  """Идентификатор модуля"""
+  goalId: ID!
+
+  """Название модуля"""
+  goalName: String!
+
+  """Уровень"""
+  goalLevel: Float!
+
+  """Длительность в часах"""
+  laboriousness: Int!
+
+  """Признак обязательности"""
+  isMandatory: Boolean!
+
+  """Сквозной порядок следования модуля внутри курса"""
+  orderNumber: Int!
+
+  """Список задач в модуле курса"""
+  tasks: [BtcCourseGoalTaskModel!]
+}
+
+"""Входные данные по задаче в модуле курса"""
+input BtcCourseGoalTaskInputModel {
+  """Уникальный идентификатор записи"""
+  goalTaskId: ID
+
+  """Ссылка на модуль в курсе"""
+  courseGoalId: ID
+
+  """Идентификатор задачи"""
+  taskId: ID!
+
+  """Уровень"""
+  goalLevel: Float!
+
+  """Признак обязательности"""
+  isMandatory: Boolean!
+
+  """Процент для завершения задачи"""
+  acceptancePercent: Int
+
+  """Признак неограниченности количества попыток"""
+  isUnlimitedAttempts: Boolean
+
+  """Количество попыток прохождения задачи"""
+  attemptsNumber: Int
+
+  """Трудоемкость задачи в часах"""
+  laboriousness: Int
+
+  """Порядковый номер задачи в модуле"""
+  taskOrder: Int!
+}
+
+"""Задача в модуле курса"""
+type BtcCourseGoalTaskModel {
+  """Уникальный идентификатор записи"""
+  goalTaskId: ID!
+
+  """Ссылка на модуль в курсе"""
+  courseGoalId: ID!
+
+  """Идентификатор задачи"""
+  taskId: ID!
+
+  """Тип задачи"""
+  taskType: TaskTypeEnum!
+
+  """Название задачи"""
+  taskName: String!
+
+  """Уровень"""
+  goalLevel: Float!
+
+  """Признак обязательности"""
+  isMandatory: Boolean!
+
+  """Тип проверки задачи"""
+  taskCheckType: TaskCheckEnum!
+
+  """Процент для завершения задачи"""
+  acceptancePercent: Int
+
+  """Признак неограниченности количества попыток"""
+  isUnlimitedAttempts: Boolean!
+
+  """Количество попыток прохождения задачи"""
+  attemptsNumber: Int
+
+  """Трудоемкость задачи в часах"""
+  laboriousness: Int!
+
+  """Порядковый номер задачи в модуле"""
+  taskOrder: Int!
+}
+
+"""Входные данные для создания/обновления курса"""
+input BtcCourseInputModel {
+  """Идентификатор"""
+  courseId: ID
+
+  """Название"""
+  courseName: String!
+
+  """Статус"""
+  status: BtcStudyStatus!
+
+  """Список тегов доступа"""
+  accessTags: [BtcAccessTagInputModel!]
+
+  """Список тегов для ограничения доступа"""
+  tags: [String!]
+
+  """Описание"""
+  courseInfo: String
+
+  """Ссылка на скин"""
+  courseSkin: String
+
+  """Ограничения длительности обучения"""
+  deadline: BtcStudyDeadlineInputModel!
+
+  """Признак необходимости закрытия доступа по истечении времени"""
+  accessLimit: Boolean!
+
+  """Дата закрытия доступа. Если указана дата, то duration не используется"""
+  accessLimitDate: Date
+
+  """Длительность в днях до закрытия доступа"""
+  accessLimitDuration: Int
+
+  """
+  Необходимый прогресс для завершения обучения. Если не задан, то будет 100%
+  """
+  progressCompleted: Int
+
+  """идентификатор курса из АС Пульс"""
+  catalogItemId: String
+
+  """Список модулей, входящих в курс"""
+  goals: [BtcCourseGoalInputModel!]
+
+  """Идентификатор автора курса"""
+  authorUserId: UUID!
+
+  """Идентификатор пользователя создавшего курс"""
+  creatorUserId: UUID!
+
+  """Идентификатор пользователя, который последний изменил курс"""
+  lastModifierUserId: UUID
+}
+
+"""Курс"""
+type BtcCourseModel {
+  """Идентификатор"""
+  courseId: ID!
+
+  """Название"""
+  courseName: String!
+
+  """Статус"""
+  status: BtcStudyStatus!
+
+  """Список тегов доступа"""
+  accessTags: [BtcAccessTagModel!]
+
+  """Список тегов для ограничения доступа"""
+  tags: [String!]
+
+  """Описание"""
+  courseInfo: String
+
+  """Ссылка на скин"""
+  courseSkin: String
+
+  """Ограничения длительности обучения"""
+  deadline: BtcStudyDeadlineModel!
+
+  """Информация об ограничении доступа по истечению времени"""
+  accessLimit: BtcStudyAccessLimitModel
+
+  """Необходимый прогресс для завершения обучения"""
+  progressCompleted: Int!
+
+  """идентификатор курса из АС Пульс"""
+  catalogItemId: String
+
+  """Список модулей, входящих в курс"""
+  goals: [BtcCourseGoalModel!]
+
+  """Идентификатор автора курса"""
+  authorUserId: UUID!
+
+  """Системная информация по курсу. Кто и когда создал."""
+  creationInfo: BtcRowSystemInfo!
+
+  """Системная информация по курсу. Кто и когда изменил."""
+  modificationInfo: BtcRowSystemInfo
+}
+
+""""""
+type BtcCourseMutations {
+  """Сохранение траектории"""
+  saveTrajectory(trajectory: BtcTrajectoryInputModel): BtcTrajectoryModel!
+
+  """Сохранение курса"""
+  saveCourse(course: BtcCourseInputModel): BtcCourseModel!
+
+  """Изменение статуса курса. Возвращает новый установленный статус"""
+  changeCourseStatus(courseId: ID!, status: BtcStudyStatus!): BtcStudyStatus!
+
+  """
+  Назначение курса на студентов. Возвращает список студентов, для которых назначение прошло успешно
+  """
+  assignTrajectoryToStudents(studyAssignment: BtcStudyAssignmentInputModel!): [UUID!]!
+
+  """
+  Назначение курса на студентов. Возвращает список студентов, для которых назначение прошло успешно
+  """
+  assignCourseToStudents(studyAssignment: BtcStudyAssignmentInputModel!): [UUID!]!
+
+  """
+   Назначение курса на текущего студента. Возвращает идентификатор студента, если назначение прошло успешно
+  assignTrajectoryToCurrentStudent(studyAssignment: BtcStudyAssignmentInputModel!): [UUID!]
+   Назначение курса на текущего студентов. Возвращает идентификатор студента, если назначение прошло успешно
+  assignCourseToCurrentStudent(studyAssignment: BtcStudyAssignmentInputModel!): [UUID!]
+   Изменить плановые даты начала и окончания назначенной траектории для студентов.
+   Возвращает список идентификаторов студентов, для которых смена прошла успешно
+  """
+  changePlanDatesAssignTrajectory(studentIds: [UUID!]!, trajectoryId: ID!, planStartDate: Date!, planEndDate: Date!): [UUID!]!
+
+  """
+  Изменить плановые даты начала и окончания назначенного курса для студентов.
+  Возвращает список идентификаторов студентов, для которых смена прошла успешно
+  """
+  changePlanDatesAssignCourse(studentIds: [UUID!]!, courseId: ID!, planStartDate: Date!, planEndDate: Date!): [UUID!]! @deprecated(reason: "Необходимо использовать changePlanDatesAssignTrajectory или changePlanDatesAssignCourse")
+
+  """"""
+  changePlanDatesAssignCourseByStudentIdsAndCourseId(studentIds: [UUID!]!, courseId: String!, planStartDate: Date!, planEndDate: Date!): [UUID!]!
+
+  """Изменение статуса задачи"""
+  changeTaskStatus(studentId: UUID!, courseId: ID!, taskId: ID!, taskStatus: TaskStatusEnum!): TaskStatusEnum!
+
+  """"""
+  changeTaskStatusByStudentTaskId(studentTaskId: ID!, taskStatus: TaskStatusEnum!): TaskStatusEnum!
+}
+
+""""""
+type BtcCourseQueries {
+  """Получение траектории по идентификатору"""
+  getTrajectoryById(trajectoryId: ID!): BtcTrajectoryModel!
+
+  """Получение списка траекторий по данным фильтра"""
+  findTrajectoriesByFilter(filter: BtcTrajectoryFilterInputModel!, page: PagingInput!): [BtcTrajectoryModel!]!
+
+  """Получение количества траекторий удовлетворяющих данным фильтра"""
+  countTrajectoriesByFilter(filter: BtcTrajectoryFilterInputModel!): Int!
+
+  """Получение курса по идентификатору"""
+  getCourseById(courseId: ID!): BtcCourseModel!
+
+  """Получение списка курсов по данным фильтра"""
+  findCoursesByFilter(filter: BtcCourseFilterInputModel!, page: PagingInput!): [BtcCourseModel!]!
+
+  """Получение количества курсов удовлетворяющих данным фильтра"""
+  countCoursesByFilter(filter: BtcCourseFilterInputModel!): Int!
+
+  """Получение списка назначений траекторий по фильтру"""
+  findTrajectoryAssignments(filter: BtcStudentTrajectoryFilterInputModel!, page: PagingInput!): [BtcStudentTrajectoryModel]!
+
+  """
+  Получение количества назначений траекторий удовлетворяющих данным фильтра
+  """
+  countTrajectoryAssignments(filter: BtcStudentTrajectoryFilterInputModel!): Int!
+
+  """Получение списка назначений курсов по фильтру"""
+  findCourseAssignments(filter: BtcStudentCourseFilterInputModel!, page: PagingInput!): [BtcStudentCourseModel]!
+
+  """Получение количества назначений курсов удовлетворяющих данным фильтра"""
+  countCourseAssignments(filter: BtcStudentCourseFilterInputModel!): Int!
+}
+
+"""Тип определения сроков курса IT Bootcamp"""
+enum BtcDeadlineType {
+  """
+  Длительность рассчитывается, исходя из суммы длительностей модулей входящих в курс
+  """
+  CALCULATE
+
+  """Длительность задана в курсе"""
+  DURATION
+
+  """Длительность берется из плановых дат курса"""
+  PLAN_DATES
+}
+
 """Фильтр для запроса внешних учителей"""
 input BtcExternalTeacherInputModel {
   """Поиск по ФИО"""
@@ -6031,6 +6530,18 @@ type BtcExternalTeacherModel {
   stageGroupIds: [ID!]
 }
 
+"""Краткая информация по созданию/изменению"""
+type BtcRowSystemInfo {
+  """Идентификатор пользователя создавшего/изменившего запись"""
+  userId: UUID!
+
+  """Дата и время создания/изменения"""
+  dateTime: DateTime!
+
+  """ФИО пользователя"""
+  name: String
+}
+
 """"""
 type BtcStudentCityModel {
   """Идентификатор города"""
@@ -6041,6 +6552,405 @@ type BtcStudentCityModel {
 
   """Формат обучения учеников в Bootcamp в этом городе (очно/дистанционно)"""
   isStudyOnline: Boolean
+}
+
+"""Фильтр для поиска назначенных курсов"""
+input BtcStudentCourseFilterInputModel {
+  """Идентификаторы назначений курсов"""
+  studentCourseIds: [ID!]
+
+  """Идентификаторы студентов"""
+  studentIds: [UUID!]
+
+  """Идентификаторы траекторий"""
+  trajectoryIds: [ID!]
+
+  """Идентификаторы курсов"""
+  courseIds: [ID!]
+
+  """Идентификаторы задач, привязанных к курсу назначенному на студента"""
+  studentTaskIds: [ID!]
+
+  """Признак завершения курса"""
+  isCompleted: Boolean
+
+  """Признак ручного завершения курса"""
+  isManualCompleted: Boolean
+}
+
+"""Модули внутри назначенного на студента курса"""
+type BtcStudentCourseGoalModel {
+  """Идентификатор модуля курса студента"""
+  studentGoalId: ID!
+
+  """Идентификатор курса студента"""
+  studentCourseId: ID!
+
+  """Идентификатор предмета"""
+  subjectId: ID!
+
+  """Название предмета"""
+  subjectName: String!
+
+  """Идентификатор модуля"""
+  goalId: ID!
+
+  """Название модуля"""
+  goalName: String!
+
+  """Уровень"""
+  goalLevel: Float!
+
+  """Длительность в часах"""
+  laboriousness: Int!
+
+  """Признак обязательности"""
+  isMandatory: Boolean!
+
+  """Сквозной порядок следования модуля внутри курса"""
+  orderNumber: Int!
+
+  """Признак завершения модуля"""
+  isCompleted: Boolean!
+
+  """Дата и время завершения модуля"""
+  completedTs: DateTime
+
+  """Дата и время создания/изменения"""
+  lastModifyTs: DateTime
+
+  """Список задач в модуле курса"""
+  tasks: [BtcStudentCourseGoalTaskModel!]
+}
+
+"""Задача в модуле назначенного на студента курса"""
+type BtcStudentCourseGoalTaskModel {
+  """Уникальный идентификатор записи"""
+  studentTaskId: ID!
+
+  """Ссылка на назначенный на студента модуль в курсе"""
+  studentGoalId: ID!
+
+  """Идентификатор задачи"""
+  taskId: ID!
+
+  """Уровень"""
+  goalLevel: Float!
+
+  """Признак обязательности"""
+  isMandatory: Boolean!
+
+  """Процент для завершения задачи"""
+  acceptancePercent: Int
+
+  """Признак неограниченности количества попыток"""
+  isUnlimitedAttempts: Boolean!
+
+  """Количество попыток прохождения задачи"""
+  attemptsNumber: Int
+
+  """Трудоемкость задачи в часах"""
+  laboriousness: Int!
+
+  """Порядковый номер задачи в модуле"""
+  taskOrder: Int!
+
+  """Статус задачи"""
+  taskStatus: BtcTaskStatusModel!
+
+  """Дата и время завершения модуля"""
+  completedTs: DateTime
+}
+
+"""Назначенный на студента курс"""
+type BtcStudentCourseModel {
+  """Идентификатор назначения"""
+  studentCourseId: ID!
+
+  """Идентификатор студента"""
+  studentId: UUID!
+
+  """Идентификатор курса"""
+  course: BtcCourseModel!
+
+  """Плановая дата начала прохождения курса"""
+  planStartDate: Date!
+
+  """Плановая дата окончания прохождения курса"""
+  planEndDate: Date!
+
+  """Фактическая дата начала курса"""
+  actualStartDate: Date
+
+  """Фактическая дата окончания курса"""
+  actualEndDate: Date
+
+  """Дата окончания доступа к курсу"""
+  accessLimitDate: Date
+
+  """Режим назначения курса"""
+  assignmentMode: BtcStudyAssignmentMode!
+
+  """Необходимый прогресс для завершения обучения"""
+  progressCompleted: Int!
+
+  """Ссылка на траекторию, а рамках которой был назначен курс"""
+  trajectoryId: ID
+
+  """Признак завершения курса"""
+  isCompleted: Boolean!
+
+  """Дата и время завершения курса"""
+  completedTs: DateTime
+
+  """Признак ручного завершения курса"""
+  isManualCompleted: Boolean
+
+  """Итоговый прогресс по курсу"""
+  progressTotal: Int!
+
+  """Признак обязательности для курса, входящего в траекторию"""
+  isMandatory: Boolean
+
+  """Сквозной порядок следования курса внутри траектории"""
+  orderNumber: Int
+
+  """Системная информация назначению курса на студента. Кто и когда создал."""
+  creationInfo: BtcRowSystemInfo!
+
+  """
+  Системная информация по назначению курса на студента. Кто и когда изменил.
+  """
+  modificationInfo: BtcRowSystemInfo
+
+  """Список модулей, входящих в курс"""
+  goals: [BtcStudentCourseGoalModel!]
+}
+
+"""Информация по ученику которому необходима проверка задания"""
+type BtcStudentReviewModel {
+  """ID задания ученика"""
+  studentTaskId: ID!
+
+  """ID ученика"""
+  studentId: UUID!
+
+  """ФИО ученика"""
+  studentFIO: String!
+
+  """Траектории назначенные на студента"""
+  studentAssignedTrajectory: StudentAssignedTrajectoryModel
+
+  """ID предмета к которому принадлежит задание"""
+  subjectId: ID!
+
+  """Наименование предмета к которому принадлежит задание"""
+  subjectName: String!
+
+  """ID модуля к которому принадлежит задание"""
+  goalId: ID
+
+  """Наименование модуля к которому принадлежит задание"""
+  goalName: String
+
+  """ID задания к которому принадлежит задание"""
+  taskId: ID!
+
+  """ID задания к которому принадлежит задание"""
+  taskName: String!
+
+  """Уровень задания в модуле"""
+  level: Float
+
+  """ФИО проверяющего которому отправлено задание"""
+  reviewerFIO: String!
+
+  """Дата создания запроса на проверку"""
+  createTime: DateTime!
+}
+
+"""Курс, входящий в назначенную на студента траекторию"""
+type BtcStudentTrajectoryCourseModel {
+  """Идентификатор назначенной на студента траектории"""
+  studentTrajectoryId: ID!
+
+  """Назначенный на студента курс"""
+  studentCourse: BtcStudentCourseModel!
+
+  """Признак обязательности"""
+  isMandatory: Boolean!
+
+  """Сквозной порядок следования курса внутри траектории"""
+  orderNumber: Int!
+}
+
+"""Фильтр для поиска назначенных траекторий"""
+input BtcStudentTrajectoryFilterInputModel {
+  """Идентификаторы назначений курсов"""
+  studentTrajectoryIds: [ID!]
+
+  """Идентификаторы студентов"""
+  studentIds: [UUID!]
+
+  """Идентификаторы траекторий"""
+  trajectoryIds: [ID!]
+
+  """Идентификаторы курсов, входящих в траектории"""
+  courseIds: [ID!]
+
+  """Идентификаторы задач, привязанных к курсу назначенному на студента"""
+  studentTaskIds: [ID!]
+
+  """Признак завершения курса"""
+  isCompleted: Boolean
+
+  """Признак ручного завершения курса"""
+  isManualCompleted: Boolean
+}
+
+"""Назначенная на студента траектория"""
+type BtcStudentTrajectoryModel {
+  """Идентификатор назначения"""
+  studentTrajectoryId: ID!
+
+  """Идентификатор студента"""
+  studentId: UUID!
+
+  """Траектория"""
+  trajectory: BtcTrajectoryModel!
+
+  """Плановая дата начала прохождения траектории"""
+  planStartDate: Date!
+
+  """Плановая дата окончания прохождения траектории"""
+  planEndDate: Date!
+
+  """Фактическая дата начала траектории"""
+  actualStartDate: Date
+
+  """Фактическая дата окончания траектории"""
+  actualEndDate: Date
+
+  """Дата окончания доступа к траектории"""
+  accessLimitDate: Date
+
+  """Режим назначения траектории"""
+  assignmentMode: BtcStudyAssignmentMode!
+
+  """Необходимый прогресс для завершения обучения"""
+  progressCompleted: Int!
+
+  """Признак завершения траектории"""
+  isCompleted: Boolean!
+
+  """Дата и время завершения траектории"""
+  completedTs: DateTime
+
+  """Признак ручного завершения траектории"""
+  isManualCompleted: Boolean
+
+  """Итоговый прогресс по траектории"""
+  progressTotal: Int!
+
+  """
+  Системная информация назначению траектории на студента. Кто и когда создал.
+  """
+  creationInfo: BtcRowSystemInfo!
+
+  """
+  Системная информация по назначению траектории на студента. Кто и когда изменил.
+  """
+  modificationInfo: BtcRowSystemInfo
+
+  """Список курсов, входящих в траекторию"""
+  courses: [BtcStudentTrajectoryCourseModel!]
+}
+
+"""Ограничение доступа по истечению времени"""
+type BtcStudyAccessLimitModel {
+  """Дата закрытия доступа. Если указана дата, то duration не используется"""
+  accessLimitDate: Date
+
+  """Длительность в днях до закрытия доступа"""
+  accessLimitDuration: Int
+}
+
+"""Данные для назначения траектории/курса"""
+input BtcStudyAssignmentInputModel {
+  """Идентификатор траектории/курса"""
+  studyId: ID!
+
+  """Идентификаторы студентов, которым будет назначен курс"""
+  studentIds: [UUID!]!
+
+  """Режим назначения курса"""
+  assignmentMode: BtcStudyAssignmentMode!
+
+  """Плановая дата начала прохождения курса"""
+  planStartDate: Date
+
+  """Плановая дата окончания прохождения курса"""
+  planEndDate: Date
+}
+
+"""Режим назначения траектории/курса"""
+enum BtcStudyAssignmentMode {
+  """
+  Пропускать назначение курса на студента, если у него такой курс уже есть
+  """
+  SKIP
+
+  """Перезаписывать назначение с сохранением достижений"""
+  REWRITE
+
+  """Перезаписывать назначение без сохранения достижений"""
+  FULL_REWRITE
+}
+
+"""Входная информация для ограничения длительности"""
+input BtcStudyDeadlineInputModel {
+  """
+  Тип ограничения длительности (расчетный, на основании max_duration или по плановым датам)
+  """
+  deadlineType: BtcDeadlineType!
+
+  """Максимальная длительность в днях"""
+  maxDuration: Int
+
+  """Плановая дата начала обучения"""
+  planStartDate: Date
+
+  """Плановая дата окончания обучения"""
+  planEndDate: Date
+}
+
+"""Ограничения длительности обучения"""
+type BtcStudyDeadlineModel {
+  """
+  Тип ограничения длительности (расчетный, на основании max_duration или по плановым датам)
+  """
+  deadlineType: BtcDeadlineType!
+
+  """Максимальная длительность в днях"""
+  maxDuration: Int
+
+  """Плановая дата начала обучения"""
+  planStartDate: Date
+
+  """Плановая дата окончания обучения"""
+  planEndDate: Date
+}
+
+"""Статус траектории или курса IT Bootcamp"""
+enum BtcStudyStatus {
+  """Черновик"""
+  DRAFT
+
+  """Опубликовано, можно пользоваться"""
+  PUBLISHED
+
+  """Неактивный, нельзя использовать"""
+  INACTIVE
 }
 
 """Информация о теге контента для сохранения"""
@@ -6130,6 +7040,234 @@ enum BtcTagsEntityTypeModel {
 
   """"""
   COURSE
+}
+
+"""Статус задачи"""
+type BtcTaskStatusModel {
+  """Идентификатор статуса"""
+  statusId: ID!
+
+  """Статус"""
+  status: TaskStatusEnum!
+
+  """Отображаемое название"""
+  statusName: String!
+}
+
+"""Фильтр для дашборда учителя"""
+input BtcTeacherDashboardFilterInputModel {
+  """Фильтр по типу проверки"""
+  taskCheckType: TaskCheckEnum!
+
+  """Фильтр по заданиям"""
+  taskIds: [ID!]
+
+  """Фильтр по модулям"""
+  goalIds: [ID!]
+
+  """Фильтр по предметам"""
+  subjectIds: [ID!]
+
+  """Фильтр по ФИО студента"""
+  textSearch: String
+
+  """Дата указывающая сдвиг влево для p2p проверок"""
+  dateTo: DateTime
+
+  """
+  Флаг указывающий на то что будут возвращены только те проверки в которых проверяющий текущий юзер
+  """
+  isIReviewer: Boolean
+
+  """
+  Список userIDs пользователей которые указаны как проверяющие (если null или пустой ищет по тому кто отправил запрос)
+  """
+  reviewersUserId: [UUID!]!
+
+  """Фильтр сортировки"""
+  isAsc: Boolean
+
+  """Пагинация"""
+  paging: PagingInput!
+}
+
+"""Параметры для заполнения фильтров дашборда учителя"""
+type BtcTeacherDashboardFilterParamsModel {
+  """Предметы"""
+  subjects: [Subject!]!
+
+  """Модули"""
+  goals: [GoalShortInfo!]!
+
+  """Задания"""
+  tasks: [Task!]!
+
+  """Список учителей"""
+  teachersInfo: [SimpleUserInfoModel!]!
+}
+
+"""Входные данные для курса траектории"""
+input BtcTrajectoryCourseInputModel {
+  """Курс"""
+  courseId: ID!
+
+  """Признак обязательности"""
+  isMandatory: Boolean!
+
+  """Сквозной порядок следования курса внутри траектории"""
+  orderNumber: Int!
+}
+
+"""Модель курса траектории"""
+type BtcTrajectoryCourseModel {
+  """Идентификатор траектории"""
+  trajectoryId: ID!
+
+  """Курс"""
+  course: BtcCourseModel!
+
+  """Признак обязательности"""
+  isMandatory: Boolean!
+
+  """Сквозной порядок следования курса внутри траектории"""
+  orderNumber: Int!
+}
+
+"""Входные данные фильтра по траекториям"""
+input BtcTrajectoryFilterInputModel {
+  """Идентификаторы траекторий"""
+  trajectoryIds: [ID!]
+
+  """Название траекторий"""
+  trajectoryName: String
+
+  """Описание траекторий"""
+  trajectoryInfo: String
+
+  """Список идентификаторов тегов доступа"""
+  accessTagIds: [ID!]
+
+  """Теги"""
+  tags: [String!]
+
+  """Курсы"""
+  courseIds: [ID!]
+
+  """Идентификаторы курсов из АС Пульс"""
+  catalogItemIds: [String!]
+
+  """классы"""
+  stageGroupIds: [ID!]
+}
+
+"""Входные данные для траектории"""
+input BtcTrajectoryInputModel {
+  """Идентификатор траектории"""
+  trajectoryId: ID
+
+  """Название траектории"""
+  trajectoryName: String!
+
+  """Статус"""
+  status: BtcStudyStatus!
+
+  """Список тегов доступа"""
+  accessTags: [BtcAccessTagInputModel!]
+
+  """Список тегов"""
+  tags: [String!]
+
+  """Описание траектории"""
+  trajectoryInfo: String
+
+  """Ссылка на скин траектории"""
+  trajectorySkin: String
+
+  """Ограничения длительности обучения"""
+  deadline: BtcStudyDeadlineInputModel!
+
+  """Признак необходимости закрытия доступа по истечении времени"""
+  accessLimit: Boolean!
+
+  """Дата закрытия доступа. Если указана дата, то duration не используется"""
+  accessLimitDate: Date
+
+  """Длительность в днях до закрытия доступа"""
+  accessLimitDuration: Int
+
+  """
+  Необходимый прогресс для завершения обучения. Если не задан, то будет 100%
+  """
+  progressCompleted: Int
+
+  """идентификатор курса из АС Пульс"""
+  catalogItemId: String
+
+  """Список курсов, входящих в траекторию"""
+  courses: [BtcTrajectoryCourseInputModel!]
+
+  """Идентификатор автора курса"""
+  authorUserId: UUID!
+
+  """Идентификатор пользователя создавшего траекторию"""
+  creatorUserId: UUID
+
+  """Идентификатор пользователя, который последний изменил траекторию"""
+  lastModifierUserId: UUID
+
+  """Идентификаторов класса"""
+  stageGroupId: ID
+}
+
+"""Модель траектории"""
+type BtcTrajectoryModel {
+  """Идентификатор траектории"""
+  trajectoryId: ID!
+
+  """Название траектории"""
+  trajectoryName: String!
+
+  """Статус"""
+  status: BtcStudyStatus!
+
+  """Список тегов доступа"""
+  accessTags: [BtcAccessTagModel!]
+
+  """Список тегов"""
+  tags: [String!]
+
+  """Описание траектории"""
+  trajectoryInfo: String
+
+  """Ссылка на скин траектории"""
+  trajectorySkin: String
+
+  """Ограничения длительности обучения"""
+  deadline: BtcStudyDeadlineModel!
+
+  """Информация об ограничении доступа по истечению времени"""
+  accessLimit: BtcStudyAccessLimitModel
+
+  """Необходимый прогресс для завершения обучения"""
+  progressCompleted: Int!
+
+  """идентификатор курса из АС Пульс"""
+  catalogItemId: String
+
+  """Список курсов, входящих в траекторию"""
+  courses: [BtcTrajectoryCourseModel!]
+
+  """Идентификатор автора курса"""
+  authorUserId: UUID!
+
+  """Системная информация по траектории. Кто и когда создал."""
+  creationInfo: BtcRowSystemInfo!
+
+  """Системная информация по траектории. Кто и когда изменил."""
+  modificationInfo: BtcRowSystemInfo
+
+  """Идентификаторов класса"""
+  stageGroupId: ID
 }
 
 """"""
@@ -6943,6 +8081,15 @@ type BusinessAdminMutations {
 
   """Обновление приватности UTM-метки"""
   updateIsTwoFactorForUtmSource(utmId: ID!, isTwoFactor: Boolean!): UtmSourceModel!
+
+  """Сохранение новых тегов доступа"""
+  saveBtcAccessTags(btcAccessTags: [BtcAccessTagInputModel!]!): [BtcAccessTagModel!]!
+
+  """Назначение тегов доступа на сущность"""
+  assignBtcAccessTagsToEntity(allTagIdsToAssign: [ID!], entityId: ID!, entityType: BtcAccessTagsEntityTypeModel!): [BtcAccessTagModel!]!
+
+  """Назначение тегов доступа на пользователя"""
+  assignBtcAccessTagsToUser(tagIds: [ID!], userId: UUID!): [BtcAccessTagToUserModel!]!
 
   """"""
   checkAutoAwards(inputs: [CheckAutoAwardsEventInput!]!): Boolean!
@@ -8510,6 +9657,12 @@ type BusinessAdminQueries {
   """Получение рейтинга по P2P проверке"""
   getP2PLeaderBoard(filter: P2PLeaderBoardInput!): [P2PLeaderBoardStudentModel!]!
 
+  """Получение списка всех тегов доступа"""
+  getAllBtcAccessTags(filter: BtcAccessTagFilterInputModel!): [BtcAccessTagModel!]!
+
+  """Получение тегов доступа пользователя"""
+  getAllAccessTagsByUserId(userId: UUID!): [BtcAccessTagToUserModel!]!
+
   """"""
   getBadges: [Badge!]!
 
@@ -9007,6 +10160,9 @@ type CalendarEvent {
   null, если событие, было созданы ДО реализации привязки эвента к школе
   """
   school: CalendarEventSchool
+
+  """Признак того, может ли быть удалено данное мероприятие"""
+  isCanBeDeleted: Boolean
 }
 
 """Информация по категории для календаря"""
@@ -14061,6 +15217,19 @@ type CourseQueries {
     """Признак публикации для изменения"""
     isPublished: Boolean!
   ): AvailablePublicationCourses!
+
+  """Получение списка модулей и настроек проверок для дашборда"""
+  getCourseModulesChecksForDashboard(globalCourseId: ID!, paging: PagingInput): DashboardCourseModulesChecks!
+
+  """
+  Получение конструкторов и настроек формирования команд проектов в глобальном курсе для дашборда
+  """
+  getCourseModulesConstructorsForDashboard(globalCourseId: ID!, paging: PagingInput): DashboardCourseModulesConstructors!
+
+  """
+  Получение заголовочной информации по курсу для дашборда, в зависимости от id
+  """
+  getCourseHeaderInfoForDashboard(globalCourseId: ID!): DashboardCourseHeaderInfo!
 }
 
 """Информация о результатах попытки в мета"""
@@ -14571,6 +15740,108 @@ type DailyTraffic {
   periodAuthorizSDP: String!
 }
 
+"""модель элемента плана для dashboard"""
+type DashboardCourseGoalChecksItem {
+  """№ п/п"""
+  order: Int!
+
+  """isConsistent"""
+  isConsistent: Boolean!
+
+  """id проекта"""
+  goalId: ID!
+
+  """название модуля"""
+  name: String!
+
+  """тип проекта"""
+  goalExecutionType: ModuleExecutionType!
+
+  """Р2Р–Вид формулы финальной сборки"""
+  p2pFormula: P2pFormulasType
+
+  """Р2Р–Количество требуемых проверок"""
+  reviewUserCount: Int
+
+  """Р2Р–Длительность проверок (в минутах)"""
+  periodOfVerification: Int
+
+  """Р2Р–Стоимость проверки (Peer Review points)"""
+  cookiesCount: Int
+
+  """Р2Р–Проверка до первой ошибки"""
+  firstMistakeP2p: Boolean
+
+  """Р2Р–Проверка сотрудником кампуса"""
+  staffCheck: Boolean
+
+  """Процент бонусной части за p2p проверку"""
+  percentageOfBonusP2p: Int
+
+  """Auto-Проверка до первой ошибки"""
+  firstMistakeAuto: Boolean
+
+  """Процент бонусной части за авто проверку"""
+  percentageOfBonusAuto: Int
+
+  """CodeReview - Количество требуемых проверок"""
+  maxCodeReviewCount: Int
+
+  """CodeReview - Длительность проверок (в минутах)"""
+  codeReviewDuration: Int
+
+  """CodeReview - Стоимость проверки (Code Review points)"""
+  codeReviewCost: Int
+
+  """CodeReview - Процент за навык код-ревью"""
+  codeReviewSkillPercentage: Int
+}
+
+"""модель конструкторов модулей курса для dashboard"""
+type DashboardCourseGoalConstructorItem {
+  """№ п/п"""
+  order: Int!
+
+  """isConsistent"""
+  isConsistent: Boolean!
+
+  """id проекта"""
+  goalId: ID!
+
+  """название модуля"""
+  name: String!
+
+  """тип проекта"""
+  goalExecutionType: ModuleExecutionType!
+
+  """конструктор кто будет проверять"""
+  checkedRules: [EvaluationRuleGroup!]!
+
+  """конструктор кто будет выполнять"""
+  performingRules: [EvaluationRuleGroup!]!
+
+  """настройки команды"""
+  teamSettings: TeamSettings
+}
+
+"""модель заголовочной курса для dashboard"""
+type DashboardCourseHeaderInfo {
+  """общее количество проектов в курсе"""
+  count: Int!
+
+  """наименование курса"""
+  name: String!
+
+  """xp"""
+  pointTask: Int
+
+  """процент выполнения"""
+  percentageOfCompletion: Int
+
+  """автоматическая настройка весов"""
+  isAutoWeightsSetting: Boolean
+}
+
 """модель курса для dashboard"""
 type DashboardCourseModules {
   """модули плана"""
@@ -14593,6 +15864,50 @@ type DashboardCourseModules {
 
   """автоматическая настройка весов"""
   isAutoWeightsSetting: Boolean
+}
+
+"""модель проверок модулей курса для dashboard"""
+type DashboardCourseModulesChecks {
+  """"""
+  dashboardCourseGoalChecksItems: [DashboardCourseGoalChecksItem]!
+
+  """общее количество проектов в курсе"""
+  count: Int!
+
+  """наименование курса"""
+  name: String!
+
+  """id курса"""
+  globalCourseId: ID!
+
+  """Тип курса"""
+  courseType: CourseType!
+}
+
+"""модель конструкторов модулей курса для dashboard"""
+type DashboardCourseModulesConstructors {
+  """"""
+  dashboardCourseGoalConstructorsItems: [DashboardCourseGoalConstructorItem]!
+
+  """общее количество проектов в курсе"""
+  count: Int!
+
+  """наименование курса"""
+  name: String!
+
+  """id курса"""
+  globalCourseId: ID!
+
+  """Тип курса"""
+  courseType: CourseType!
+
+  """Список всех доступных условий заданного типа для конструкторов CHECKED"""
+  checkedFieldOptions: [EvaluationRuleFieldOption!]!
+
+  """
+  Список всех доступных условий заданного типа для конструкторов PERFORMING
+  """
+  performingFieldOptions: [EvaluationRuleFieldOption!]!
 }
 
 """модель элемента плана для dashboard"""
@@ -17329,6 +18644,9 @@ type EventMutations {
 
   """Участник - отказаться от фидбека на мероприятие"""
   rejectCalendarEventFeedback(eventId: ID!): Boolean!
+
+  """Удаление мероприятия"""
+  deleteEvent(eventId: ID!): Boolean!
 }
 
 """"""
@@ -29128,6 +30446,9 @@ type Mutation {
   userChangeRequest: UserChangeRequestMutations
 
   """"""
+  btcCourse: BtcCourseMutations
+
+  """"""
   sc21ProjectFlow: SC21ProjectFlowMutations
 
   """"""
@@ -30305,6 +31626,36 @@ enum P2pRequirementStatus {
 
   """"""
   NO_NEED_CHECK
+}
+
+""""""
+enum P2pReviewMode {
+  """"""
+  ONLINE
+
+  """"""
+  OFFLINE
+
+  """"""
+  ONLINE_AND_OFFLINE
+}
+
+""""""
+type P2pReviewModeSettings {
+  """"""
+  stage: Stage!
+
+  """"""
+  mode: P2pReviewMode!
+}
+
+""""""
+input P2pReviewModeSettingsInput {
+  """"""
+  stageId: Int!
+
+  """"""
+  mode: P2pReviewMode!
 }
 
 """"""
@@ -34265,6 +35616,9 @@ type Query {
   userChangeRequest: UserChangeRequestQueries
 
   """"""
+  btcCourse: BtcCourseQueries
+
+  """"""
   student: StudentQueries
 
   """"""
@@ -35620,6 +36974,57 @@ input ReviewFeedbackInput {
 
   """заполненные оценки по критериям"""
   reviewFeedbackCategoryValues: [ReviewFeedbackCategoryValueInput!]!
+}
+
+""""""
+type ReviewPointTransaction {
+  """"""
+  id: Int!
+
+  """"""
+  rpType: RpType!
+
+  """"""
+  date: DateTime!
+
+  """"""
+  isLastTransactionOfDay: Boolean!
+
+  """"""
+  transactionSource: TransactionSource!
+
+  """"""
+  amount: Int!
+
+  """"""
+  amountAfter: Int!
+
+  """"""
+  actionTypeDescription: String!
+
+  """"""
+  badgeName: String
+
+  """"""
+  badgeAvatar: String
+
+  """"""
+  projectName: String
+
+  """"""
+  projectId: Int
+
+  """"""
+  verifiableLogin: String
+}
+
+""""""
+type ReviewPointTransactionsSummary {
+  """"""
+  lastBalanceBeforePeriod: Int!
+
+  """"""
+  reviewPointTransactions: [ReviewPointTransaction!]!
 }
 
 """"""
@@ -37913,6 +39318,9 @@ type School21Mutations {
 
   """S21. Логирование ошибок Centrifugo, которые получает Front"""
   logCentrifugoError(jsonMessage: String!): Boolean!
+
+  """Изменить настройки режимов п2п-проверок"""
+  updateP2pReviewModeSettings(settings: [P2pReviewModeSettingsInput!]!): Boolean!
 }
 
 """"""
@@ -38434,6 +39842,17 @@ type School21Queries {
   Получение всех языков, которые уже опубликованы для текущей активной контент версии для код ревью по студенческому голу
   """
   getImportedLanguagesForCurrentVersionByStudentGoalId(studentGoalId: ID!): [String]!
+
+  """"""
+  getReviewPointTransactions(userId: UUID!, rpType: RpType!, from: DateTime!, to: DateTime!): ReviewPointTransactionsSummary!
+
+  """Получение настроек онлайн\оффлайн проверок на все параллели"""
+  getP2pReviewModeSettings(searchStageName: String, mode: P2pReviewMode): [P2pReviewModeSettings!]!
+
+  """
+  Получение настройки режима п2п проверок на параллель конкретного студента
+  """
+  getP2pReviewModeSettingsByStudentId(studentId: UUID!): P2pReviewModeSettings!
 }
 
 """"""
@@ -45304,6 +46723,9 @@ type StudentMutations {
 
     """Путь до задания на проверку"""
     pathToCheck: String
+
+    """Идентификатор курса буткемпа, которому принадлежит задание"""
+    courseId: ID
   ): SaveStudentAnswerResponse!
 
   """"""
@@ -45330,6 +46752,9 @@ type StudentMutations {
 
     """Ид госудерственной оценки"""
     governmentMarkId: Int
+
+    """Идентификатор курса буткемпа, которому принадлежит задание"""
+    courseId: ID
   ): StudentTask!
 
   """"""
@@ -47509,6 +48934,9 @@ type StudentQueries {
   """Получение рейтинга по P2P проверке"""
   getP2PLeaderBoard(filter: P2PLeaderBoardInput!): P2PLeaderBoardModel!
 
+  """Получение своих тегов доступа учеником"""
+  getAllAccessTagsByUserId: [BtcAccessTagToUserModel!]!
+
   """Все бейджи, с флагом, выданные или нет"""
   getBadges: [UserBadgeAward!]!
 
@@ -49489,6 +50917,9 @@ input StudentWhiteListInputModel {
 
   """Является ли метка приватной"""
   isTwoFactor: Boolean
+
+  """Теги доступа"""
+  tagIds: [ID!]
 }
 
 """"""
@@ -52804,6 +54235,9 @@ type Task {
 
   """Перевод контента задания на другой язык, если он был запрошен"""
   translatedData: String
+
+  """Ш21. Тип выполнения"""
+  taskExecutionType: ModuleExecutionType
 }
 
 """Форма работы"""
@@ -53870,6 +55304,9 @@ input TaskMetaInput {
 
   """Ш21. Тип загружаемого решения"""
   taskSolutionType: TaskSolutionTypeEnum
+
+  """Ш21. Тип выполнения"""
+  taskExecutionType: ModuleExecutionType
 }
 
 """
@@ -55438,6 +56875,9 @@ type TeacherMutations {
 
     """Критерии оценивания"""
     criteriaEvaluations: [EvaluatedTaskCriterionInput!]!
+
+    """Ид курса Bootcamp, которому принадлежит задание"""
+    courseId: ID
   ): StudentTaskInfo!
 
   """Изменение учителем статусов заданий с типом контента дженерик"""
@@ -56360,6 +57800,9 @@ type TeacherQueries {
 
     """Тип задания"""
     taskAssignmentTypes: [TaskAssignmentEnum]
+
+    """Ш21. Тип выполнения"""
+    goalExecutionType: ModuleExecutionType
   ): [Task!]!
 
   """"""
@@ -56432,6 +57875,9 @@ type TeacherQueries {
 
     """Ш21. Тип загружаемого решения"""
     solutionTypes: [TaskSolutionTypeEnum]
+
+    """Ш21. Тип выполнения"""
+    goalExecutionType: ModuleExecutionType
   ): TasksWithCount!
 
   """
@@ -58435,6 +59881,24 @@ type TeacherQueries {
 
   """Получение классов внешнего учителя"""
   getStageGroupsForExternalTeacher: [StageGroup]!
+
+  """Возвращает параметры для фильтров дашборда учителя"""
+  getFilterForTeacherDashBoardBTC: BtcTeacherDashboardFilterParamsModel!
+
+  """Возвращает параметры для фильтров дашборда мастер учителя"""
+  getFilterForMasterTeacherDashBoardBTC: BtcTeacherDashboardFilterParamsModel!
+
+  """Возвращает задания на проверку для учителя"""
+  getTeacherDashBoardBTC(
+    """Фильтр"""
+    filter: BtcTeacherDashboardFilterInputModel!
+  ): [BtcStudentReviewModel!]!
+
+  """Возвращает задания на проверку для мастур-учителя"""
+  getMasterTeacherDashBoardBTC(
+    """Фильтр"""
+    filter: BtcTeacherDashboardFilterInputModel!
+  ): [BtcStudentReviewModel!]!
 
   """выбирает только с BadgeAssignmentType == TEACHER_STUDENT"""
   getBadgesByKindId(kindId: Int!): [Badge!]!
@@ -60555,6 +62019,24 @@ type TrajectoryWithUsedModels {
 
   """"""
   usedModules: [ModuleInfo]
+}
+
+""""""
+enum TransactionSource {
+  """"""
+  INITIAL_REWARD
+
+  """первичная выдача поинтов"""
+  TRANSFER_STUDENT
+
+  """поинты при переводе студента"""
+  PROJECT
+
+  """все операции связанные с проектом\проверками\отменами"""
+  AWARD
+
+  """поинты выданы с наградой"""
+  POINTS_LIMIT
 }
 
 """
@@ -62681,6 +64163,9 @@ type UserQueries {
   """Получение операций по типу сущности"""
   getAuditOperationTypeByEntityType(entityTypeCode: String): [AuditOperationType!]! @deprecated(reason: "Switched to REST API")
 
+  """Критериальный поиск типов аудита (Ш21)"""
+  findAuditOperationTypesByCriteria(criteria: AuditTypeSearchCriteriaInput!): [AuditOperationType!]!
+
   """Получение списка всех аудируемых сущностей"""
   getAllAuditableEntityTypes: [AuditableEntityType!]! @deprecated(reason: "Switched to REST API")
 
@@ -62909,6 +64394,24 @@ type UserQueries {
     """Тип запрашиваемой сущности"""
     entityType: BtcTagsEntityTypeModel!
   ): [ID!]!
+
+  """Список сущностей, на которых назначен тег доступа с указанными tag_ids"""
+  getEntitiesByAccessTagIds(
+    """Идентификаторы тегов"""
+    tagId: [ID!]!
+
+    """Тип запрашиваемой сущности"""
+    entityType: BtcAccessTagsEntityTypeModel!
+  ): [ID!]!
+
+  """Получение тегов доступа сущности (курса или траектории)"""
+  getAccessTagsByEntityId(
+    """Идентификатор сущности"""
+    entityId: ID!
+
+    """Тип сущности"""
+    entityType: BtcAccessTagsEntityTypeModel!
+  ): [BtcAccessTagModel!]!
 
   """Отчет по жалобам пользователей в Bootcamp"""
   exportComplaintsBTC(
