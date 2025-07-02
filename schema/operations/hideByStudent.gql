@@ -1,0 +1,5 @@
+mutation hideByStudent($eventId: ID!, $isHideByStudent: Boolean!) {
+  calendarEventS21 {
+    hideEventByStudent(eventId: $eventId, isHideByStudent: $isHideByStudent)
+  }
+}

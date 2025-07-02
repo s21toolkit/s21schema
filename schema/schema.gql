@@ -10163,6 +10163,9 @@ type CalendarEvent {
 
   """Признак того, может ли быть удалено данное мероприятие"""
   isCanBeDeleted: Boolean
+
+  """"""
+  isHideByStudent: Boolean
 }
 
 """Информация по категории для календаря"""
@@ -10415,6 +10418,12 @@ type CalendarEventQueries {
 
   """Получить список задач в календаре"""
   getCalendarTasks(childUserId: UUID): [CalendarTask!]!
+}
+
+""""""
+type CalendarEventS21Mutations {
+  """"""
+  hideEventByStudent(eventId: ID!, isHideByStudent: Boolean!): Boolean
 }
 
 """"""
@@ -30482,6 +30491,9 @@ type Mutation {
   ASAP: ASAPMutations
 
   """"""
+  calendarEventS21: CalendarEventS21Mutations
+
+  """"""
   bigChallenge: BigChallengeMutations
 
   """"""
@@ -39220,6 +39232,11 @@ type School21Mutations {
   S21. Принудительное создание приватного репозитория экзаменационного задания
   """
   forcedCreateExamPrivateGitlabProject(examEventId: ID!, taskId: ID!, studentId: UUID!, gitlabUserAccessLevel: GitlabUserAccessLevel!): Boolean!
+
+  """
+  S21. Создание приватного репозитория экзаменационного задания студентом
+  """
+  studentBootManually(examEventId: ID!, taskId: ID!, studentId: UUID!, gitlabUserAccessLevel: GitlabUserAccessLevel!): Int!
 
   """
   S21. Принудительная синхронизация командных настроек для групповых проектов в аланах на параллель, класс и в локальных курсах
