@@ -6079,7 +6079,10 @@ type BtcAccessTagToUserModel {
   btcTag: BtcAccessTagModel!
 
   """Идентификатор пользователя"""
-  userId: UUID!
+  userId: UUID! @deprecated(reason: "Заглушен, необходимо использовать studentId")
+
+  """Идентификатор ученика"""
+  studentId: UUID
 
   """
   Время, до которого данный тег активен и дает пользователю доступ к контенту
@@ -6114,6 +6117,40 @@ enum BtcAccessTagsTypeModel {
   EXTERNAL
 }
 
+"""Определение области обновления назначенных курсов"""
+enum BtcAssignCourseRefreshScope {
+  """
+  Для назначенных курсов, по которым еще не было ни одной закрытой задачи
+  """
+  NEW
+
+  """
+  Для курсов, находящихся в процессе изучения (есть хотя бы одна закрытая задача)
+  """
+  PROGRESS
+
+  """Для завершенных"""
+  COMPLETED
+}
+
+""""""
+type BtcCertificateTemplateToStudyModel {
+  """ID записи"""
+  id: ID!
+
+  """Шаблон сертификата для выдачи"""
+  certificateTemplate: CertificateTemplateModel
+
+  """Тип сущности, к которой привязан сертификат"""
+  studyEntityType: StudyEntityTypeEnum
+
+  """ID сущности, к которой привязан сертификат"""
+  studyId: ID!
+
+  """"""
+  studyName: String
+}
+
 """Фильтр для поиска курсов"""
 input BtcCourseFilterInputModel {
   """Идентификаторы курсов"""
@@ -6143,7 +6180,7 @@ input BtcCourseFilterInputModel {
   """Задача"""
   taskIds: [ID!]
 
-  """Идентификаторы курсов из АС Пульс"""
+  """Идентификаторы курсов из АС Пульс (должен быть тип UUID)"""
   catalogItemIds: [String!]
 
   """Автор"""
@@ -6334,7 +6371,7 @@ input BtcCourseInputModel {
   """
   progressCompleted: Int
 
-  """идентификатор курса из АС Пульс"""
+  """идентификатор курса из АС Пульс (должен быть тип UUID)"""
   catalogItemId: String
 
   """Список модулей, входящих в курс"""
@@ -6382,7 +6419,7 @@ type BtcCourseModel {
   """Необходимый прогресс для завершения обучения"""
   progressCompleted: Int!
 
-  """идентификатор курса из АС Пульс"""
+  """идентификатор курса из АС Пульс (должен быть тип UUID)"""
   catalogItemId: String
 
   """Список модулей, входящих в курс"""
@@ -6396,6 +6433,9 @@ type BtcCourseModel {
 
   """Системная информация по курсу. Кто и когда изменил."""
   modificationInfo: BtcRowSystemInfo
+
+  """Сертификат выдаваемый за закрытие курса"""
+  certificateTemplate: CertificateTemplateModel
 }
 
 """"""
@@ -6404,7 +6444,7 @@ type BtcCourseMutations {
   saveTrajectory(trajectory: BtcTrajectoryInputModel): BtcTrajectoryModel!
 
   """Сохранение курса"""
-  saveCourse(course: BtcCourseInputModel): BtcCourseModel!
+  saveCourse(course: BtcCourseInputModel, certificateTemplate: CertificateTemplateInputModel): BtcCourseModel!
 
   """Изменение статуса курса. Возвращает новый установленный статус"""
   changeCourseStatus(courseId: ID!, status: BtcStudyStatus!): BtcStudyStatus!
@@ -6418,6 +6458,16 @@ type BtcCourseMutations {
   Назначение курса на студентов. Возвращает список студентов, для которых назначение прошло успешно
   """
   assignCourseToStudents(studyAssignment: BtcStudyAssignmentInputModel!): [UUID!]!
+
+  """
+  Обновление данных по назначенным курсам на основании обновленного курса
+  """
+  refreshAssignCourse(courseId: ID!, mode: [BtcAssignCourseRefreshScope!]!): [UUID!]
+
+  """
+  Обновление данных по назначенным курсам на основании обновленного курса для указанных студентов
+  """
+  refreshAssignCourseByStudentIds(courseId: ID!, studentIds: [UUID!]!, mode: [BtcAssignCourseRefreshScope!]!): [UUID!]
 
   """
    Назначение курса на текущего студента. Возвращает идентификатор студента, если назначение прошло успешно
@@ -6436,13 +6486,24 @@ type BtcCourseMutations {
   changePlanDatesAssignCourse(studentIds: [UUID!]!, courseId: ID!, planStartDate: Date!, planEndDate: Date!): [UUID!]! @deprecated(reason: "Необходимо использовать changePlanDatesAssignTrajectory или changePlanDatesAssignCourse")
 
   """"""
-  changePlanDatesAssignCourseByStudentIdsAndCourseId(studentIds: [UUID!]!, courseId: String!, planStartDate: Date!, planEndDate: Date!): [UUID!]!
+  changePlanDatesAssignCourseByStudentIdsAndCourseId(studentIds: [UUID!]!, courseId: String!, planStartDate: Date!, planEndDate: Date!): [UUID!]! @deprecated(reason: "Необходимо использовать changeTaskStatusByStudentIdAndTaskId")
 
-  """Изменение статуса задачи"""
-  changeTaskStatus(studentId: UUID!, courseId: ID!, taskId: ID!, taskStatus: TaskStatusEnum!): TaskStatusEnum!
+  """"""
+  changeTaskStatus(studentId: UUID!, courseId: ID!, taskId: ID!, taskStatus: TaskStatusEnum!): TaskStatusEnum! @deprecated(reason: "Необходимо использовать changeTaskStatusByStudentIdAndTaskId")
 
   """"""
   changeTaskStatusByStudentTaskId(studentTaskId: ID!, taskStatus: TaskStatusEnum!): TaskStatusEnum!
+
+  """"""
+  changeTaskStatusByStudentIdAndTaskId(studentId: UUID!, taskId: ID!, taskStatus: TaskStatusEnum!): TaskStatusEnum!
+
+  """Проверка доступа и назначение на пользователя курса по course_id"""
+  checkUserAccessToCourse(courseId: ID!): BtcStudentCourseModel!
+
+  """
+  Изменение состояний событий о прогрессе прохождения курсов/траекторий для последующей обработки
+  """
+  changePulseEventStatus(filter: PulseEventFilterInputModel!, statusMapping: [MatchPulseEventStatusInputModel!]!): Int!
 }
 
 """"""
@@ -6478,6 +6539,39 @@ type BtcCourseQueries {
 
   """Получение количества назначений курсов удовлетворяющих данным фильтра"""
   countCourseAssignments(filter: BtcStudentCourseFilterInputModel!): Int!
+
+  """
+  События о прогрессе прохождения курсов/траекторий
+  Получение списка событий по фильтру
+  """
+  findPulseEvents(filter: PulseEventFilterInputModel!, page: PagingInput!): [PulseEventModel!]!
+
+  """Получение количества событий по фильтру"""
+  countPulseEvents(filter: PulseEventFilterInputModel): Int!
+
+  """Получить траектории назначенные на текущего пользователя"""
+  getMyTrajectories: [BtcStudentTrajectoryModel]!
+
+  """Получить курсы назначенные на текущего пользователя"""
+  getMyCourses: [BtcStudentCourseModel]!
+
+  """Получить курсе доступные для назначения на текущего пользователя"""
+  getAvailableCourses(page: PagingInput!): [BtcCourseModel!]!
+
+  """
+  Получение количества курсов доступных для назначения на текущего пользователя
+  """
+  countAvailableCourses: Int!
+
+  """
+  Получить траекторию назначенную на текущего пользователя по идентификатору траектории
+  """
+  getMyTrajectoryByTrajectoryId(trajectoryId: ID!): BtcStudentTrajectoryModel
+
+  """
+  Получить курс назначенный на текущего пользователя по идентификатору курса
+  """
+  getMyCourseByCourseId(courseId: ID!): BtcStudentCourseModel
 }
 
 """Тип определения сроков курса IT Bootcamp"""
@@ -6528,6 +6622,36 @@ type BtcExternalTeacherModel {
 
   """Список классов внешнего учителя"""
   stageGroupIds: [ID!]
+}
+
+""""""
+input BtcGetUserFilterModel {
+  """Поиск ученика по фио/логи/email"""
+  textSearch: String
+
+  """IDs городов учеников"""
+  cityIds: [ID!]
+
+  """Slugs траекторий учеников"""
+  trajectorySlugs: [String!]
+
+  """IDs тег доступа назначенных на ученика"""
+  accessTags: [ID!]
+
+  """IDs классов ученика"""
+  stageGroupIds: [ID!]
+
+  """IDs Bootcamp мастеров учеников"""
+  bmIds: [UUID!]
+
+  """Фильтр по дате начала обучения (левая граница)"""
+  dateFrom: DateTime
+
+  """Фильтр по дате начала обучения (правая граница)"""
+  dateTo: DateTime
+
+  """Пагинация"""
+  paging: PagingInput!
 }
 
 """Краткая информация по созданию/изменению"""
@@ -6941,6 +7065,42 @@ type BtcStudyDeadlineModel {
   planEndDate: Date
 }
 
+""""""
+type BtcStudyInfoModel {
+  """Student id пользователя"""
+  studentId: UUID!
+
+  """Id класса ученика"""
+  stageGroup: StageGroup
+
+  """Список выданных сертификатов ученику"""
+  issuedCertificates: [IssuedCertificateModel!]! @deprecated(reason: "Переход на курсы. Используйте certificateTemplates")
+
+  """"""
+  certificatesOfParticipation: [CertificateOfParticipation!]!
+
+  """Список возможных к выдаче сертификатов ученику"""
+  certificateTemplates: [CertificateTemplateModel!]!
+
+  """IDs траекторий студентов"""
+  studentTrajectories: [StudentAssignedTrajectoryModel!]!
+
+  """WelcomePack ученика"""
+  welcomePack: WelcomePackModel
+
+  """Город обучения"""
+  city: String
+
+  """Формат обучения"""
+  isStudyOnline: Boolean
+
+  """Флаг, указывающий, что Буткемп-мастер не определен для ученика"""
+  isBmMasterUndefined: Boolean!
+
+  """Bootcamp мастер ученика"""
+  bootcampMaster: BootcampMasterModel
+}
+
 """Статус траектории или курса IT Bootcamp"""
 enum BtcStudyStatus {
   """Черновик"""
@@ -7141,6 +7301,9 @@ input BtcTrajectoryFilterInputModel {
   """Название траекторий"""
   trajectoryName: String
 
+  """Статус"""
+  statuses: [BtcStudyStatus!]
+
   """Описание траекторий"""
   trajectoryInfo: String
 
@@ -7153,7 +7316,7 @@ input BtcTrajectoryFilterInputModel {
   """Курсы"""
   courseIds: [ID!]
 
-  """Идентификаторы курсов из АС Пульс"""
+  """Идентификаторы курсов из АС Пульс (должен быть тип UUID)"""
   catalogItemIds: [String!]
 
   """классы"""
@@ -7200,7 +7363,7 @@ input BtcTrajectoryInputModel {
   """
   progressCompleted: Int
 
-  """идентификатор курса из АС Пульс"""
+  """идентификатор курса из АС Пульс (должен быть тип UUID)"""
   catalogItemId: String
 
   """Список курсов, входящих в траекторию"""
@@ -7251,7 +7414,7 @@ type BtcTrajectoryModel {
   """Необходимый прогресс для завершения обучения"""
   progressCompleted: Int!
 
-  """идентификатор курса из АС Пульс"""
+  """идентификатор курса из АС Пульс (должен быть тип UUID)"""
   catalogItemId: String
 
   """Список курсов, входящих в траекторию"""
@@ -7268,6 +7431,51 @@ type BtcTrajectoryModel {
 
   """Идентификаторов класса"""
   stageGroupId: ID
+}
+
+""""""
+type BtcUserModel {
+  """user_id пользователя"""
+  userId: UUID!
+
+  """student_id пользователя"""
+  studentId: UUID
+
+  """Имя пользователя"""
+  firstName: String!
+
+  """Фамилия пользователя"""
+  lastName: String!
+
+  """Отчество пользователя"""
+  middleName: String
+
+  """Полное ФИО пользователя"""
+  fullName: String!
+
+  """Email пользователя"""
+  email: String
+
+  """Мобильный телефон пользователя"""
+  mobilePhone: String
+
+  """Дата рождения пользователя"""
+  birthdayDate: Date
+
+  """Дата создания уз"""
+  createTs: Date!
+
+  """Указатель на подтверждение email"""
+  emailConfirmed: Boolean!
+
+  """Дата последнего входа"""
+  lastLoginTs: DateTime
+
+  """Теги доступа казанные для данного пользователя"""
+  btcAccessTags: [BtcAccessTagToUserModel!]
+
+  """Информация по обучению пользователя"""
+  studyInfo: BtcStudyInfoModel
 }
 
 """"""
@@ -8024,10 +8232,16 @@ type BusinessAdminMutations {
   saveS21SchoolViews(s21SchoolViews: [S21SchoolViewSettingsInput!]!): [S21SchoolViewSettings!]!
 
   """Создание новой записи в student_whiteList"""
-  insertNewStudent(studentWhiteListInputModel: StudentWhiteListInputModel!): Boolean
+  insertNewStudent(studentWhiteListInputModel: StudentWhiteListInputModel!): Boolean @deprecated(reason: "Использовать insertNewStudentInWhitelist")
+
+  """Создание новой записи о студенте в таблице whitelist"""
+  insertNewStudentInWhitelist(studentWhiteListInputModel: StudentWhiteListInputModel!): StudentWhiteListModel!
 
   """Изменение признака разрешения для студента в student_whiteList"""
-  updateAllowedStatusByMobilePhoneOrEmailOrUtmSource(email: String, mobilePhone: String, utmSource: String, isTwoFactor: Boolean, allowed: Boolean!): Boolean
+  updateAllowedStatusByMobilePhoneOrEmailOrUtmSource(email: String, mobilePhone: String, utmSource: String, isTwoFactor: Boolean, allowed: Boolean!): Boolean @deprecated(reason: "Использовать updateStudentWhitelist")
+
+  """Обновляет запись Student Whitelist"""
+  updateStudentWhitelist(studentWhiteListInputModel: StudentWhiteListInputModel!): StudentWhiteListModel!
 
   """Удаление записи в student_whiteList"""
   deleteStudentByMobilePhoneOrEmailOrUtmSource(mobilePhone: String, email: String, utmSource: String): Boolean
@@ -8090,6 +8304,12 @@ type BusinessAdminMutations {
 
   """Назначение тегов доступа на пользователя"""
   assignBtcAccessTagsToUser(tagIds: [ID!], userId: UUID!): [BtcAccessTagToUserModel!]!
+
+  """Запись/обновление информации об учениках в Bootcamp"""
+  saveBtcStudentInfo(studentsInfo: [BTCStudentsInfoInputModel!]!): [BTCStudentsInfoModel!]!
+
+  """Сохранение, редактирование и архивирование тегов доступа"""
+  saveAndUpdateBtcAccessTags(btcAccessTags: [BtcAccessTagInputModel!]!): [BtcAccessTagModel!]!
 
   """"""
   checkAutoAwards(inputs: [CheckAutoAwardsEventInput!]!): Boolean!
@@ -9663,6 +9883,20 @@ type BusinessAdminQueries {
   """Получение тегов доступа пользователя"""
   getAllAccessTagsByUserId(userId: UUID!): [BtcAccessTagToUserModel!]!
 
+  """Получение информации по пользователям Bootcamp"""
+  getUsersBtc(filter: BtcGetUserFilterModel!): [BtcUserModel!]!
+
+  """Получение прогресса студентов по их траекториям"""
+  getStudentsProgressBtc(
+    """Список учеников"""
+    studentIds: [UUID!]!
+
+    """
+    Указатель подсчета только по основным траекториям, False в инном случае
+    """
+    isByPrimary: Boolean!
+  ): [StudentTrajectoryProgressModel!]!
+
   """"""
   getBadges: [Badge!]!
 
@@ -10966,6 +11200,52 @@ type CertificateOfParticipationInfoModel {
 
   """Текущий уровень прохождения траектории учеником"""
   trajectoryProgress: Int!
+}
+
+""""""
+input CertificateTemplateInputModel {
+  """ID шаблона сертификата"""
+  templateId: ID
+
+  """Наименование курса"""
+  courseTitle: String!
+
+  """Наименование программы"""
+  programTitle: String!
+
+  """Необходимый уровень прохождения для получения сертификата"""
+  achieveLevel: Int
+}
+
+""""""
+type CertificateTemplateModel {
+  """ID шаблона"""
+  templateId: ID!
+
+  """Титул свидетельства"""
+  programTitle: String!
+
+  """
+  Название траектории/курса по которому происходит выдача свидетельства (может не совпадать с trajectoryTemplateName)
+  """
+  curseTitle: String!
+
+  """Необходимый уровень прохождения для получения сертификата"""
+  achieveLevel: Int!
+
+  """Плановая трудоемкость в часах"""
+  planLaboriousness: Int!
+}
+
+"""
+Информация по всем сертификатам ученика (возможным к получению / выданным)
+"""
+type CertificatesForStudentModel {
+  """Список выданных сертификатов ученику"""
+  issuedCertificates: [IssuedCertificateModel!]!
+
+  """Информация по возможным к получению сертификатам"""
+  notIssuedCertificates: [StudentCertificateWithProgressModel!]!
 }
 
 """"""
@@ -24991,7 +25271,16 @@ type IssuedCertificateModel {
   certificateId: ID! @deprecated(reason: "Под удаление.")
 
   """"""
-  certificateInfo: CertificateOfParticipation!
+  certificateInfo: CertificateOfParticipation! @deprecated(reason: "Под удаление.")
+
+  """Шаблон сертификата для выдачи"""
+  certificateTemplate: CertificateTemplateModel
+
+  """ID шаблона и информации по обучению"""
+  certificateTemplateToStudyId: ID!
+
+  """"""
+  certificateTemplateToStudy: BtcCertificateTemplateToStudyModel
 
   """Дата выдачи"""
   issuedTs: Date
@@ -28393,6 +28682,15 @@ input MassiveLocalCourseAssignInput {
 
   """Дата/время окончания регистрации на курс"""
   endRegisterDate: DateTime
+}
+
+"""Соответствие статусов для их модификации"""
+input MatchPulseEventStatusInputModel {
+  """"""
+  sourceStatus: PulseEventStatus!
+
+  """"""
+  targetStatus: PulseEventStatus!
 }
 
 """
@@ -35484,6 +35782,117 @@ enum PublishContentResult {
 
   """публикация в целом успешная, но требуется реакция пользователя"""
   SUCCESS_WITH_MESSAGE
+}
+
+"""Фильтр по поиска событий о прогрессе"""
+input PulseEventFilterInputModel {
+  """Список идентификаторов студентов"""
+  studentIds: [UUID!]
+
+  """Список идентификаторов курсов/траекторий"""
+  courseIds: [ID!]
+
+  """Список типов событий"""
+  eventTypes: [PulseEventType!]
+
+  """Список статусов"""
+  statuses: [PulseEventStatus!]
+
+  """Временной интервал"""
+  eventInterval: PulseEventIntervalInputModel
+}
+
+""""""
+input PulseEventIntervalInputModel {
+  """Дата и время начала интервала"""
+  startDateTime: DateTime!
+
+  """Дата и время окончания интервала"""
+  endDateTime: DateTime!
+}
+
+"""Событие о прогрессе"""
+type PulseEventModel {
+  """Идентификатор события по прогрессу студента"""
+  pulseEventId: ID!
+
+  """Идентификатор студента"""
+  studentId: ID!
+
+  """Идентификатор курса"""
+  courseId: ID!
+
+  """Тип события"""
+  eventType: PulseEventType!
+
+  """Время события"""
+  eventTime: DateTime!
+
+  """Идентификатор пользователя из АС Пульс"""
+  personId: UUID
+
+  """Идентификатор курса из АС Пульс"""
+  catalogItemId: UUID!
+
+  """Текст события"""
+  eventBody: String
+
+  """Значение прогресса (от 0 до 100)"""
+  progressValue: Int!
+
+  """Дата и время окончания курса"""
+  graduationDate: DateTime
+
+  """Статус события"""
+  status: PulseEventStatus!
+
+  """Количество попыток отправки"""
+  attemptNumber: Int!
+
+  """Примечание"""
+  note: String
+
+  """Дата и время создания"""
+  createTs: DateTime!
+
+  """Дата и время последнего изменения"""
+  lastModifyTs: DateTime!
+}
+
+"""Статусы обработки событий о прогрессе обучения"""
+enum PulseEventStatus {
+  """Новое"""
+  NEW
+
+  """Подготовленное к обработке"""
+  PREPARED
+
+  """В работе"""
+  PROGRESS
+
+  """Обработано"""
+  DONE
+
+  """Ошибка при обработке"""
+  ERROR
+
+  """Повторная обработка после ошибки"""
+  RETRY
+
+  """Отмена дальнейших попыток обработки"""
+  ABORT
+
+  """Пропуск. Обработано, но не отправлено"""
+  SKIP
+}
+
+"""Тип события"""
+enum PulseEventType {
+  """Изменение прогресса ученика"""
+  CHANGED
+
+  """Завершение обучение"""
+  COMPLETED
 }
 
 """
@@ -43848,6 +44257,21 @@ type StudentByStudentCheckInfo {
   answerId: ID! @deprecated(reason: "unused. Will be deleted in 0.13")
 }
 
+""""""
+type StudentCertificateWithProgressModel {
+  """ID учебной сущности"""
+  studyEntityId: ID!
+
+  """Шаблон сертификата"""
+  certificateTemplate: CertificateTemplateModel
+
+  """Тип учебной сущности курс/траектория"""
+  studyEntityType: StudyEntityTypeEnum
+
+  """Прогресс по учебной сущности"""
+  progressPrecent: Int!
+}
+
 """
 Информация об оцененных заданиях в контексте ГКПП(Группы класса по предмету)
 """
@@ -46449,7 +46873,7 @@ type StudentMutations {
   """
   Генерирует Траекторию достаточную для достижения Учебного Модуля по идентификатору Учебного Модуля (goals.goal_id)
   """
-  generateTrajectory(goalId: ID!): StudentModule!
+  generateTrajectory(goalId: ID!, courseId: ID): StudentModule!
 
   """
   Создает Траекторию, которая заполняется исключительно обязательными Заданиями из Плейлиста
@@ -46740,9 +47164,6 @@ type StudentMutations {
 
     """Путь до задания на проверку"""
     pathToCheck: String
-
-    """Идентификатор курса буткемпа, которому принадлежит задание"""
-    courseId: ID
   ): SaveStudentAnswerResponse!
 
   """"""
@@ -46769,9 +47190,6 @@ type StudentMutations {
 
     """Ид госудерственной оценки"""
     governmentMarkId: Int
-
-    """Идентификатор курса буткемпа, которому принадлежит задание"""
-    courseId: ID
   ): StudentTask!
 
   """"""
@@ -47865,10 +48283,10 @@ type StudentQueries {
   getTaskWidgetAnswers(taskId: ID!): [StudentTaskWidgetAnswer!]!
 
   """"""
-  getPersonalTrajectory(taskId: ID, goalId: ID): PersonalTrajectory
+  getPersonalTrajectory(taskId: ID, goalId: ID, courseId: ID): PersonalTrajectory
 
   """"""
-  getModuleById(goalId: ID!): StudentModule!
+  getModuleById(goalId: ID!, courseId: ID): StudentModule!
 
   """Получение студенческого модуля в контексте студента по идентификатору"""
   getStudentModuleByStudentGoalId(studentGoalId: ID!, language: String): StudentModule!
@@ -48932,7 +49350,10 @@ type StudentQueries {
   getStudentUniversityEmailInfoV2(studentId: UUID): StudentUniversityEmailModel
 
   """Получение сертификатов доступных студенту"""
-  getCertificatesForStudent: [IssuedCertificateModel]
+  getCertificatesForStudent: [IssuedCertificateModel] @deprecated(reason: " Unused. Will be deleted in a release")
+
+  """Получение сертификатов доступных студенту"""
+  getStudentCertificate: CertificatesForStudentModel
 
   """Получение сертификатов не доступных к скачиванию ученику"""
   getNotReceivedCertificatesForStudent: [CertificateOfParticipationInfoModel]
@@ -48953,6 +49374,12 @@ type StudentQueries {
 
   """Получение своих тегов доступа учеником"""
   getAllAccessTagsByUserId: [BtcAccessTagToUserModel!]!
+
+  """"""
+  getAllEntitiesUserHasAccessTo(
+    """Тип запрашиваемой сущности"""
+    entityType: BtcAccessTagsEntityTypeModel!
+  ): [ID!]!
 
   """Все бейджи, с флагом, выданные или нет"""
   getBadges: [UserBadgeAward!]!
@@ -50749,6 +51176,33 @@ type StudentTraffic {
   days: [DailyTraffic!]!
 }
 
+""""""
+type StudentTrajectoryProgressModel {
+  """ID ученика"""
+  studentId: UUID!
+
+  """ID траектории ученика"""
+  trajectoryId: ID!
+
+  """Наименование траектории ученика"""
+  trajectoryName: String!
+
+  """Прогресс по траектории в процентах"""
+  progressByTrajectory: Int!
+
+  """Плановая дата начала траектории"""
+  planStatDate: DateTime!
+
+  """Плановая дата окончания траектории"""
+  planEndDate: DateTime!
+
+  """Фактическая дата начала траектории"""
+  factStatDate: DateTime
+
+  """Фактическая дата окончания траектории"""
+  factEndDate: DateTime
+}
+
 """Траектории назначенные на студента"""
 type StudentTrajectorySlug {
   """идентификатор студента"""
@@ -50914,6 +51368,9 @@ enum StudentVisitStatus {
 
 """"""
 input StudentWhiteListInputModel {
+  """Идентификатор student-whitelist-а"""
+  studentWhitelistId: ID
+
   """Номер телефона"""
   mobilePhone: String
 
@@ -50932,6 +51389,9 @@ input StudentWhiteListInputModel {
   """Значение метки utm_source"""
   utmSource: String
 
+  """Метка utm_source"""
+  utmSourceInputModel: UtmSourceInputModel
+
   """Является ли метка приватной"""
   isTwoFactor: Boolean
 
@@ -50941,6 +51401,9 @@ input StudentWhiteListInputModel {
 
 """"""
 type StudentWhiteListModel {
+  """Идентификатор элемента"""
+  studentWhitelistId: ID
+
   """Номер телефона"""
   mobilePhone: String
 
@@ -50979,6 +51442,9 @@ type StudentWhiteListModel {
 
   """Дата и время последнего изменения"""
   lastModifyTs: DateTime
+
+  """Теги доступа"""
+  accessTags: [BtcAccessTagModel!]
 }
 
 """"""
@@ -51248,6 +51714,15 @@ type StudyActivity {
 
   """Система оценивания"""
   schoolMarks: [SchoolMark]
+}
+
+""""""
+enum StudyEntityTypeEnum {
+  """Шаблон траектории"""
+  TRAJECTORY_TEMPLATE
+
+  """Курс"""
+  COURSE
 }
 
 """Учебный Модуль без персональной информации"""
@@ -56892,9 +57367,6 @@ type TeacherMutations {
 
     """Критерии оценивания"""
     criteriaEvaluations: [EvaluatedTaskCriterionInput!]!
-
-    """Ид курса Bootcamp, которому принадлежит задание"""
-    courseId: ID
   ): StudentTaskInfo!
 
   """Изменение учителем статусов заданий с типом контента дженерик"""
@@ -59917,6 +60389,16 @@ type TeacherQueries {
     filter: BtcTeacherDashboardFilterInputModel!
   ): [BtcStudentReviewModel!]!
 
+  """
+  Получение идентификатора ученика учителем по иденификатору пользователя
+  """
+  getStudentIdByUserIdBtc(userId: UUID!): UUID!
+
+  """
+  Получение идентификатора ученика мастер-учителем по иденификатору пользователя
+  """
+  getStudentIdByUserIdForMasterTeacherBtc(userId: UUID!): UUID!
+
   """выбирает только с BadgeAssignmentType == TEACHER_STUDENT"""
   getBadgesByKindId(kindId: Int!): [Badge!]!
 
@@ -61670,10 +62152,10 @@ type TrajectoryMutations {
   updateTrajectory(id: ID!, name: String!): Trajectory!
 
   """Сохранение шаблона траектории Bootcamp"""
-  saveTrajectoryTemplate(trajectoryTemplate: TrajectoryTemplateInputModel!): TrajectoryTemplate!
+  saveTrajectoryTemplate(trajectoryTemplate: TrajectoryTemplateInputModel!, certificateTemplate: CertificateTemplateInputModel): TrajectoryTemplate!
 
   """Изменение шаблона траектории Bootcamp"""
-  updateTrajectoryTemplate(trajectoryTemplate: TrajectoryTemplateInputModel!): TrajectoryTemplate!
+  updateTrajectoryTemplate(trajectoryTemplate: TrajectoryTemplateInputModel!, certificateTemplate: CertificateTemplateInputModel): TrajectoryTemplate!
 
   """
   Обновление статуса шаблона траектории Bootcamp по идентификатору шаблона
@@ -61851,7 +62333,10 @@ type TrajectoryTemplate {
   trajectoryTemplateTypeV2: String
 
   """Свидетельство о прохождение траектории"""
-  certificate: CertificateOfParticipation
+  certificate: CertificateOfParticipation @deprecated(reason: "Unused, will be deleted in realise")
+
+  """Шаблон сертификата для выдачи"""
+  certificateTemplate: CertificateTemplateModel
 
   """плановая дата начала обучения по шаблону"""
   planBeginDate: Date
@@ -61861,6 +62346,9 @@ type TrajectoryTemplate {
 
   """Список тегов, назначенных на шаблон траектории"""
   tags: [BtcTagModel!]
+
+  """Список тегов доступа, назначенных на шаблон траектории"""
+  accessTags: [BtcAccessTagModel!]
 }
 
 """Модуль по предмету входящему в шаблон траектории Bootcamp"""
@@ -61983,6 +62471,9 @@ input TrajectoryTemplateInputModel {
 
   """Список тегов, назначаемых на шаблон траектории"""
   tags: [BtcTagInputModel!]
+
+  """Список тегов доступа, назначаемых на шаблон траектории"""
+  accessTags: [BtcAccessTagInputModel!]
 }
 
 """
@@ -64851,6 +65342,18 @@ input UtmSourceFilterInputModel {
 
   """Пагинация"""
   paging: PagingInput!
+}
+
+""""""
+input UtmSourceInputModel {
+  """Идентификатор UTM-метки"""
+  utmId: ID
+
+  """Имя UTM-метки"""
+  utmName: String!
+
+  """Флаг необхордимости ввода invite-кода при входе"""
+  isTwoFactor: Boolean!
 }
 
 """"""
