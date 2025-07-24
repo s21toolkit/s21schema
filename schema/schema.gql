@@ -6572,6 +6572,20 @@ type BtcCourseQueries {
   Получить курс назначенный на текущего пользователя по идентификатору курса
   """
   getMyCourseByCourseId(courseId: ID!): BtcStudentCourseModel
+
+  """
+  Получение плановых дат начала и окончания назначаемого курса или траектории
+  """
+  getStudyPlanDates(
+    """Идентификатор сущности (курса или траектории)"""
+    studyItemId: ID!
+
+    """Плановая дата начала курса/траектории из назначения"""
+    assignPlanStartDate: Date
+
+    """Плановая дата окончания курса/траектории из назначения"""
+    assignPlanEndDate: Date
+  ): BtcStudyAssignDateModel!
 }
 
 """Тип определения сроков курса IT Bootcamp"""
@@ -6988,6 +7002,9 @@ type BtcStudentTrajectoryModel {
 
   """Список курсов, входящих в траекторию"""
   courses: [BtcStudentTrajectoryCourseModel!]
+
+  """Признак обязательности выполнения траектории"""
+  isMandatory: Boolean
 }
 
 """Ограничение доступа по истечению времени"""
@@ -6997,6 +7014,18 @@ type BtcStudyAccessLimitModel {
 
   """Длительность в днях до закрытия доступа"""
   accessLimitDuration: Int
+}
+
+"""Плановые даты начала и окончания курса/траектории"""
+type BtcStudyAssignDateModel {
+  """Идентификатор назначаемого курса/траектории"""
+  studyId: ID!
+
+  """Плановая дата начала"""
+  planStartDate: Date!
+
+  """Плановая дата окончания"""
+  planEndDate: Date!
 }
 
 """Данные для назначения траектории/курса"""
@@ -7015,6 +7044,9 @@ input BtcStudyAssignmentInputModel {
 
   """Плановая дата окончания прохождения курса"""
   planEndDate: Date
+
+  """Обязательность траектории"""
+  isMandatory: Boolean
 }
 
 """Режим назначения траектории/курса"""
