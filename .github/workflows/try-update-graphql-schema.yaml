@@ -26,7 +26,7 @@ jobs:
           S21_PASSWORD: ${{ secrets.S21_PASSWORD }}
         run: |
           rm -rf ./schema
-          npx @s21toolkit/introspector @ $(npx @s21toolkit/introspector auth $S21_USERNAME $S21_PASSWORD) --isolate-operations -o ./schema
+          npx @s21toolkit/introspector#latest @ $(npx @s21toolkit/introspector@latest auth $S21_USERNAME $S21_PASSWORD) --isolate-operations -o ./schema
 
       - id: diff
         run: |
